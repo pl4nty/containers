@@ -1,10 +1,11 @@
 # https://github.com/microsoftgraph/windowsupdates-webapplication-sample
 FROM node:18 AS build-env
-
 WORKDIR /app
-COPY . .
 
-RUN npm ci
+COPY package*.json .
+RUN npm ci --only=production
+
+COPY . .
 RUN npm run build
 
 FROM joseluisq/static-web-server:2.15.0
