@@ -1,5 +1,12 @@
+# https://github.com/stephenegriffin/MHA
 FROM node:18 as build
 WORKDIR /app
+
+# puppeteer dependency can't install ARM chromium by default
+# puppeteer/puppeteer#7740
+RUN apt-get update
+RUN apt-get install -y chromium && apt-get clean
+ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD true
 
 COPY package*.json .
 RUN npm ci
