@@ -3,7 +3,7 @@ FROM node:18 AS build-env
 WORKDIR /app
 
 COPY package*.json .
-RUN npm ci --only=production
+RUN npm ci --omit=dev
 
 COPY . .
 RUN npm run build
