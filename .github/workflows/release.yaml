@@ -45,9 +45,9 @@ jobs:
         - linux/amd64
         - linux/arm64
         include:
-        - sku: ubuntu-latest
+        - os: ubuntu-latest
         - arch: linux/arm64
-          sku: buildjet-4vcpu-ubuntu-2204
+          os: buildjet-4vcpu-ubuntu-2204
     runs-on: ${{ matrix.os }}
     permissions:
       packages: write
