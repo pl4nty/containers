@@ -67,10 +67,12 @@ jobs:
           tags: type=sha
 
       - name: Create build directory or update image submodule
-        run: cd ${{ matrix.image }} && mkdir aussiebb || git submodule update --remote
+        run: cd ${{ matrix.image }} && mkdir aussiebb || git submodule update --init
 
       - name: Copy patches over build directory
-        run: cd ${{ matrix.image }} && cp !(${{ matrix.image }}) ${{ matrix.image }} -r
+        run: |
+          shopt -s extglob
+          cd ${{ matrix.image }} && cp !(${{ matrix.image }}) ${{ matrix.image }} -r
         continue-on-error: true
 
       - uses: docker/build-push-action@v4
