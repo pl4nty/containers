@@ -1,9 +1,12 @@
 [submodule "aussiebb/aussiebb"]
 	path = aussiebb/aussiebb
 	url = https://github.com/mikalstill/aussiebb
-[submodule "jsonwebtoken/jsonwebtoken.github.io"]
-	path = jsonwebtoken/jsonwebtoken.github.io
+[submodule "jsonwebtoken/jsonwebtoken"]
+	path = jsonwebtoken/jsonwebtoken
 	url = https://github.com/jsonwebtoken/jsonwebtoken.github.io
+[submodule "jwtplayground/jwtplayground"]
+	path = jwtplayground/jwtplayground
+	url = https://github.com/maliksahil/JWTPlayground
 [submodule "mac_apt/mac_apt"]
 	path = mac_apt/mac_apt
 	url = https://github.com/ydkhatri/mac_apt
@@ -16,6 +19,3 @@
 [submodule "wufb-ds/wufb-ds"]
 	path = wufb-ds/wufb-ds
 	url = https://github.com/microsoftgraph/windowsupdates-webapplication-sample
-[submodule "jwtplayground/jwtplayground"]
-	path = jwtplayground/jwtplayground
-	url = https://github.com/maliksahil/JWTPlayground
