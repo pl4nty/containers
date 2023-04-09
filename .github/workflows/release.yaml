@@ -68,7 +68,7 @@ jobs:
         run: cd ${{ matrix.image }} && mkdir aussiebb || git submodule update --remote
 
       - name: Copy patches over build directory
-        run: cp ${{ matrix.image }}/
+        run: cd ${{ matrix.image }} && cp !(${{ matrix.image }}) ${{ matrix.image }} -r
 
       - uses: docker/build-push-action@v4
         with:
