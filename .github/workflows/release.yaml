@@ -31,7 +31,7 @@ jobs:
       uses: tj-actions/changed-files@v35
       with:
         dir_names: true # output folders instead of files
-        dir_names_max_depth: 1 # only return roots, not subfolders
+        dir_names_max_depth: 2 # only return roots, not subfolders
         json: true # output in matrix JSON format
 
   docker:
