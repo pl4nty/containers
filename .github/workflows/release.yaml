@@ -3,7 +3,9 @@ name: release
 on:
   push:
     branches:
-      - 'main'
+      - main
+    paths-ignore:
+      - .github/**
   workflow_dispatch:
     inputs:
       images:
