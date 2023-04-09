@@ -17,7 +17,7 @@ jobs:
     permissions:
       contents: read
     outputs:
-      images: ${{ github.event_name == 'workflow_dispatch' && fromJson(inputs.images) || steps.changed-files.outputs.all_changed_and_modified_files }}
+      images: ${{ github.event_name == 'workflow_dispatch' && inputs.images || steps.changed-files.outputs.all_changed_and_modified_files }}
     steps:
     - name: Checkout repository
       uses: actions/checkout@v3
@@ -30,12 +30,13 @@ jobs:
       with:
         dir_names: true # output folders instead of files
         dir_names_max_depth: 1 # only return roots, not subfolders
+        json: true # output in matrix JSON format
 
   docker:
     needs: get-images
     strategy:
       matrix:
-        image: ${{ needs.get-images.outputs.images }}
+        image: ${{ fromJson(needs.get-images.outputs.images) }}
     runs-on: ubuntu-latest
     permissions:
       packages: write
