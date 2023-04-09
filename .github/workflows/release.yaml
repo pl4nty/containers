@@ -59,9 +59,6 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ github.token }}
 
-      - uses: docker/setup-qemu-action@v2
-      - uses: docker/setup-buildx-action@v2
-
       - name: Generate image tags
         id: meta
         uses: docker/metadata-action@v4
@@ -70,13 +67,16 @@ jobs:
           tags: type=sha
 
       - name: Create build directory or update image submodule
-        run: cd ${{ matrix.image }} && mkdir aussiebb || git submodule update --init
+        run: cd ${{ matrix.image }} && git submodule update --init --recursive || mkdir aussiebb -p 
 
       - name: Copy patches over build directory
         run: |
           shopt -s extglob
           cd ${{ matrix.image }} && cp !(${{ matrix.image }}) ${{ matrix.image }} -r
         continue-on-error: true
+
+      - uses: docker/setup-qemu-action@v2
+      - uses: docker/setup-buildx-action@v2
 
       - uses: docker/build-push-action@v4
         with:
