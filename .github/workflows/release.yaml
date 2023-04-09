@@ -67,7 +67,7 @@ jobs:
           tags: type=sha
 
       - name: Create build directory or update image submodule
-        run: cd ${{ matrix.image }} && git submodule update --init --recursive || mkdir aussiebb -p 
+        run: cd ${{ matrix.image }} && git submodule update --init --recursive ${{ matrix.image }} || mkdir ${{ matrix.image }} -p 
 
       - name: Copy patches over build directory
         run: |
