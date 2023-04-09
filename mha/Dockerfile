@@ -1,4 +1,3 @@
-# https://github.com/stephenegriffin/MHA
 FROM node:18 as build
 WORKDIR /app
 

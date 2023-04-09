@@ -1,4 +1,3 @@
-# https://github.com/microsoftgraph/windowsupdates-webapplication-sample
 FROM node:18 AS build-env
 WORKDIR /app
 

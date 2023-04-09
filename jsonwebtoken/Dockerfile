@@ -1,4 +1,3 @@
-# https://github.com/jsonwebtoken/jsonwebtoken.github.io
 FROM node:19 AS build-env
 WORKDIR /app
 
