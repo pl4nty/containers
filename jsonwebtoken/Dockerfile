@@ -11,7 +11,7 @@ COPY . .
 RUN ./node_modules/.bin/grunt build-website
 RUN ./node_modules/.bin/grunt pug:website 
 
-FROM joseluisq/static-web-server:2.15.0
+FROM ghcr.io/pl4nty/static-web-server:latest
 
 COPY --from=build-env /app/dist/website /public
 
