@@ -12,10 +12,30 @@ on:
         type: string
 
 jobs:
+  get-images:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    outputs:
+      images: ${{ github.event_name == 'workflow_dispatch' && fromJson(inputs.images) || steps.changed-files.outputs.all_changed_and_modified_files }}
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+      with:
+        fetch-depth: 0
+
+    - name: Get changed files
+      id: changed-files
+      uses: tj-actions/changed-files@v35
+      with:
+        dir_names: true # output folders instead of files
+        dir_names_max_depth: 1 # only return roots, not subfolders
+
   docker:
+    needs: get-images
     strategy:
       matrix:
-        image: ${{ fromJson(inputs.images) }}
+        image: ${{  }} || 
     runs-on: ubuntu-latest
     permissions:
       packages: write
