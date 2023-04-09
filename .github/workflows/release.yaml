@@ -47,7 +47,7 @@ jobs:
         include:
         - os: ubuntu-latest
         - arch: linux/arm64
-          os: buildjet-4vcpu-ubuntu-2204
+          os: buildjet-2vcpu-ubuntu-2204-arm
     runs-on: ${{ matrix.os }}
     permissions:
       packages: write
