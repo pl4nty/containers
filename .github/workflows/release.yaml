@@ -41,7 +41,14 @@ jobs:
     strategy:
       matrix:
         image: ${{ fromJson(needs.get-images.outputs.images) }}
-    runs-on: ubuntu-latest
+        arch:
+        - linux/amd64
+        - linux/arm64
+        include:
+        - sku: ubuntu-latest
+        - arch: linux/arm64
+          sku: buildjet-4vcpu-ubuntu-2204
+    runs-on: ${{ matrix.os }}
     permissions:
       packages: write
       contents: read
@@ -75,13 +82,12 @@ jobs:
           cd ${{ matrix.image }} && cp !(${{ matrix.image }}) ${{ matrix.image }} -r
         continue-on-error: true
 
-      - uses: docker/setup-qemu-action@v2
       - uses: docker/setup-buildx-action@v2
 
       - uses: docker/build-push-action@v4
         with:
           context: ${{ matrix.image }}/${{ matrix.image }}
-          platforms: linux/amd64,linux/arm64
+          platforms: ${{ matrix.arch }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
           push: true
