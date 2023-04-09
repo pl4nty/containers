@@ -35,7 +35,7 @@ jobs:
     needs: get-images
     strategy:
       matrix:
-        image: ${{  }} || 
+        image: ${{ needs.get-images.outputs.images }}
     runs-on: ubuntu-latest
     permissions:
       packages: write
