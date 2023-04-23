@@ -84,15 +84,16 @@ jobs:
           images: ghcr.io/${{ github.repository_owner }}/${{ matrix.image }}
           tags: type=sha
 
-      - name: Create build directory or update image submodule
-        run: cd ${{ matrix.image }} && git submodule update --init --recursive ${{ matrix.image }} || mkdir ${{ matrix.image }}
-        continue-on-error: true
-
-      - name: Copy patches over build directory
+      - name: Patch submodule if present
+        id: get-context
         run: |
-          shopt -s extglob || true
-          cd ${{ matrix.image }} && cp !(${{ matrix.image }}) ${{ matrix.image }} -r
+          cd $IMAGE
+          git submodule update --init --recursive $IMAGE
+          cp * $IMAGE -r
+          echo "context=$IMAGE/$IMAGE" >> $GITHUB_OUTPUT
         continue-on-error: true
+        env:
+          IMAGE: ${{ matrix.image }}
 
       # - uses: docker/setup-buildx-action@v2
 
@@ -104,7 +105,7 @@ jobs:
           registry: ghcr.io #
           username: ${{ github.actor }} #
           password: ${{ github.token }} #
-          directory: ${{ matrix.image }}/${{ matrix.image }} # context:
+          directory: steps.get-context.outputs.context || ${{ matrix.image }} # context:
           # platform: ${{ matrix.arch }} # platforms:
           # cache-from: type=gha
           # cache-to: type=gha,mode=max
