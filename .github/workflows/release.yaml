@@ -114,6 +114,14 @@ jobs:
           replace-with: '="'
           flags: 'g'
 
+      - uses: jpribyl/action-docker-layer-caching@v0.1.1
+        continue-on-error: true
+        with:
+          key: docker-layer-cache-{hash}
+          restore-keys: |
+            docker-layer-cache-
+            layer-docker-layer-cache-
+
       # docker/build-push-action#18 doesn't support Windows
       # this action doesn't have caching though
       - uses: mr-smithers-excellent/docker-build-push@v6
