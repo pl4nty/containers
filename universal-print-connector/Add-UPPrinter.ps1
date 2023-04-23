@@ -1,0 +1,1 @@
+# HKLM:\SYSTEM\CurrentControlSet\Control\Print\Printers\<printer>\CloudData certificate_thumbprint, device_id
