@@ -6,6 +6,8 @@ on:
       - main
     paths-ignore:
       - .github/**
+      - LICENSE
+      - README.md
   workflow_dispatch:
     inputs:
       images:
@@ -126,4 +128,4 @@ jobs:
           # cache-to: type=gha,mode=max
           # push: true
           tags: sha-${{ github.sha }} # ${{ steps.meta.outputs.tags }}
-          labels: ${{ steps.format-labels-2.outputs.replaced }}
+          labels: ${{ steps.format-labels-2.outputs.replaced }}"
