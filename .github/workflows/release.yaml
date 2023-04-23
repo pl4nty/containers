@@ -88,8 +88,7 @@ jobs:
         id: get-context
         run: |
           cd $IMAGE
-          git submodule update --init --recursive $IMAGE
-          cp * $IMAGE -r
+          git submodule update --init --recursive $IMAGE && cp * $IMAGE -r
           echo "context=$IMAGE/$IMAGE" >> $GITHUB_OUTPUT
         continue-on-error: true
         env:
@@ -105,7 +104,7 @@ jobs:
           registry: ghcr.io #
           username: ${{ github.actor }} #
           password: ${{ github.token }} #
-          directory: steps.get-context.outputs.context || ${{ matrix.image }} # context:
+          directory: ${{ steps.get-context.outputs.context || matrix.image }} # context:
           # platform: ${{ matrix.arch }} # platforms:
           # cache-from: type=gha
           # cache-to: type=gha,mode=max
