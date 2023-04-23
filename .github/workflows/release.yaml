@@ -40,19 +40,24 @@ jobs:
   docker:
     needs: get-images
     strategy:
+      # assumes Linux can be multi-arch but Windows can't
       matrix:
         image: ${{ fromJson(needs.get-images.outputs.images) }}
         arch:
         - linux/amd64
         - linux/arm64
+        os:
+        - ubuntu-latest
+        - buildjet-2vcpu-ubuntu-2204-arm
         include:
-        - os: ubuntu-latest
-        - arch: linux/arm64
-          os: buildjet-2vcpu-ubuntu-2204-arm
         - image: universal-print-connector
           arch: windows/amd64
           os: windows-latest
         exclude:
+        - arch: linux/amd64
+          os: buildjet-2vcpu-ubuntu-2204-arm
+        - arch: linux/arm64
+          os: ubuntu-latest
         - image: universal-print-connector
     runs-on: ${{ matrix.os }}
     permissions:
