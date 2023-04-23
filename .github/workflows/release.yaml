@@ -85,11 +85,11 @@ jobs:
           tags: type=sha
 
       - name: Create build directory or update image submodule
-        run: cd ${{ matrix.image }} && git submodule update --init --recursive ${{ matrix.image }} || mkdir ${{ matrix.image }} -p 
+        run: cd ${{ matrix.image }} && git submodule update --init --recursive ${{ matrix.image }} || mkdir ${{ matrix.image }}
 
       - name: Copy patches over build directory
         run: |
-          shopt -s extglob
+          shopt -s extglob || true
           cd ${{ matrix.image }} && cp !(${{ matrix.image }}) ${{ matrix.image }} -r
         continue-on-error: true
 
