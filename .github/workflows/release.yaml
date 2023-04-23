@@ -136,5 +136,5 @@ jobs:
           # cache-from: type=gha
           # cache-to: type=gha,mode=max
           # push: true
-          tags: sha-${{ github.sha }} # ${{ steps.meta.outputs.tags }}
+          tags: ${{ fromJSON(steps.meta.outputs.json).labels['org.opencontainers.image.version'] }} # ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.format-labels-2.outputs.replaced }}"
