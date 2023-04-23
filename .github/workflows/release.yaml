@@ -70,12 +70,12 @@ jobs:
         with:
           files: ${{ matrix.image }}
 
-      - name: Login to GitHub Container Registry
-        uses: docker/login-action@v2
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ github.token }}
+      # - name: Login to GitHub Container Registry
+      #   uses: docker/login-action@v2
+      #   with:
+      #     registry: ghcr.io
+      #     username: ${{ github.actor }}
+      #     password: ${{ github.token }}
 
       - name: Generate image tags
         id: meta
@@ -94,14 +94,20 @@ jobs:
           cd ${{ matrix.image }} && cp !(${{ matrix.image }}) ${{ matrix.image }} -r
         continue-on-error: true
 
-      - uses: docker/setup-buildx-action@v2
+      # - uses: docker/setup-buildx-action@v2
 
-      - uses: docker/build-push-action@v4
+      # docker/build-push-action#18 doesn't support Windows
+      # this action doesn't have caching though
+      - uses: mr-smithers-excellent/docker-build-push@v6
         with:
-          context: ${{ matrix.image }}/${{ matrix.image }}
-          platforms: ${{ matrix.arch }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
-          push: true
+          image: ${{ github.repository_owner }}/${{ matrix.image }} #
+          registry: ghcr.io #
+          username: ${{ github.actor }} #
+          password: ${{ github.token }} #
+          directory: ${{ matrix.image }}/${{ matrix.image }} # context:
+          # platform: ${{ matrix.arch }} # platforms:
+          # cache-from: type=gha
+          # cache-to: type=gha,mode=max
+          # push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
