@@ -86,6 +86,7 @@ jobs:
 
       - name: Create build directory or update image submodule
         run: cd ${{ matrix.image }} && git submodule update --init --recursive ${{ matrix.image }} || mkdir ${{ matrix.image }}
+        continue-on-error: true
 
       - name: Copy patches over build directory
         run: |
