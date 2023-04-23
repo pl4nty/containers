@@ -100,7 +100,7 @@ jobs:
       # this action doesn't have caching though
       - uses: mr-smithers-excellent/docker-build-push@v6
         with:
-          image: ${{ github.repository_owner }}/${{ matrix.image }} #
+          image: ${{ matrix.image }} #
           registry: ghcr.io #
           username: ${{ github.actor }} #
           password: ${{ github.token }} #
@@ -109,5 +109,5 @@ jobs:
           # cache-from: type=gha
           # cache-to: type=gha,mode=max
           # push: true
-          tags: ${{ steps.meta.outputs.tags }}
+          tags: sha-${{ github.sha }} # ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
