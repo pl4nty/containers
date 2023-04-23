@@ -101,7 +101,15 @@ jobs:
         with:
           pattern: '\n'
           string: ${{ steps.meta.outputs.labels }}
-          replace-with: ','
+          replace-with: '",'
+          flags: 'g'
+
+      - uses: frabert/replace-string-action@v2
+        id: format-labels-2
+        with:
+          pattern: '='
+          string: ${{ steps.format-labels.outputs.replaced }}
+          replace-with: '="'
           flags: 'g'
 
       # docker/build-push-action#18 doesn't support Windows
@@ -118,4 +126,4 @@ jobs:
           # cache-to: type=gha,mode=max
           # push: true
           tags: sha-${{ github.sha }} # ${{ steps.meta.outputs.tags }}
-          labels: ${{ steps.format-labels.outputs.replaced }}
+          labels: ${{ steps.format-labels-2.outputs.replaced }}
