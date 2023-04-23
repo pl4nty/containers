@@ -52,6 +52,8 @@ jobs:
         - image: universal-print-connector
           arch: windows/amd64
           os: windows-latest
+        exclude:
+        - image: universal-print-connector
     runs-on: ${{ matrix.os }}
     permissions:
       packages: write
