@@ -33,6 +33,7 @@ jobs:
         dir_names: true # output folders instead of files
         dir_names_max_depth: 2 # only return roots, not subfolders
         json: true # output in matrix JSON format
+        files_ignore: .github
     
     - run: echo ${{ steps.changed-files.outputs.all_changed_and_modified_files }}
 
