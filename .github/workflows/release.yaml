@@ -37,7 +37,7 @@ jobs:
         json: true # output in matrix JSON format
         files_ignore: .github
     
-    - run: echo ${{ steps.changed-files.outputs.all_changed_and_modified_files }}
+    - run: echo ${{ github.event_name == 'workflow_dispatch' && inputs.images || steps.changed-files.outputs.all_changed_and_modified_files }}
 
   docker:
     needs: get-images
