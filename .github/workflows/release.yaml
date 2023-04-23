@@ -123,6 +123,7 @@ jobs:
           username: ${{ github.actor }} #
           password: ${{ github.token }} #
           directory: ${{ steps.get-context.outputs.context || matrix.image }} # context:
+          dockerfile: ${{ steps.get-context.outputs.context || matrix.image }}/Dockerfile
           # platform: ${{ matrix.arch }} # platforms:
           # cache-from: type=gha
           # cache-to: type=gha,mode=max
