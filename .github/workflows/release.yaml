@@ -69,6 +69,7 @@ jobs:
     permissions:
       packages: write
       contents: read
+      actions: write
     steps:
       - name: Exit on skipped Windows image
         run: |
