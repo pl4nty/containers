@@ -17,7 +17,6 @@ on:
 
 jobs:
   get-images:
-    if: ${{ github.event_name != 'workflow_dispatch' }}
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -25,12 +24,14 @@ jobs:
       images: ${{ github.event_name == 'workflow_dispatch' && inputs.images || steps.changed-files.outputs.all_changed_and_modified_files }}
     steps:
     - name: Checkout repository
+      if: ${{ github.event_name != 'workflow_dispatch' }}
       uses: actions/checkout@v3
       with:
         fetch-depth: 0
         submodules: true
 
     - name: Get changed files
+      if: ${{ github.event_name != 'workflow_dispatch' }}
       id: changed-files
       uses: tj-actions/changed-files@v35
       with:
