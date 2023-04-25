@@ -143,6 +143,7 @@ jobs:
           replace-with: '-'
           flags: 'g'
 
+      # can we use arch in here? suspect windows images could slow linux down otherwise
       - uses: jpribyl/action-docker-layer-caching@v0.1.1
         continue-on-error: true
         with:
@@ -167,12 +168,16 @@ jobs:
           labels: ${{ steps.format-labels-2.outputs.replaced }}"
 
   manifest:
-    needs: build
+    needs:
+    - get-images
+    - build
     strategy:
       fail-fast: false # allows visibility of multiarch support
       matrix:
         image: ${{ fromJson(needs.get-images.outputs.images) }}
     runs-on: ubuntu-latest
+    permissions:
+      packages: write
     env:
       IMAGE: ghcr.io/${{ github.repository_owner }}/${{ matrix.image }}
     steps:
