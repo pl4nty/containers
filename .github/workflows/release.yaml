@@ -74,7 +74,7 @@ jobs:
       - name: Checkout image folder
         run: |
           git clone -n --depth=1 --filter=tree:0 ${{ github.server_url }}/${{ github.repository }}
-          cd containers/${{ matrix.image }}
+          cd containers
           git sparse-checkout set --no-cone ${{ matrix.image }}
           git checkout ${{ github.sha }}
 
