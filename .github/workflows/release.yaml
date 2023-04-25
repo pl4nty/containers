@@ -66,17 +66,16 @@ jobs:
     permissions:
       packages: write
       contents: read
-      actions: write
     steps:
       # required for builds with custom context
       # https://stackoverflow.com/a/52269934
       # can't use github.repositoryUrl - it uses git://, which seems to be blocked on Windows runners
       - name: Checkout image folder
         run: |
-          git clone -n --depth=1 --filter=tree:0 ${{ github.server_url }}/${{ github.repository }}
-          cd containers
+          git clone -n --depth=1 --filter=tree:0 ${{ github.server_url }}/${{ github.repository }} ./
           git sparse-checkout set --no-cone ${{ matrix.image }}
           git checkout ${{ github.sha }}
+          ls ${{ matrix.image }}
 
       # - name: Login to GitHub Container Registry
       #   uses: docker/login-action@v2
