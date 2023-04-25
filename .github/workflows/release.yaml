@@ -99,7 +99,7 @@ jobs:
           echo "context=$IMAGE/$IMAGE" >> $GITHUB_OUTPUT
 
           shopt -s extglob
-          cd $IMAGE && cp !($IMAGE) $IMAGE -r
+          cp !($IMAGE) $IMAGE -r
         continue-on-error: true
         env:
           IMAGE: ${{ matrix.image }}
