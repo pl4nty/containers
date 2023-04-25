@@ -181,8 +181,8 @@ jobs:
           echo "tags=$tags" >> $GITHUB_OUTPUT
       - uses: actions/upload-artifact@v3
         with:
-          name: ${{ matrix.image }}-${{ hashFiles(matrix.image) || 'none' }}
-          path: ${{ matrix.image }}-tags
+          name: ${{ matrix.image }}-${{ hashFiles(matrix.arch) || 'none' }}
+          path: tags
           if-no-files-found: warn
 
   manifest:
