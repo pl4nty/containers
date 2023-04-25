@@ -51,13 +51,17 @@ jobs:
       fail-fast: false # allows visibility of multiarch support
       matrix:
         image: ${{ fromJson(needs.get-images.outputs.images) }}
+        os:
+        - ubuntu-latest
+        - buildjet-2vcpu-ubuntu-2204-arm
+        - windows-latest
         include:
-        - arch: linux/amd64
-          os: ubuntu-latest
-        - arch: linux/arm64
-          os: buildjet-2vcpu-ubuntu-2204-arm
-        - arch: windows/amd64
-          os: windows-latest
+        - os: ubuntu-latest
+          arch: linux/amd64
+        - os: buildjet-2vcpu-ubuntu-2204-arm
+          arch: linux/arm64
+        - os: windows-latest
+          arch: windows/amd64
     runs-on: ${{ matrix.os }}
     permissions:
       packages: write
@@ -69,9 +73,8 @@ jobs:
       # can't use github.repositoryUrl - it uses git://, which seems to be blocked on Windows runners
       - name: Checkout image folder
         run: |
-          git clone -n --depth=1 --filter=tree:0 ${{ github.server_url }}/${{ github.repository }} .
-          ls
-          cd ${{ matrix.image }}
+          git clone -n --depth=1 --filter=tree:0 ${{ github.server_url }}/${{ github.repository }}
+          cd containers/${{ matrix.image }}
           git sparse-checkout set --no-cone ${{ matrix.image }}
           git checkout ${{ github.sha }}
 
