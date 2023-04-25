@@ -1,7 +1,7 @@
 FROM node:19 AS build-env
 WORKDIR /app
 
-COPY package*.json .
+COPY package*.json ./
 RUN npm ci
 
 # conflict between webpack 4 and node >= 17: error:0308010C:digital envelope routines::unsupported

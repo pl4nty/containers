@@ -7,7 +7,7 @@ RUN apt-get update
 RUN apt-get install -y chromium && apt-get clean
 ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD true
 
-COPY package*.json .
+COPY package*.json ./
 RUN npm ci
 
 COPY . .
