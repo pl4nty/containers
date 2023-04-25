@@ -46,8 +46,9 @@ jobs:
     - id: folders-condition
       run: echo "folders=${{ github.event_name == 'workflow_dispatch' && inputs.images || steps.changed-files.outputs.all_changed_and_modified_files }}" >> $GITHUB_OUTPUT
 
-  docker:
+  build:
     needs: get-images
+    continue-on-error: true # push tags even if some architectures fail
     strategy:
       fail-fast: false # allows visibility of multiarch support
       matrix:
@@ -67,6 +68,9 @@ jobs:
     permissions:
       packages: write
       contents: read
+    outputs:
+      tag: ${{ fromJSON(steps.meta.outputs.json).labels['org.opencontainers.image.version'] }}
+      arch-tag: ${{ steps.build-push.outputs.tags }}
     steps:
       # required for builds with custom context
       # https://stackoverflow.com/a/52269934
@@ -130,6 +134,15 @@ jobs:
           replace-with: '="'
           flags: 'g'
 
+      # format arch for image tag
+      - uses: frabert/replace-string-action@v2
+        id: format-labels-tag
+        with:
+          pattern: '/'
+          string: ${{ matrix.arch }}
+          replace-with: '-'
+          flags: 'g'
+
       - uses: jpribyl/action-docker-layer-caching@v0.1.1
         continue-on-error: true
         with:
@@ -141,6 +154,7 @@ jobs:
       # docker/build-push-action#18 doesn't support Windows
       # this action doesn't have caching though
       - uses: mr-smithers-excellent/docker-build-push@v6
+        id: build-push
         with:
           image: ${{ matrix.image }} #
           registry: ghcr.io #
@@ -149,5 +163,23 @@ jobs:
           directory: ${{ steps.get-context.outputs.context || matrix.image }} # context:
           dockerfile: ${{ steps.get-context.outputs.context || matrix.image }}/Dockerfile
           # platform: ${{ matrix.arch }}
-          tags: ${{ fromJSON(steps.meta.outputs.json).labels['org.opencontainers.image.version'] }} # ${{ steps.meta.outputs.tags }}
+          tags: ${{ fromJSON(steps.meta.outputs.json).labels['org.opencontainers.image.version'] }}-${{ steps.format-labels-tag.outputs.replaced }} # ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.format-labels-2.outputs.replaced }}"
+
+  manifest:
+    needs: build
+    strategy:
+      fail-fast: false # allows visibility of multiarch support
+      matrix:
+        image: ${{ fromJson(needs.get-images.outputs.images) }}
+    runs-on: ubuntu-latest
+    env:
+      IMAGE: ghcr.io/${{ github.repository_owner }}/${{ matrix.image }}
+    steps:
+    - name: Create and push manifest images
+      uses: Noelware/docker-manifest-action@v0.3.1
+      with:
+        inputs: ${{ env.IMAGE }}:${{ needs.build[0].outputs.tag }}
+        # TODO helper jq step to clean this up
+        images: ${{ env.IMAGE }}:${{ needs.build[0].outputs.arch-tag }},${{ env.IMAGE }}:${{ needs.build[1].outputs.arch-tag }},${{ env.IMAGE }}:${{ needs.build[2].outputs.arch-tag }}
+        push: true
