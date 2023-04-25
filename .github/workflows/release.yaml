@@ -188,11 +188,12 @@ jobs:
 
   manifest:
     needs:
+    - get-images
     - build
     strategy:
       fail-fast: false
       matrix:
-        image: ${{ fromJson(jobs.get-images.outputs.images) }}
+        image: ${{ fromJson(needs.get-images.outputs.images) }}
     runs-on: ubuntu-latest
     permissions:
       packages: write
@@ -203,18 +204,18 @@ jobs:
     - run: echo ${{ needs }}
     
     - uses: actions/download-artifact@v3
-    - id: tags-text
+    - id: tags
       run: |
         ls
         shopt -s extglob
         tags="$(cat */${{ matrix.image }}*/tags | jq -c --slurp .)"
         echo "tags=$tags" >> $GITHUB_OUTPUT
-    - id: tags
-      run: echo "tags=${{ fromJson(steps.tags-text.outputs.tags) }}" >> $GITHUB_OUTPUT
 
     - name: Create and push manifest images
       uses: Noelware/docker-manifest-action@0.3.1
       with:
-        inputs: ${{ env.IMAGE }}:${{ steps.tags.outputs.tags[0][0] }}
-        images: ${{ env.IMAGE }}:${{ steps.tags.outputs.tags[0][1] }},${{ env.IMAGE }}:${{ steps.tags.outputs.tags[1][0] }},${{ env.IMAGE }}:${{ steps.tags.outputs.tags[2][1] }}
+        inputs: ${{ env.IMAGE }}:${{ env.TAGS[0][0] }}
+        images: ${{ env.IMAGE }}:${{ env.TAGS[0][1] }},${{ env.IMAGE }}:${{ env.TAGS[1][0] }},${{ env.IMAGE }}:${{ env.TAGS[2][1] }}
         push: true
+      env:
+        $TAGS: ${{ fromJson(steps.tags.outputs.tags) }}
