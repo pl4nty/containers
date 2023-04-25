@@ -71,10 +71,11 @@ jobs:
       contents: read
     steps:
       # required for builds with custom context
+      # ${{ github.repositoryUrl }} uses git://, which seems to be blocked on Windows runners
       # https://stackoverflow.com/a/52269934
       - name: Checkout image folder
         run: |
-          git clone -n --depth=1 --filter=tree:0 ${{ github.repositoryUrl }}
+          git clone -n --depth=1 --filter=tree:0 ${{ github.server_url }}/${{ github.repository }}
           cd ${{ matrix.image }}
           git sparse-checkout set --no-cone ${{ matrix.image }}
           git checkout ${{ github.sha }}
