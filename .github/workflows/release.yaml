@@ -177,11 +177,11 @@ jobs:
       - id: tags
         run: |
           tags="['${{ fromJSON(steps.meta.outputs.json).labels['org.opencontainers.image.version'] }}','${{ steps.build-push.outputs.tags }}']"
-          echo "$tags" > ${{ matrix.image }}-tags
+          echo "$tags" > tags
           echo "tags=$tags" >> $GITHUB_OUTPUT
       - uses: actions/upload-artifact@v3
         with:
-          name: ${{ matrix.image }}-${{ hashFiles(matrix.arch) || 'none' }}
+          name: ${{ matrix.image }}-${{ hashFiles('tags') || 'none' }}
           path: tags
           if-no-files-found: warn
 
