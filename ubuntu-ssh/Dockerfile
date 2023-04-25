@@ -11,5 +11,5 @@ RUN ssh-keygen -A
 
 USER root
 
-EXPOSE 2222
 CMD ["/usr/sbin/sshd","-D","-p 2222"]
+EXPOSE 2222
