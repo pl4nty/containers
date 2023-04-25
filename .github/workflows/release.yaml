@@ -73,8 +73,8 @@ jobs:
     steps:
       - name: Exit on skipped Windows image
         run: |
-          gh run cancel ${{ github.run_id }}
-          gh run watch ${{ github.run_id }}
+          gh run cancel --repo ${{ github.repository }} ${{ github.run_id }}
+          gh run watch --repo ${{ github.repository }} ${{ github.run_id }}
         env:
           GITHUB_TOKEN: ${{ github.token }}
 
