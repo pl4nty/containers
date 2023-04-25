@@ -71,7 +71,10 @@ jobs:
       # required for builds with custom context
       # https://stackoverflow.com/a/52269934
       - name: Checkout image folder
-        run: git sparse-checkout set --no-cone ${{ matrix.image }} && git checkout
+        run: |
+          git clone -n --depth=1 --filter=tree:0 ${{ github.repositoryUrl }}
+          git sparse-checkout set --no-cone ${{ matrix.image }}
+          git checkout ${{ github.sha }}
 
       # - name: Login to GitHub Container Registry
       #   uses: docker/login-action@v2
