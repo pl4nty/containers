@@ -69,8 +69,14 @@ jobs:
     permissions:
       packages: write
       contents: read
-    if: ${{ matrix.image != '' }}
     steps:
+      - name: Exit on skipped Windows image
+        run: |
+          gh run cancel ${{ github.run_id }}
+          gh run watch ${{ github.run_id }}
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+
       # required for builds with custom context
       # ${{ github.repositoryUrl }} uses git://, which seems to be blocked on Windows runners
       # https://stackoverflow.com/a/52269934
