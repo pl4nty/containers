@@ -56,7 +56,7 @@ jobs:
         - ubuntu-latest
         - buildjet-2vcpu-ubuntu-2204-arm
         include:
-        - image: universal-print-connector
+        - image: ${{ contains(fromJson(needs.get-images.outputs.images), 'universal-print-connector') && 'universal-print-connector' || '' }}
           arch: windows/amd64
           os: windows-latest
         exclude:
