@@ -29,6 +29,7 @@ jobs:
       with:
         fetch-depth: 0
         submodules: true
+        ssh-key: ${{ secrets.GIT_SSH_KEY }}
 
     - name: Get changed files
       if: ${{ github.event_name != 'workflow_dispatch' }}
