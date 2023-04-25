@@ -182,7 +182,7 @@ jobs:
       IMAGE: ghcr.io/${{ github.repository_owner }}/${{ matrix.image }}
     steps:
     - name: Create and push manifest images
-      uses: Noelware/docker-manifest-action@v0.3.1
+      uses: Noelware/docker-manifest-action@0.3.1
       with:
         inputs: ${{ env.IMAGE }}:${{ needs.build[0].outputs.tag }}
         # TODO helper jq step to clean this up
