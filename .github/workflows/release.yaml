@@ -69,6 +69,7 @@ jobs:
     permissions:
       packages: write
       contents: read
+    if: ${{ matrix.image != '' }}
     steps:
       # required for builds with custom context
       # ${{ github.repositoryUrl }} uses git://, which seems to be blocked on Windows runners
