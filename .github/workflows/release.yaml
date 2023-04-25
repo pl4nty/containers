@@ -70,6 +70,7 @@ jobs:
     permissions:
       packages: write
       contents: read
+
     outputs:
       tag: ${{ fromJSON(steps.meta.outputs.json).labels['org.opencontainers.image.version'] }}
       arch-tag: ${{ steps.build-push.outputs.tags }}
@@ -170,25 +171,50 @@ jobs:
           # platform: ${{ matrix.arch }}
           tags: ${{ fromJSON(steps.meta.outputs.json).labels['org.opencontainers.image.version'] }}-${{ steps.format-labels-tag.outputs.replaced }} # ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.format-labels-2.outputs.replaced }}"
+      
+      # workaround for lack of matrix support in job.outputs. was almost done, but the team got laid off
+      # https://github.com/actions/runner/pull/2477#issuecomment-1501003600
+      - id: tags
+        run: |
+          tags="['${{ fromJSON(steps.meta.outputs.json).labels['org.opencontainers.image.version'] }}','${{ steps.build-push.outputs.tags }}']"
+          mkdir ${{ matrix.image }}
+          echo "$tags" > ${{ matrix.image }}\tags
+          echo "tags=$tags" >> $GITHUB_OUTPUT
+      - uses: actions/upload-artifact@v3
+        with:
+          name: ${{ matrix.image }}-${{ hashFiles(matrix.image) || 'none' }}
+          path: ${{ matrix.image }}\tags
+          if-no-files-found: warn
 
   manifest:
     needs:
-    - get-images
     - build
     strategy:
       fail-fast: false
       matrix:
-        image: ${{ fromJson(needs.get-images.outputs.images) }}
+        image: ${{ fromJson(jobs.get-images.outputs.images) }}
     runs-on: ubuntu-latest
     permissions:
       packages: write
     env:
       IMAGE: ghcr.io/${{ github.repository_owner }}/${{ matrix.image }}
     steps:
+    - run: echo ${{ jobs }}
+    - run: echo ${{ needs }}
+    
+    - uses: actions/download-artifact@v3
+    - id: tags-text
+      run: |
+        ls
+        shopt -s extglob
+        tags="$(cat */${{ matrix.image }}*/tags | jq -c --slurp .)"
+        echo "tags=$tags" >> $GITHUB_OUTPUT
+    - id: tags
+      run: echo "tags=${{ fromJson(steps.tags-text.outputs.tags) }}" >> $GITHUB_OUTPUT
+
     - name: Create and push manifest images
       uses: Noelware/docker-manifest-action@0.3.1
       with:
-        inputs: ${{ env.IMAGE }}:${{ needs.build[0].outputs.tag }}
-        # TODO helper jq step to clean this up
-        images: ${{ env.IMAGE }}:${{ needs.build[0].outputs.arch-tag }},${{ env.IMAGE }}:${{ needs.build[1].outputs.arch-tag }},${{ env.IMAGE }}:${{ needs.build[2].outputs.arch-tag }}
+        inputs: ${{ env.IMAGE }}:${{ steps.tags.outputs.tags[0][0] }}
+        images: ${{ env.IMAGE }}:${{ steps.tags.outputs.tags[0][1] }},${{ env.IMAGE }}:${{ steps.tags.outputs.tags[1][0] }},${{ env.IMAGE }}:${{ steps.tags.outputs.tags[2][1] }}
         push: true
