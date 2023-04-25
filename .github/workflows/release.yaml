@@ -91,15 +91,25 @@ jobs:
           images: ghcr.io/${{ github.repository_owner }}/${{ matrix.image }}
           tags: type=sha
 
-      - name: Patch submodule if present
+      - name: Init submodule if present, copy patches (Linux)
         id: get-context
         run: |
           cd $IMAGE
-          git submodule update --init --recursive $IMAGE && cp * $IMAGE -r
+          git submodule update --init --recursive $IMAGE
           echo "context=$IMAGE/$IMAGE" >> $GITHUB_OUTPUT
+
+          shopt -s extglob
+          cd $IMAGE && cp !($IMAGE) $IMAGE -r
         continue-on-error: true
         env:
           IMAGE: ${{ matrix.image }}
+
+      - name: Copy patches to submodule (Windows)
+        if: ${{ startsWith(matrix.arch, 'windows/') }}
+        continue-on-error: true
+        run: |
+          cd ${{ matrix.image }}
+          cp * test2
 
       # - uses: docker/setup-buildx-action@v2
 
