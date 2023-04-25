@@ -144,13 +144,14 @@ jobs:
           flags: 'g'
 
       # can we use arch in here? suspect windows images could slow linux down otherwise
+      # confirmed - particularly bad for off-net ARM64 workers, 3+ minutes
       - uses: jpribyl/action-docker-layer-caching@v0.1.1
         continue-on-error: true
         with:
-          key: docker-layer-cache-{hash}
+          key: docker-layer-cache-${{ steps.format-labels-tag.outputs.replaced }}-{hash}
           restore-keys: |
-            docker-layer-cache-
-            layer-docker-layer-cache-
+            docker-layer-cache-${{ steps.format-labels-tag.outputs.replaced }}-
+            layer-docker-layer-cache-${{ steps.format-labels-tag.outputs.replaced }}-
 
       # docker/build-push-action#18 doesn't support Windows
       # this action doesn't have caching though
@@ -172,7 +173,7 @@ jobs:
     - get-images
     - build
     strategy:
-      fail-fast: false # allows visibility of multiarch support
+      fail-fast: false
       matrix:
         image: ${{ fromJson(needs.get-images.outputs.images) }}
     runs-on: ubuntu-latest
