@@ -1,11 +1,11 @@
-FROM eclipse-temurin:17-jdk AS build
+FROM eclipse-temurin:17.0.6_10-jdk AS build
 
 COPY . .
 RUN chmod +x gradlew && ./gradlew jproRelease --warning-mode all
 
 # Ubuntu with required packages
 # https://www.jpro.one/docs/current/2.7/PREPARING_LINUX_FOR_JPRO
-FROM eclipse-temurin:17-jre
+FROM eclipse-temurin:17.0.6_10-jre
 RUN apt-get update
 # prevent interactive prompt from debconf
 RUN echo 'debconf debconf/frontend select Noninteractive' | debconf-set-selections
