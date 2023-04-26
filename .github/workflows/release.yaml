@@ -32,10 +32,6 @@ jobs:
         submodules: true
         ssh-key: ${{ secrets.GIT_SSH_KEY }}
 
-    - run: |
-        echo ${{ fromJson('[["sha-9edc3c1","sha-9edc3c1-linux-arm64"],["sha-9edc3c1","sha-9edc3c1-linux-amd64"]]')[0] }}
-        echo ${{ fromJson('[["sha-9edc3c1","sha-9edc3c1-linux-arm64"],["sha-9edc3c1","sha-9edc3c1-linux-amd64"]]')[0][0] }}
-
     # TODO not detecting submodule changes properly. possibly related to checkout err on private repo?
     # https://github.com/tj-actions/changed-files/pull/394/files
     - name: Get changed files
@@ -200,25 +196,25 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       packages: write
-    env:
-      IMAGE: ghcr.io/${{ github.repository_owner }}/${{ matrix.image }}
+
     steps:
     - run: echo ${{ needs }}
     - run: echo ${{ needs.build.outputs }}
-    
-    # TODO output as {tag: inputs, images: [images]}
+  
     - uses: actions/download-artifact@v3
     - id: tags
       run: |
         ls
         shopt -s extglob
-        tags="$(cat ${{ matrix.image }}-*/tags | jq -c --slurp .)"
+        tags="$(cat ${{ matrix.image }}-*/tags | jq --slurp -c 'map(.[] |= "ghcr.io/$IMAGE:\(.)") | { tag: .[0][0], images: ([.[][1]] | join(",")) }')"
         echo 'tags=$tags' >> $GITHUB_OUTPUT
         echo $tags
+      env:
+        IMAGE: ghcr.io/${{ github.repository_owner }}/${{ matrix.image }}
 
     - name: Create and push manifest images
       uses: Noelware/docker-manifest-action@0.3.1
       with:
-        inputs: ${{ env.IMAGE }}:${{ fromJson(steps.tags.outputs.tags)[0][0] }}
-        images: ${{ env.IMAGE }}:${{ fromJson(steps.tags.outputs.tags)[0][1] }},${{ env.IMAGE }}:${{ fromJson(steps.tags.outputs.tags)[1][0] }},${{ env.IMAGE }}:${{ fromJson(steps.tags.outputs.tags)[2][1] }}
+        inputs: ${{ fromJson(steps.tags.outputs.tags)['tag'] }}
+        images: ${{ fromJson(steps.tags.outputs.tags)['images'] }}
         push: true
