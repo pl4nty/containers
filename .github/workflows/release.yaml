@@ -45,7 +45,6 @@ jobs:
         dir_names: true # output folders instead of files
         dir_names_max_depth: 1 # only return roots, not subfolders
         json: true # output in matrix JSON format
-        # json_raw_format: true
 
     - id: folders-condition
       run: echo "folders=${{ github.event_name == 'workflow_dispatch' && inputs.images || steps.changed-files.outputs.all_changed_and_modified_files }}" >> $GITHUB_OUTPUT
@@ -77,10 +76,9 @@ jobs:
       tag: ${{ fromJSON(steps.meta.outputs.json).labels['org.opencontainers.image.version'] }}
       arch-tag: ${{ steps.build-push.outputs.tags }}
     steps:
-      - uses: kielabokkie/ssh-key-and-known-hosts-action@v1
+      - uses: webfactory/ssh-agent@v0.7.0
         with:
           ssh-private-key: ${{ secrets.GIT_SSH_KEY }}
-          ssh-host: github.com
     
       # required for builds with custom context
       # https://stackoverflow.com/a/52269934
