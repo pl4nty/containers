@@ -32,6 +32,10 @@ jobs:
         submodules: true
         ssh-key: ${{ secrets.GIT_SSH_KEY }}
 
+    - run: |
+        echo ${{ fromJson('[["sha-9edc3c1","sha-9edc3c1-linux-arm64"],["sha-9edc3c1","sha-9edc3c1-linux-amd64"]]')[0] }}
+        echo ${{ fromJson('[["sha-9edc3c1","sha-9edc3c1-linux-arm64"],["sha-9edc3c1","sha-9edc3c1-linux-amd64"]]')[0][0] }}
+
     # TODO not detecting submodule changes properly. possibly related to checkout err on private repo?
     # https://github.com/tj-actions/changed-files/pull/394/files
     - name: Get changed files
