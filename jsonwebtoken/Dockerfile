@@ -10,7 +10,7 @@ COPY . .
 RUN ./node_modules/.bin/grunt build-website
 RUN ./node_modules/.bin/grunt pug:website 
 
-FROM ghcr.io/pl4nty/static-web-server:master-alpine
+FROM joseluisq/static-web-server:2
 
 COPY --from=build-env /app/dist/website /public
 
