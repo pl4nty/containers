@@ -18,7 +18,7 @@
 	url = https://github.com/StoreDev/StoreWeb
 [submodule "tsuro"]
 	path = tsuro/tsuro
-	url = https://github.com/pl4nty/tsuro
+	url = git@github.com:pl4nty/tsuro.git
 [submodule "wufb-ds/wufb-ds"]
 	path = wufb-ds/wufb-ds
 	url = https://github.com/microsoftgraph/windowsupdates-webapplication-sample
