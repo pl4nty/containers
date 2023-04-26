@@ -1,5 +1,5 @@
 FROM node:18
-WORKDIR /usr/src/app
+WORKDIR /app
 
 ENV NODE_ENV production
 COPY package*.json ./
