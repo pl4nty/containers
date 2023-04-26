@@ -4,9 +4,13 @@ on:
   push:
     branches:
       - main
+    # can't find a way to ignore all root files
     paths-ignore:
       - .github/**
-      - /*
+      - .devcontainer.json
+      - .gitmodules
+      - LICENSE
+      - README.md
   workflow_dispatch:
     inputs:
       images:
@@ -41,8 +45,7 @@ jobs:
         dir_names: true # output folders instead of files
         dir_names_max_depth: 1 # only return roots, not subfolders
         json: true # output in matrix JSON format
-        json_raw_format: true
-        files_ignore: .github
+        # json_raw_format: true
 
     - id: folders-condition
       run: echo "folders=${{ github.event_name == 'workflow_dispatch' && inputs.images || steps.changed-files.outputs.all_changed_and_modified_files }}" >> $GITHUB_OUTPUT
