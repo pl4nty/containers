@@ -209,8 +209,8 @@ jobs:
         tags="$(cat ${{ matrix.image }}-*/tags | jq --slurp -c 'map(.[] |= "ghcr.io/${{ github.repository_owner }}/${{ matrix.image }}:\(.)") | { tag: .[0][0], images: ([.[][1]] | join(",")) }')"
         echo 'tags=$tags' >> $GITHUB_OUTPUT
         echo $tags
-      env:
-        IMAGE: ghcr.io/${{ github.repository_owner }}/${{ matrix.image }}
+
+    - run: echo '${{ fromJson(steps.tags.outputs.tags) }}'
 
     - name: Create and push manifest images
       uses: Noelware/docker-manifest-action@0.3.1
