@@ -6,8 +6,7 @@ on:
       - main
     paths-ignore:
       - .github/**
-      - LICENSE
-      - README.md
+      - /*
   workflow_dispatch:
     inputs:
       images:
