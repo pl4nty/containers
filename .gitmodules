@@ -22,3 +22,6 @@
 [submodule "wufb-ds/wufb-ds"]
 	path = wufb-ds/wufb-ds
 	url = https://github.com/microsoftgraph/windowsupdates-webapplication-sample
+[submodule "openssl-webterm/openssl-webterm"]
+	path = openssl-webterm/openssl-webterm
+	url = https://github.com/cryptool-org/openssl-webterm
