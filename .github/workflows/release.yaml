@@ -111,12 +111,16 @@ jobs:
           cd $IMAGE
           git submodule update --init --recursive $IMAGE
           echo "context=$IMAGE/$IMAGE" >> $GITHUB_OUTPUT
-
-          shopt -s extglob
-          cp !($IMAGE) $IMAGE -r
         continue-on-error: true
         env:
           IMAGE: ${{ matrix.image }}
+
+      - name: Copy patches to submodule (Linux)
+        if: ${{ startsWith(matrix.arch, 'linux/') }}
+        continue-on-error: true
+        run: |
+          shopt -s extglob
+          cp !($IMAGE) $IMAGE -r
 
       - name: Copy patches to submodule (Windows)
         if: ${{ startsWith(matrix.arch, 'windows/') }}
