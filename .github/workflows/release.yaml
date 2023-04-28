@@ -89,14 +89,29 @@ jobs:
           git clone -n --depth=1 --filter=tree:0 ${{ github.server_url }}/${{ github.repository }} ./
           git sparse-checkout set --no-cone ${{ matrix.image }}
           git checkout ${{ github.sha }}
-          ls ${{ matrix.image }}
 
-      # - name: Login to GitHub Container Registry
-      #   uses: docker/login-action@v2
-      #   with:
-      #     registry: ghcr.io
-      #     username: ${{ github.actor }}
-      #     password: ${{ github.token }}
+      - name: Init submodule if present
+        id: get-context
+        continue-on-error: true
+        run: |
+          git submodule update --init --recursive $CONTEXT
+          echo "context=$CONTEXT" >> $GITHUB_OUTPUT
+        env:
+          CONTEXT: ${{ matrix.image }}/${{ matrix.image }}
+
+      - name: Copy patches to submodule (Linux)
+        if: ${{ steps.get-context.outputs.context && startsWith(matrix.arch, 'linux/') }}
+        continue-on-error: true
+        run: |
+          shopt -s extglob
+          cp !(${{ matrix.image }}) ${{ matrix.image }} -r
+
+      - name: Copy patches to submodule (Windows)
+        if: ${{ steps.get-context.outputs.context && startsWith(matrix.arch, 'windows/') }}
+        continue-on-error: true
+        run: |
+          cd ${{ matrix.image }}
+          cp * ${{ matrix.image }} -r
 
       - name: Generate image tags
         id: meta
@@ -104,34 +119,6 @@ jobs:
         with:
           images: ghcr.io/${{ github.repository_owner }}/${{ matrix.image }}
           tags: type=sha
-
-      - name: Init submodule if present, copy patches (Linux)
-        id: get-context
-        run: |
-          cd $IMAGE
-          git submodule update --init --recursive $IMAGE
-          echo "context=$IMAGE/$IMAGE" >> $GITHUB_OUTPUT
-        continue-on-error: true
-        env:
-          IMAGE: ${{ matrix.image }}
-
-      - name: Copy patches to submodule (Linux)
-        if: ${{ startsWith(matrix.arch, 'linux/') }}
-        continue-on-error: true
-        run: |
-          shopt -s extglob
-          cp !($IMAGE) $IMAGE -r
-        env:
-          IMAGE: ${{ matrix.image }}
-
-      - name: Copy patches to submodule (Windows)
-        if: ${{ startsWith(matrix.arch, 'windows/') }}
-        continue-on-error: true
-        run: |
-          cd ${{ matrix.image }}
-          cp * ${{ matrix.image }} -r
-
-      # - uses: docker/setup-buildx-action@v2
 
       # format labels for build action
       - uses: frabert/replace-string-action@v2
