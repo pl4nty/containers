@@ -121,6 +121,8 @@ jobs:
         run: |
           shopt -s extglob
           cp !($IMAGE) $IMAGE -r
+        env:
+          IMAGE: ${{ matrix.image }}
 
       - name: Copy patches to submodule (Windows)
         if: ${{ startsWith(matrix.arch, 'windows/') }}
