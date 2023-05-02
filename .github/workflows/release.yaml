@@ -151,10 +151,10 @@ jobs:
       - uses: jpribyl/action-docker-layer-caching@v0.1.1
         continue-on-error: true
         with:
-          key: docker-layer-cache-${{ steps.format-labels-tag.outputs.replaced }}-{hash}
+          key: docker-layer-cache-${{ matrix.image }}-${{ steps.format-labels-tag.outputs.replaced }}-{hash}
           restore-keys: |
-            docker-layer-cache-${{ steps.format-labels-tag.outputs.replaced }}-
-            layer-docker-layer-cache-${{ steps.format-labels-tag.outputs.replaced }}-
+            docker-layer-cache-${{ matrix.image }}-${{ steps.format-labels-tag.outputs.replaced }}-
+            layer-docker-layer-cache-${{ matrix.image }}-${{ steps.format-labels-tag.outputs.replaced }}-
 
       # docker/build-push-action#18 doesn't support Windows
       # this action doesn't have caching though
