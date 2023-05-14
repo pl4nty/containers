@@ -106,9 +106,8 @@ jobs:
       - name: Copy patches to submodule (Windows)
         if: ${{ steps.get-context.outputs.context && startsWith(matrix.arch, 'windows/') }}
         continue-on-error: true
-        run: |
-          cd ${{ matrix.image }}
-          cp * ${{ matrix.image }} -r
+        working-directory: ${{ matrix.image }}
+        run: cp * ${{ matrix.image }} -r
 
       - name: Generate image tags
         id: meta
@@ -144,6 +143,7 @@ jobs:
 
       - name: Check if Dockerfile exists
         id: dockerfileexists
+        working-directory: ${{ matrix.image }}/${{ matrix.image }}
         run: ls Dockerfile${{ matrix.ext }}
         continue-on-error: true
 
