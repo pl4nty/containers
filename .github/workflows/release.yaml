@@ -72,10 +72,6 @@ jobs:
     permissions:
       packages: write
       contents: read
-
-    outputs:
-      tag: ${{ fromJSON(steps.meta.outputs.json).labels['org.opencontainers.image.version'] }}
-      arch-tag: ${{ steps.build-push.outputs.tags }}
     steps:
       - uses: webfactory/ssh-agent@v0.8.0
         with:
@@ -173,12 +169,7 @@ jobs:
       
       # workaround for lack of matrix support in job.outputs. was almost done, but the team got laid off
       # https://github.com/actions/runner/pull/2477#issuecomment-1501003600
-      - id: tags
-        run: |
-          tags='["${{ fromJSON(steps.meta.outputs.json).labels['org.opencontainers.image.version'] }}","${{ steps.build-push.outputs.tags }}"]'
-          echo "$tags" > tags
-          echo "tags=$tags" >> $GITHUB_OUTPUT
-          echo $tags
+      - run: echo ["${{ fromJSON(steps.meta.outputs.json).labels['org.opencontainers.image.version'] }}","${{ steps.build-push.outputs.tags }}"] > tags
       - uses: actions/upload-artifact@v3
         with:
           name: ${{ matrix.image }}-${{ hashFiles('tags') || 'none' }}
