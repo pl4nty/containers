@@ -178,7 +178,7 @@ jobs:
       # workaround for lack of matrix support in job.outputs. was almost done, but the team got laid off
       # https://github.com/actions/runner/pull/2477#issuecomment-1501003600
       - if: ${{ steps.dockerfileexists.outcome == 'success' }}
-        run: echo ["${{ fromJSON(steps.meta.outputs.json).labels['org.opencontainers.image.version'] }}","${{ steps.build-push.outputs.tags }}"] > tags
+        run: echo '["${{ fromJSON(steps.meta.outputs.json).labels['org.opencontainers.image.version'] }}","${{ steps.build-push.outputs.tags }}"]' > tags
       - uses: actions/upload-artifact@v3
         if: ${{ steps.dockerfileexists.outcome == 'success' }}
         with:
