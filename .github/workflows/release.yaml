@@ -68,6 +68,7 @@ jobs:
           arch: linux/arm64
         - os: windows-latest
           arch: windows/amd64
+          ext: .windows
     runs-on: ${{ matrix.os }}
     permissions:
       packages: write
@@ -141,10 +142,16 @@ jobs:
           replace-with: '-'
           flags: 'g'
 
+      - name: Check if Dockerfile exists
+        id: dockerfileexists
+        run: ls Dockerfile${{ matrix.ext }}
+        continue-on-error: true
+
       # can we use arch in here? suspect windows images could slow linux down otherwise
       # confirmed - particularly bad for off-net ARM64 workers, 3+ minutes
       # https://github.com/satackey/action-docker-layer-caching/issues/169#issuecomment-1217408538
       - uses: jpribyl/action-docker-layer-caching@v0.1.1
+        if: ${{ steps.dockerfileexists.outcome == 'success' }}
         continue-on-error: true
         with:
           key: docker-layer-cache-${{ matrix.image }}-${{ steps.format-labels-tag.outputs.replaced }}-{hash}
@@ -155,6 +162,7 @@ jobs:
       # docker/build-push-action#18 doesn't support Windows
       # this action doesn't have caching though
       - uses: mr-smithers-excellent/docker-build-push@v6
+        if: ${{ steps.dockerfileexists.outcome == 'success' }}
         id: build-push
         with:
           image: ${{ matrix.image }} #
@@ -162,15 +170,17 @@ jobs:
           username: ${{ github.actor }} #
           password: ${{ github.token }} #
           directory: ${{ steps.get-context.outputs.context || matrix.image }} # context:
-          dockerfile: ${{ steps.get-context.outputs.context || matrix.image }}/Dockerfile
+          dockerfile: ${{ steps.get-context.outputs.context || matrix.image }}/Dockerfile${{ matrix.ext }}
           # platform: ${{ matrix.arch }}
           tags: ${{ fromJSON(steps.meta.outputs.json).labels['org.opencontainers.image.version'] }}-${{ steps.format-labels-tag.outputs.replaced }} # ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.format-labels-2.outputs.replaced }}"
       
       # workaround for lack of matrix support in job.outputs. was almost done, but the team got laid off
       # https://github.com/actions/runner/pull/2477#issuecomment-1501003600
-      - run: echo ["${{ fromJSON(steps.meta.outputs.json).labels['org.opencontainers.image.version'] }}","${{ steps.build-push.outputs.tags }}"] > tags
+      - if: ${{ steps.dockerfileexists.outcome == 'success' }}
+        run: echo ["${{ fromJSON(steps.meta.outputs.json).labels['org.opencontainers.image.version'] }}","${{ steps.build-push.outputs.tags }}"] > tags
       - uses: actions/upload-artifact@v3
+        if: ${{ steps.dockerfileexists.outcome == 'success' }}
         with:
           name: ${{ matrix.image }}-${{ hashFiles('tags') || 'none' }}
           path: tags
