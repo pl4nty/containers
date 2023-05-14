@@ -143,7 +143,7 @@ jobs:
 
       - name: Check if Dockerfile exists
         id: dockerfileexists
-        working-directory: ${{ matrix.image }}/${{ matrix.image }}
+        working-directory: ${{ steps.get-context.outputs.context || matrix.image }}
         run: ls Dockerfile${{ matrix.ext }}
         continue-on-error: true
 
