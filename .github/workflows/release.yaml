@@ -177,7 +177,7 @@ jobs:
 
       - uses: sigstore/cosign-installer@v3.0.5
       - if: ${{ steps.dockerfileexists.outcome == 'success' }}
-        run: cosign sign ${{ steps.build-push.outputs.imageFullName }}:${{ steps.build-push.outputs.tags }}
+        run: cosign sign --yes ${{ steps.build-push.outputs.imageFullName }}:${{ steps.build-push.outputs.tags }}
       
       # workaround for lack of matrix support in job.outputs. was almost done, but the team got laid off
       # https://github.com/actions/runner/pull/2477#issuecomment-1501003600
@@ -226,4 +226,4 @@ jobs:
         push: true
 
     - uses: sigstore/cosign-installer@v3.0.5
-    - run: cosign sign ${{ fromJson(steps.tags.outputs.tags)['tag'] }}
+    - run: cosign sign --yes ${{ fromJson(steps.tags.outputs.tags)['tag'] }}
