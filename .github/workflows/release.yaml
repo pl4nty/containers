@@ -73,6 +73,7 @@ jobs:
     permissions:
       packages: write
       contents: read
+      id-token: write # OIDC artifact signing
     steps:
       - uses: webfactory/ssh-agent@v0.8.0
         with:
@@ -175,7 +176,8 @@ jobs:
           labels: ${{ steps.format-labels-2.outputs.replaced }}"
 
       - uses: sigstore/cosign-installer@v3.0.5
-      - run: echo "${{ steps.build-push.outputs.tags }}" | xargs -I {} cosign sign {}
+      - if: ${{ steps.dockerfileexists.outcome == 'success' }}
+        run: cosign sign ${{ steps.build-push.outputs.tags }}
       
       # workaround for lack of matrix support in job.outputs. was almost done, but the team got laid off
       # https://github.com/actions/runner/pull/2477#issuecomment-1501003600
