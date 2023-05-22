@@ -3,6 +3,18 @@
   "extends": [
     "config:base"
   ],
+  "rangeStrategy": "pin",
+  "platformAutomerge": true,
+  "lockFileMaintenance": {
+    "enabled": true,
+    "automerge": true
+  },
+  "packageRules": [
+    {
+      "matchUpdateTypes": ["minor", "patch"],
+      "automerge": true
+    }
+  ]
   "git-submodules": {
     "enabled": true
   }
