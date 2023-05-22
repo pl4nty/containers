@@ -25,3 +25,6 @@
 [submodule "openssl-webterm/openssl-webterm"]
 	path = openssl-webterm/openssl-webterm
 	url = https://github.com/cryptool-org/openssl-webterm
+[submodule "excel2latex/excel2latex"]
+	path = excel2latex/excel2latex
+	url = https://github.com/pl4nty/excel2latex
