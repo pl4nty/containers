@@ -14,7 +14,7 @@
       "matchUpdateTypes": ["minor", "patch"],
       "automerge": true
     }
-  ]
+  ],
   "git-submodules": {
     "enabled": true
   }
