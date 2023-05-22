@@ -169,11 +169,13 @@ jobs:
           registry: ghcr.io #
           username: ${{ github.actor }} #
           password: ${{ github.token }} #
-          directory: ${{ steps.get-context.outputs.context || matrix.image }} # context:
+          directory: ${{ steps.get-context.outputs.context || matrix.image }}
           dockerfile: ${{ steps.get-context.outputs.context || matrix.image }}/Dockerfile${{ matrix.ext }}
-          # platform: ${{ matrix.arch }}
-          tags: ${{ fromJSON(steps.meta.outputs.json).labels['org.opencontainers.image.version'] }}-${{ steps.format-labels-tag.outputs.replaced }} # ${{ steps.meta.outputs.tags }}
+          tags: ${{ fromJSON(steps.meta.outputs.json).labels['org.opencontainers.image.version'] }}-${{ steps.format-labels-tag.outputs.replaced }}
           labels: ${{ steps.format-labels-2.outputs.replaced }}"
+
+      - uses: sigstore/cosign-installer@v3.0.5
+      - run: echo "${{ steps.build-push.outputs.tags }}" | xargs -I {} cosign sign {}
       
       # workaround for lack of matrix support in job.outputs. was almost done, but the team got laid off
       # https://github.com/actions/runner/pull/2477#issuecomment-1501003600
@@ -220,3 +222,6 @@ jobs:
         inputs: ${{ fromJson(steps.tags.outputs.tags)['tag'] }}
         images: ${{ fromJson(steps.tags.outputs.tags)['images'] }}
         push: true
+
+    - uses: sigstore/cosign-installer@v3.0.5
+    - run: cosign sign ${{ fromJson(steps.tags.outputs.tags)['tag'] }}
