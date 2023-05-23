@@ -4,7 +4,7 @@ WORKDIR /app
 # puppeteer dependency can't install ARM chromium by default
 # puppeteer/puppeteer#7740
 RUN apt-get update
-RUN apt-get install -y chromium chromium-browser && apt-get clean
+RUN apt-get install -y chromium && apt-get clean
 ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD true
 ENV PUPPETEER_EXECUTABLE_PATH /usr/bin/chromium
 
