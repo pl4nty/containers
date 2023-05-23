@@ -101,6 +101,7 @@ jobs:
       - name: Copy patches to submodule (Linux)
         if: ${{ steps.get-context.outputs.context && startsWith(matrix.arch, 'linux/') }}
         continue-on-error: true
+        working-directory: ${{ matrix.image }}
         run: |
           shopt -s extglob
           cp !(${{ matrix.image }}) ${{ matrix.image }} -r
