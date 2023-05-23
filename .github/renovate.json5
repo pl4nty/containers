@@ -4,7 +4,6 @@
     "config:base"
   ],
   "rangeStrategy": "pin",
-  "platformAutomerge": true,
   "lockFileMaintenance": {
     "enabled": true,
     "automerge": true
