@@ -4,6 +4,7 @@
     "config:base"
   ],
   "rangeStrategy": "pin",
+  "ignoreTests": true,
   "lockFileMaintenance": {
     "enabled": true,
     "automerge": true
