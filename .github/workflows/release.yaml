@@ -9,6 +9,7 @@ on:
       - .github/**
       - .devcontainer.json
       - .gitmodules
+      - archive
       - LICENSE
       - README.md
   workflow_dispatch:
