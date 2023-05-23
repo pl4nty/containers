@@ -1,4 +1,4 @@
-FROM debian:buster
+FROM debian:bullseye
 RUN useradd -ms /bin/bash codeworld \
   && apt-get update \
   && apt-get install -y sudo \
