@@ -1,6 +1,5 @@
-FROM debian:stretch
-RUN echo "deb http://archive.debian.org/debian stretch main contrib non-free" > /etc/apt/sources.list \
-  && useradd -ms /bin/bash codeworld \
+FROM debian:buster
+RUN useradd -ms /bin/bash codeworld \
   && apt-get update \
   && apt-get install -y sudo \
   && echo "codeworld ALL=(ALL:ALL) NOPASSWD:ALL" >> /etc/sudoers
