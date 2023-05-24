@@ -81,7 +81,7 @@ jobs:
       # can't use github.repositoryUrl - it uses git://, which seems to be blocked on Windows runners
       - name: Checkout image folder
         run: |
-          git config --system credential.helper store
+          git config credential.helper store
           echo "https://oauth2:${{ secrets.GH_PAT }}@github.com" > ~/.git-credentials
           git clone -n --depth=1 --filter=tree:0 ${{ github.server_url }}/${{ github.repository }} ./
           git sparse-checkout set --no-cone ${{ matrix.image }}
