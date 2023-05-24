@@ -73,7 +73,6 @@ jobs:
     runs-on: ${{ matrix.os }}
     permissions:
       packages: write
-      contents: read
       id-token: write # OIDC artifact signing
     steps:    
       # required for builds with custom context
@@ -81,8 +80,6 @@ jobs:
       # can't use github.repositoryUrl - it uses git://, which seems to be blocked on Windows runners
       - name: Checkout image folder
         run: |
-          git config credential.helper store
-          echo "https://oauth2:${{ secrets.GH_PAT }}@github.com" > ~/.git-credentials
           git clone -n --depth=1 --filter=tree:0 ${{ github.server_url }}/${{ github.repository }} ./
           git sparse-checkout set --no-cone ${{ matrix.image }}
           git checkout ${{ github.sha }}
@@ -95,6 +92,7 @@ jobs:
           echo "context=$CONTEXT" >> $GITHUB_OUTPUT
         env:
           CONTEXT: ${{ matrix.image }}/${{ matrix.image }}
+          GITHUB_TOKEN: ${{ secrets.GH_PAT }}
 
       - name: Copy patches to submodule (Linux)
         if: ${{ steps.get-context.outputs.context && startsWith(matrix.arch, 'linux/') }}
