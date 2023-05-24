@@ -88,6 +88,7 @@ jobs:
         id: get-context
         continue-on-error: true
         run: |
+          git config --global --add url."https://oauth2:${{ secrets.GH_PAT }}@github.com/".insteadOf https://github.com/
           git submodule update --init --recursive $CONTEXT
           echo "context=$CONTEXT" >> $GITHUB_OUTPUT
         env:
