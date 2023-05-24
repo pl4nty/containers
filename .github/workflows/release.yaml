@@ -34,7 +34,7 @@ jobs:
       with:
         fetch-depth: 0
         submodules: true
-        ssh-key: ${{ secrets.GIT_SSH_KEY }}
+        token: ${{ secrets.GH_PAT }}
 
     # TODO not detecting submodule changes properly. possibly related to checkout err on private repo?
     # https://github.com/tj-actions/changed-files/pull/394/files
@@ -75,16 +75,14 @@ jobs:
       packages: write
       contents: read
       id-token: write # OIDC artifact signing
-    steps:
-      - uses: webfactory/ssh-agent@v0.8.0
-        with:
-          ssh-private-key: ${{ secrets.GIT_SSH_KEY }}
-    
+    steps:    
       # required for builds with custom context
       # https://stackoverflow.com/a/52269934
       # can't use github.repositoryUrl - it uses git://, which seems to be blocked on Windows runners
       - name: Checkout image folder
         run: |
+          git config --system credential.helper store
+          echo "https://oauth2:${{ secrets.GH_PAT }}@github.com" > ~/.git-credentials
           git clone -n --depth=1 --filter=tree:0 ${{ github.server_url }}/${{ github.repository }} ./
           git sparse-checkout set --no-cone ${{ matrix.image }}
           git checkout ${{ github.sha }}
