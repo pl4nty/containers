@@ -31,3 +31,6 @@
 [submodule "codeworld/codeworld"]
 	path = codeworld/codeworld
 	url = https://github.com/google/codeworld
+[submodule "ataxx/ataxx"]
+	path = ataxx/ataxx
+	url = https://github.com/pl4nty/ataxx
