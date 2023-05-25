@@ -29,10 +29,10 @@
     "codespaces": {
       "repositories": {
 				"pl4nty/ataxx": {
-          "contents": "read"
+          "permissions": "read-all"
         },
         "pl4nty/tsuro": {
-          "contents": "read"
+          "contents": "write"
         }
       }
     }
