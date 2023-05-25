@@ -28,8 +28,11 @@
 	"customizations": {
     "codespaces": {
       "repositories": {
+				"pl4nty/ataxx": {
+          "contents": "read"
+        },
         "pl4nty/tsuro": {
-          "permissions": "write-all"
+          "contents": "read"
         }
       }
     }
