@@ -29,10 +29,26 @@
     "codespaces": {
       "repositories": {
 				"pl4nty/ataxx": {
-          "contents": "write"
+					"actions": "read",
+					"checks": "read",
+          "contents": "read",
+					"deployments": "read",
+					"discussions": "read",
+					"issues": "read",
+					"packages": "read",
+          "pages": "read",
+          "pull_requests": "read",
+          "repository_projects": "read",
+          "statuses": "read",
+          "workflows": "read"
         },
         "pl4nty/tsuro": {
-          "permissions": "read-all"
+          "packages": "read",
+          "pages": "read",
+          "pull_requests": "read",
+          "repository_projects": "read",
+          "statuses": "read",
+          "workflows": "read"
         }
       }
     }
