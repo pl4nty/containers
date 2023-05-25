@@ -218,10 +218,17 @@ jobs:
         echo "tags=$tags" >> $GITHUB_OUTPUT
         echo $tags
 
-    - name: Create and push manifest images
+    - name: Create and push SHA manifest
       uses: Noelware/docker-manifest-action@0.3.1
       with:
         inputs: ${{ fromJson(steps.tags.outputs.tags)['tag'] }}
+        images: ${{ fromJson(steps.tags.outputs.tags)['images'] }}
+        push: true
+        
+    - name: Create and push latest manifest
+      uses: Noelware/docker-manifest-action@0.3.1
+      with:
+        inputs: ghcr.io/${{ github.repository_owner }}/${{ matrix.image }}:latest
         images: ${{ fromJson(steps.tags.outputs.tags)['images'] }}
         push: true
 
