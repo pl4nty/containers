@@ -25,30 +25,16 @@
 	// "postCreateCommand": "docker --version",
 
 	// Configure tool-specific properties.
+	// contents: read doesn't allow pull, and neither does read for all documented perms
+	// but read-all works fine...
 	"customizations": {
     "codespaces": {
       "repositories": {
 				"pl4nty/ataxx": {
-					"actions": "read",
-					"checks": "read",
-          "contents": "read",
-					"deployments": "read",
-					"discussions": "read",
-					"issues": "read",
-					"packages": "read",
-          "pages": "read",
-          "pull_requests": "read",
-          "repository_projects": "read",
-          "statuses": "read",
-          "workflows": "read"
+					"permissions": "read-all"
         },
         "pl4nty/tsuro": {
-          "packages": "read",
-          "pages": "read",
-          "pull_requests": "read",
-          "repository_projects": "read",
-          "statuses": "read",
-          "workflows": "read"
+					"permissions": "read-all"
         }
       }
     }
