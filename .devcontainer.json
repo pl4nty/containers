@@ -36,6 +36,9 @@
 				"pl4nty/shapes": {
 					"permissions": "read-all"
         },
+				"pl4nty/temple-trap": {
+					"permissions": "read-all"
+        },
         "pl4nty/tsuro": {
 					"permissions": "read-all"
         }
