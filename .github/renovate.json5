@@ -13,6 +13,7 @@
   "packageRules": [
     {
       "matchUpdateTypes": ["minor", "patch"],
+      "matchManagers": ["git-submodules"],
       "automerge": true
     }
   ],
