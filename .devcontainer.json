@@ -33,6 +33,9 @@
 				"pl4nty/ataxx": {
 					"permissions": "read-all"
         },
+        "pl4nty/cellular-automata": {
+					"permissions": "read-all"
+        },
 				"pl4nty/shapes": {
 					"permissions": "read-all"
         },
