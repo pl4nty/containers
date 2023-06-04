@@ -100,7 +100,7 @@ jobs:
         continue-on-error: true
         working-directory: ${{ matrix.image }}
         run: |
-          shopt -s extglob
+          shopt -s extglob dotglob
           cp !(${{ matrix.image }}) ${{ matrix.image }} -r
 
       - name: Copy patches to submodule (Windows)
