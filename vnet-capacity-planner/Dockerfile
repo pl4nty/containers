@@ -3,7 +3,7 @@ WORKDIR /app
 
 RUN git clone -b gh-pages https://github.com/chunliu/vnet-capacity-planner
 
-FROM joseluisq/static-web-server:2.16.0
+FROM joseluisq/static-web-server:2.17.0
 
 COPY --from=build /app/vnet-capacity-planner /public
 
