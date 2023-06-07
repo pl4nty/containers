@@ -40,3 +40,6 @@
 [submodule "temple-trap/temple-trap"]
 	path = temple-trap/temple-trap
 	url = https://github.com/pl4nty/temple-trap
+[submodule "anudegreeapp/anudegreeapp"]
+	path = anudegreeapp/anudegreeapp
+	url = https://github.com/nicholas-russell/anudegreeapp
