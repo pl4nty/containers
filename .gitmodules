@@ -34,3 +34,9 @@
 [submodule "ataxx/ataxx"]
 	path = ataxx/ataxx
 	url = https://github.com/pl4nty/ataxx
+[submodule "shapes/shapes"]
+	path = shapes/shapes
+	url = https://github.com/pl4nty/shapes
+[submodule "temple-trap/temple-trap"]
+	path = temple-trap/temple-trap
+	url = https://github.com/pl4nty/temple-trap
