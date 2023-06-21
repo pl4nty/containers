@@ -3,7 +3,7 @@ import { LogLevel } from "@azure/msal-browser"; //MIT LICENSE < https://github.c
 export const msalConfig = {
   auth: {
     clientId: "0fa38708-b7d4-4600-bc07-2b1b6a329e4e", // e.g. "70258689-8a4e-410f-a300-cb2011f23cf3"
-    redirectUri: "https://wufb-ds.tplant.com.au"
+    redirectUri: "https://wufb-ds.tplant.com.au" // e.g. "http://localhost:8080"
   },
   cache: {
     cacheLocation: "sessionStorage",
@@ -30,6 +30,7 @@ export const wufbRequest = {
     "00000003-0000-0000-c000-000000000000/WindowsUpdates.ReadWrite.All",
     "User.Read",
   ],
+  prompt: "select_account"
 };
 
 export const userFeedbackRequest = {

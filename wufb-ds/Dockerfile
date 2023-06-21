@@ -2,7 +2,8 @@ FROM node:18 AS build-env
 WORKDIR /app
 
 COPY package*.json ./
-RUN npm ci
+# lock wasn't updated so npm ci fails
+RUN npm install
 
 COPY . .
 RUN npm run build
