@@ -154,6 +154,7 @@ jobs:
         if: ${{ steps.dockerfileexists.outcome == 'success' }}
         continue-on-error: true
         with:
+          concurrency: 10
           key: docker-layer-cache-${{ matrix.image }}-${{ steps.format-labels-tag.outputs.replaced }}-{hash}
           restore-keys: |
             docker-layer-cache-${{ matrix.image }}-${{ steps.format-labels-tag.outputs.replaced }}-
