@@ -55,3 +55,12 @@
 [submodule "ct-monitor/ct-monitor"]
 	path = ct-monitor/ct-monitor
 	url = https://github.com/crtsh/ct_monitor
+[submodule "crtsh-postgres/libx509pq"]
+	path = crtsh-postgres/libx509pq
+	url = https://github.com/crtsh/libx509pq
+[submodule "crtsh-postgres/libzlintpq"]
+	path = crtsh-postgres/libzlintpq
+	url = https://github.com/crtsh/libzlintpq
+[submodule "crtsh-postgres/certwatch_db"]
+	path = crtsh-postgres/certwatch_db
+	url = https://github.com/crtsh/certwatch_db
