@@ -46,3 +46,6 @@
 [submodule "caissuer-monitor/caissuer-monitor"]
 	path = caissuer-monitor/caissuer-monitor
 	url = https://github.com/crtsh/caissuer_monitor
+[submodule "cert-validation-success-monitor/cert-validation-success-monitor"]
+	path = cert-validation-success-monitor/cert-validation-success-monitor
+	url = https://github.com/crtsh/cert_validation_success_monitor
