@@ -43,3 +43,6 @@
 [submodule "anudegreeapp/anudegreeapp"]
 	path = anudegreeapp/anudegreeapp
 	url = https://github.com/pl4nty/anudegreeapp
+[submodule "caissuer-monitor/caissuer-monitor"]
+	path = caissuer-monitor/caissuer-monitor
+	url = https://github.com/crtsh/caissuer_monitor
