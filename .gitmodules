@@ -49,3 +49,6 @@
 [submodule "cert-validation-success-monitor/cert-validation-success-monitor"]
 	path = cert-validation-success-monitor/cert-validation-success-monitor
 	url = https://github.com/crtsh/cert_validation_success_monitor
+[submodule "crl-monitor/crl-monitor"]
+	path = crl-monitor/crl-monitor
+	url = https://github.com/crtsh/crl_monitor
