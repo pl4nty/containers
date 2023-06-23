@@ -52,3 +52,6 @@
 [submodule "crl-monitor/crl-monitor"]
 	path = crl-monitor/crl-monitor
 	url = https://github.com/crtsh/crl_monitor
+[submodule "ct-monitor/ct-monitor"]
+	path = ct-monitor/ct-monitor
+	url = https://github.com/crtsh/ct_monitor
