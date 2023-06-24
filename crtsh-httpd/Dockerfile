@@ -37,7 +37,7 @@ RUN printf 'LoadModule certwatch_module modules/mod_certwatch.so\n\
 LoadModule pgconn_module modules/mod_pgconn.so\n\
 SetHandler certwatch\n\
 <Location "/">\n\
-  ConnInfo "host=postgres port=5432 dbname=certwatch user=httpd password=httpd"\n\
+  ConnInfo "${CONNINFO}"\n\
 </Location>' >> /usr/local/apache2/conf/httpd.conf
 
 COPY brand/ /usr/local/apache2/htdocs/
