@@ -1,5 +1,6 @@
 services:
   postgres:
+    # TODO build image and mount pgdata
     image: ghcr.io/pl4nty/crtsh-postgres
     environment:
       POSTGRES_PASSWORD: postgres
@@ -10,30 +11,46 @@ services:
   httpd:
     build: .
     environment:
-      CONNINFO: host=postgres user=crtsh password=crtsh dbname=certwatch
+      CONNINFO: host=postgres user=certwatch password=certwatch dbname=certwatch
     ports:
       - "8080:80"
     depends_on:
       postgres:
         condition: service_healthy
   caissuer-monitor:
-    image: ghcr.io/pl4nty/caissuer-monitor
-    environment:
-      - CERTWATCH_PASSWORD=crtsh
+    build:
+      context: ../caissuer-monitor/caissuer-monitor
+      dockerfile: ../Dockerfile
     depends_on:
       postgres:
         condition: service_healthy
-    command: ["-conninfo", "host=postgres port=5432 dbname=certwatch user=crtsh password=crtsh sslmode=disable"]
+    command: ["-conninfo", "host=postgres port=5432 dbname=certwatch user=certwatch password=certwatch sslmode=disable"]
     volumes:
-      - ./default.toml:/default.toml
+      - type: bind
+        source: ./default.toml
+        target: /default.toml
   ct-monitor:
-    image: ghcr.io/pl4nty/ct-monitor
+    build:
+      context: ../ct-monitor/ct-monitor
+      dockerfile: ../Dockerfile
     environment:
       - CTMONITOR_CERTWATCHDB_HOST=postgres
-      - CTMONITOR_CERTWATCHDB_USER=crtsh
-      - CTMONITOR_CERTWATCHDB_PASSWORD=crtsh
+      - CTMONITOR_CERTWATCHDB_USER=certwatch
+      - CTMONITOR_CERTWATCHDB_PASSWORD=certwatch
     depends_on:
       postgres:
         condition: service_healthy
     ports:
       - "8081:8081"
+  ocsp-monitor:
+    build:
+      context: ../ocsp-monitor/ocsp-monitor
+      dockerfile: ../Dockerfile
+    depends_on:
+      postgres:
+        condition: service_healthy
+    command: ["-conninfo", "host=postgres port=5432 dbname=certwatch user=certwatch password=certwatch sslmode=disable"]
+    volumes:
+      - type: bind
+        source: ./default.toml
+        target: /default.toml

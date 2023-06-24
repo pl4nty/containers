@@ -55,14 +55,13 @@ COPY certwatch_db/ .
 COPY certwatch_db/sql/create_schema.sql 1-init.sql /docker-entrypoint-initdb.d/
 RUN sed -i -e 's/EXTENSION libzlintpq/EXTENSION libzlintpq; CREATE EXTENSION libx509pq/' \
 -e 's/\\i fnc\/determine_ca_trust_purposes.fnc//' /docker-entrypoint-initdb.d/create_schema.sql
-# RUN printf '\i fnc/apple_disclosures.fnc\n\
-# \i fnc/chrome_disclosures.fnc' >> /docker-entrypoint-initdb.d/create_schema.sql
+RUN printf '\i ccadb/apple_disclosures.fnc\n\
+\i ccadb/chrome_disclosures.fnc\n\
+\i ca_issuers/ca_issuers.fnc'>> /docker-entrypoint-initdb.d/create_schema.sql
 
 # TODO add these submodules
 RUN sed -i -e 's/\\i libocsppq\/ocsp_embedded.fnc//' \
 -e 's/\\i libocsppq\/ocsp_randomserial_embedded.fnc//' \
--e 's/\\i ocsp_responders\/ocsp_responders.fnc//' \
--e 's/\\i ocsp_responders\/ocsp_response.fnc//' \
 -e 's/\\i revoked_intermediates\/revoked_intermediates.fnc//' \
 -e 's/\\i test_websites\/test_websites.fnc//' /docker-entrypoint-initdb.d/create_schema.sql
 
