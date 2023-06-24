@@ -32,7 +32,7 @@ jobs:
       uses: actions/checkout@v3
       with:
         token: ${{ secrets.GH_PAT }}
-        fetch-depth: 100
+        fetch-depth: 0 # fetch all, otherwise changed-files will and it's slower
         submodules: true
 
     # TODO not detecting submodule changes properly. possibly related to checkout err on private repo?
