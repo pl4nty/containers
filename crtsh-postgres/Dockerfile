@@ -1,10 +1,10 @@
 FROM golang:1.20.5 AS cert_validation_success_monitor
 
 WORKDIR /app
-COPY go.* ./
+COPY cert_validation_success_monitor/go.* ./
 RUN go mod download
 
-COPY *.go ./
+COPY cert_validation_success_monitor/*.go ./
 # can't use Makefile, it references SVN
 RUN CGO_ENABLED=0 go build cert_validation_success_monitor.go
 

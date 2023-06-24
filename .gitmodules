@@ -67,3 +67,6 @@
 [submodule "crtsh-httpd/mod_pgconn"]
 	path = crtsh-httpd/mod_pgconn
 	url = https://github.com/crtsh/mod_pgconn
+[submodule "crtsh-postgres/cert_validation_success_monitor"]
+	path = crtsh-postgres/cert_validation_success_monitor
+	url = https://github.com/crtsh/cert_validation_success_monitor
