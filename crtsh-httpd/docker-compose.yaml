@@ -1,0 +1,25 @@
+services:
+  postgres:
+    image: ghcr.io/pl4nty/crtsh-postgres
+    environment:
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5432:5432"
+  httpd:
+    build: .
+    environment:
+      CONNINFO: host=postgres user=crtsh password=crtsh dbname=certwatch
+    ports:
+      - "8080:80"
+    depends_on:
+      - postgres
+  ct-monitor:
+    image: ghcr.io/pl4nty/ct-monitor
+    environment:
+      - CTMONITOR_CERTWATCHDB_HOST=postgres
+      - CTMONITOR_CERTWATCHDB_USER=crtsh
+      - CTMONITOR_CERTWATCHDB_PASSWORD=crtsh
+    depends_on:
+      - postgres
+    ports:
+      - "8081:8081"

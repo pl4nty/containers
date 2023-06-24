@@ -36,8 +36,9 @@ RUN make install
 RUN printf 'LoadModule certwatch_module modules/mod_certwatch.so\n\
 LoadModule pgconn_module modules/mod_pgconn.so\n\
 SetHandler certwatch\n\
-<Location "/">\n\
+<FilesMatch "\.html$">\n\
   ConnInfo "${CONNINFO}"\n\
-</Location>' >> /usr/local/apache2/conf/httpd.conf
+  SetHandler certwatch\n\
+</FilesMatch>' >> /usr/local/apache2/conf/httpd.conf
 
 COPY brand/ /usr/local/apache2/htdocs/
