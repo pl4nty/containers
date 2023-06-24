@@ -64,3 +64,9 @@
 [submodule "crtsh-postgres/certwatch_db"]
 	path = crtsh-postgres/certwatch_db
 	url = https://github.com/crtsh/certwatch_db
+[submodule "crtsh-httpd/mod_certwatch"]
+	path = crtsh-httpd/mod_certwatch
+	url = https://github.com/crtsh/mod_certwatch
+[submodule "crtsh-httpd/mod_pgconn"]
+	path = crtsh-httpd/mod_pgconn
+	url = https://github.com/crtsh/mod_pgconn
