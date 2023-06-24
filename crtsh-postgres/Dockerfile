@@ -1,3 +1,13 @@
+FROM golang:1.20.5 AS cert_validation_success_monitor
+
+WORKDIR /app
+COPY go.* ./
+RUN go mod download
+
+COPY *.go ./
+# can't use Makefile, it references SVN
+RUN CGO_ENABLED=0 go build cert_validation_success_monitor.go
+
 # 15 perms are incompatible with setup scripts (public schema)
 FROM postgres:13-bullseye AS libx509pq
 
@@ -56,5 +66,6 @@ RUN sed -i -e 's/\\i libocsppq\/ocsp_embedded.fnc//' \
 
 # crontab and manual maintenance
 COPY certwatch_db/ /root/certwatch/
+COPY --from=cert_validation_success_monitor /app/cert_validation_success_monitor /root/certwatch/cert_validation_success_monitor/cert_validation_success_monitor
 ENV PGHOST localhost
 RUN crontab /root/certwatch/jobs/crontab
