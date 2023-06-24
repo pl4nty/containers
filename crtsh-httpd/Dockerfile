@@ -36,6 +36,10 @@ RUN make install
 RUN printf 'LoadModule certwatch_module modules/mod_certwatch.so\n\
 LoadModule pgconn_module modules/mod_pgconn.so\n\
 SetHandler certwatch\n\
+<Location "/">\n\
+  ConnInfo "${CONNINFO}"\n\
+  SetHandler certwatch\n\
+</Location>\n\
 <FilesMatch "\.html$">\n\
   ConnInfo "${CONNINFO}"\n\
   SetHandler certwatch\n\
