@@ -1,6 +1,6 @@
 FROM httpd AS run
 RUN apt-get update \
-&& apt-get install -y --no-install-recommends gcc make libaprutil1-dev \
+&& apt-get install -y --no-install-recommends gcc make libaprutil1-dev libpq5 \
 && rm -rf /var/lib/apt/lists/*
 
 FROM run AS build
