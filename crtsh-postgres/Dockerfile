@@ -152,5 +152,6 @@ COPY --from=crlset-tools /crlset-tools/crlset ./jobs/
 RUN chmod +x ./mozilla_telemetry/update_mozilla_cert_validation_success.sh
 
 WORKDIR /
-COPY entrypoint.sh .
-ENTRYPOINT [ "/bin/bash", "/entrypoint.sh" ]
+COPY certwatch_db/jobs/crontab /etc/cron.d/certwatch
+RUN chmod 0644 /etc/cron.d/certwatch && crontab /etc/cron.d/certwatch
+CMD cron && /usr/local/bin/docker-entrypoint.sh postgres
