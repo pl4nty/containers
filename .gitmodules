@@ -81,7 +81,7 @@
 	url = https://github.com/crtsh/libcablintpq
 [submodule "crtsh-postgres/libx509lintpq"]
 	path = crtsh-postgres/libx509lintpq
-	url = https://github.com/crtsh/libx509lintpq
+	url = https://github.com/crtsh/tlibx509lintpq
 [submodule "crtsh-postgres/x509lint"]
 	path = crtsh-postgres/x509lint
 	url = https://github.com/kroeckx/x509lint.git
