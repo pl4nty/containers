@@ -2,9 +2,7 @@
 # docker compose up -d
 # docker compose exec postgres sh
 # psql -h crt.sh -p 5432 -U guest -d certwatch -c "\COPY (SELECT * FROM ct_log) TO 'ct_log.csv' WITH CSV DELIMITER ',' HEADER;"
-# psql -U postgres -d certwatch
-# \COPY ct_log (id,operator,url,name,public_key,is_active,latest_update,latest_sth_timestamp,mmd_in_seconds,tree_size,batch_size,chunk_size,google_uptime,chrome_version_added,chrome_inclusion_status,chrome_issue_number,chrome_final_tree_size,chrome_disqualified_at,apple_inclusion_status,apple_last_status_change,requests_concurrent,requests_throttle) FROM 'ct_log.csv' CSV HEADER;ch';
-# exit
+# psql -U postgres -d certwatch -c "\COPY ct_log (id,operator,url,name,public_key,is_active,latest_update,latest_sth_timestamp,mmd_in_seconds,tree_size,batch_size,chunk_size,google_uptime,chrome_version_added,chrome_inclusion_status,chrome_issue_number,chrome_final_tree_size,chrome_disqualified_at,apple_inclusion_status,apple_last_status_change,requests_concurrent,requests_throttle) FROM 'ct_log.csv' CSV HEADER;"
 # rm ct_log.csv
 # exit
 # docker compose up -d
