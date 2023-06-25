@@ -127,7 +127,8 @@ ALTER TABLE ocsp_responder ADD COLUMN unencoded_plus_duration bigint;\n\
 ALTER TABLE ccadb_certificate ADD COLUMN cp_cps_last_updated timestamp;\n\
 CLUSTER ct_log USING ctl_sha256_pubkey;\n\
 CLUSTER ca USING ca_uniq;\n\
-CLUSTER crl USING crl_ia_lc;" >> create_schema.sql
+CLUSTER crl USING crl_ia_lc;\n\
+CREATE EXTENSION libocsppq;" >> create_schema.sql
 # TODO CREATE INDEX (UNIQUE?) on ocsp_responder 
 
 COPY libcablintpq/create_functions.sql z1-create_functions.sql
