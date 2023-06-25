@@ -45,4 +45,7 @@ SetHandler certwatch\n\
   SetHandler certwatch\n\
 </FilesMatch>' >> /usr/local/apache2/conf/httpd.conf
 
+COPY asn1js/ /usr/local/apache2/htdocs/asn1js/
+# remove html, body block like crt.sh, because it has background-color: #C0C0C0
+RUN sed -i '1,5d' /usr/local/apache2/htdocs/asn1js/index.css
 COPY brand/ /usr/local/apache2/htdocs/
