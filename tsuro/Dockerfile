@@ -7,10 +7,12 @@ RUN gradle jproRelease --warning-mode all
 # Ubuntu with required packages
 # https://www.jpro.one/docs/current/2.7/PREPARING_LINUX_FOR_JPRO
 FROM eclipse-temurin:17-jre
-RUN apt-get update
+
 # prevent interactive prompt from debconf
-RUN echo 'debconf debconf/frontend select Noninteractive' | debconf-set-selections
-RUN apt-get -y install xorg libasound2 libgtk2.0-0 unzip
+RUN echo 'debconf debconf/frontend select Noninteractive' | debconf-set-selections \
+&& apt-get update \
+&& apt-get -y --no-install-recommends install xorg libasound2 libgtk2.0-0 unzip \
+&& rm -rf /var/lib/apt/lists/*
 
 COPY --from=build /app/build/distributions/app-jpro.zip .
 RUN unzip app-jpro.zip -d . && rm app-jpro.zip
