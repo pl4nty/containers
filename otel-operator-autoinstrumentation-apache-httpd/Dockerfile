@@ -229,6 +229,10 @@ COPY --from=build /otel-webserver-module/build/opentelemetry-webserver-sdk-x64-l
 RUN mkdir agent
 RUN tar -xvf opentelemetry-webserver-sdk-x64-linux.tgz -C agent
 
+WORKDIR agent/opentelemetry-webserver-sdk
+RUN cp conf/opentelemetry_sdk_log4cxx.xml.template conf/appdynamics_sdk_log4cxx.xml.template \
+&& rm conf/opentelemetry_sdk_log4cxx.xml.template
+
 FROM alpine:latest
 COPY --from=agent /opt/opentelemetry/agent/opentelemetry-webserver-sdk /opt/opentelemetry
 RUN chmod a+w /opt/opentelemetry/logs
