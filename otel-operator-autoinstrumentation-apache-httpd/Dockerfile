@@ -202,25 +202,6 @@ RUN cp -r /dependencies /otel-webserver-module/ \
     && cd otel-webserver-module \
     && ./gradlew assembleWebServerModule -DtargetSystem=ubuntu
 
-RUN cd /otel-webserver-module/build \
-    && tar -xf opentelemetry-webserver-sdk-x64-linux.tgz \
-    && mv -f opentelemetry-webserver-sdk /opt/ \
-    && cd ../ \
-    && cp opentelemetry_module.conf /etc/apache2/opentelemetry_module.conf \
-    && sed -i "s/libmod_apache_otel22.so/libmod_apache_otel.so/g" /etc/apache2/opentelemetry_module.conf \
-    && echo 'Include opentelemetry_module.conf' >> /etc/apache2/apache2.conf \
-    && cd /opt/opentelemetry-webserver-sdk \
-    && ./install.sh \
-    && cd /
-
-RUN cd /otel-webserver-module/build \
-    && cp ../conf/nginx/opentelemetry_module.conf /opt/ \
-    && sed -i '5i load_module /opt/opentelemetry-webserver-sdk/WebServerModule/Nginx/1.22.0/ngx_http_opentelemetry_module.so;' /etc/nginx/nginx.conf \
-    && sed -i '33i include /opt/opentelemetry_module.conf;' /etc/nginx/nginx.conf \
-    && cd /opt/opentelemetry-webserver-sdk \
-    && ./install.sh \
-    && cd /
-
 # https://github.com/open-telemetry/opentelemetry-operator/blob/main/autoinstrumentation/apache-httpd/Dockerfile
 FROM alpine:latest AS agent
 WORKDIR /opt/opentelemetry
@@ -229,12 +210,11 @@ COPY --from=build /otel-webserver-module/build/opentelemetry-webserver-sdk-x64-l
 RUN mkdir agent
 RUN tar -xvf opentelemetry-webserver-sdk-x64-linux.tgz -C agent
 
-WORKDIR agent/opentelemetry-webserver-sdk
-RUN cp conf/opentelemetry_sdk_log4cxx.xml.template conf/appdynamics_sdk_log4cxx.xml.template \
-&& rm conf/opentelemetry_sdk_log4cxx.xml.template
-
 FROM alpine:latest
 COPY --from=agent /opt/opentelemetry/agent/opentelemetry-webserver-sdk /opt/opentelemetry
 RUN chmod a+w /opt/opentelemetry/logs
 
 CMD ["cat", "Just delivering the Opentelemetry Apache/Nginx agent"]
+
+# checkout at v1.0.3 5c0cc9c88b60ec48d0f6f8a11523c97d9079a9f8
+# breaking change in 470b8f78175442e72d87aed14a63de5b604cacb0
