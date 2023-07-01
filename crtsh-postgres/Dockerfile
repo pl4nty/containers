@@ -141,8 +141,9 @@ COPY certwatch_db/jobs/*app_monitor.sh /root/
 COPY --from=cert_validation_success_monitor /app/cert_validation_success_monitor /cert_validation_success_monitor/cert_validation_success_monitor
 
 WORKDIR /root/certwatch
-ENV PGHOST localhost
 COPY certwatch_db/ .
+RUN echo "export PGHOST=localhost" >> /root/.profile
+ENV PGHOST localhost
 
 COPY --from=test_websites_monitor /app/test_websites_monitor /app/*.toml ./test_websites_monitor/bin/
 RUN echo 'conninfo = "user=certwatch sslmode=disable"' >> ./test_websites_monitor/bin/test_websites_monitor.toml
