@@ -195,7 +195,7 @@ RUN echo "deb [signed-by=/usr/share/keyrings/nginx-archive-keyring.gpg] \
 
 # Build Webserver Module
 COPY opentelemetry-cpp-contrib/instrumentation/otel-webserver-module /otel-webserver-module
-COPY build.gradle /otel-webserver-module
+COPY *.gradle /otel-webserver-module
 
 RUN cp -r /dependencies /otel-webserver-module/ \
     && cp -r /build-dependencies /otel-webserver-module/ \
