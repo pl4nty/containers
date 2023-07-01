@@ -43,7 +43,7 @@ SetHandler certwatch\n\
 <FilesMatch "\.html$">\n\
   ConnInfo "${CONNINFO}"\n\
   SetHandler certwatch\n\
-</FilesMatch>' >> /usr/local/apache2/conf/httpd.conf
+</FilesMatch>\n' >> /usr/local/apache2/conf/httpd.conf
 
 COPY asn1js/ /usr/local/apache2/htdocs/asn1js/
 # remove html, body block like crt.sh, because it has background-color: #C0C0C0
