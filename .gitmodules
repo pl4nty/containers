@@ -100,3 +100,6 @@
 [submodule "volsync/volsync"]
 	path = volsync/volsync
 	url = https://github.com/backube/volsync
+[submodule "otel-operator-autoinstrumentation-apache-httpd/opentelemetry-cpp-contrib"]
+	path = otel-operator-autoinstrumentation-apache-httpd/opentelemetry-cpp-contrib
+	url = https://github.com/open-telemetry/opentelemetry-cpp-contrib
