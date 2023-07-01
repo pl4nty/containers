@@ -41,7 +41,7 @@ ext {
   if (osArch == 'i386' || osArch == 'i586' || osArch == 'i686') {
     osArch = 'x86'
   // adds aarch64 support
-  } else if (osArch == 'x86_64' || osArch == 'amd64' || osArcch == 'aarch64') {
+  } else if (osArch == 'x86_64' || osArch == 'amd64' || osArch == 'aarch64') {
     osArch = 'x64'
   }
 
