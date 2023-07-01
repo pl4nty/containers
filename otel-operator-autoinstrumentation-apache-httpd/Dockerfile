@@ -1,5 +1,5 @@
 # https://github.com/open-telemetry/opentelemetry-cpp-contrib/blob/main/instrumentation/otel-webserver-module/Dockerfile
-FROM ubuntu:20.04
+FROM ubuntu:20.04 AS build
 ENV DEBIAN_FRONTEND noninteractive
 
 RUN apt-get -y update && apt-get -y upgrade && apt-get -y dist-upgrade
