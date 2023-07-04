@@ -1,5 +1,5 @@
 # https://github.com/signalapp/Signal-TLS-Proxy/blob/main/nginx-relay/Dockerfile
-FROM ubuntu:20.04
+FROM ubuntu:22.04
 
 RUN apt-get update && apt-get -y upgrade && \
     apt-get install -y wget libpcre3-dev build-essential libssl-dev zlib1g-dev && \
