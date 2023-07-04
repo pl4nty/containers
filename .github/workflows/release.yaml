@@ -173,7 +173,7 @@ jobs:
           tags: ${{ fromJSON(steps.meta.outputs.json).labels['org.opencontainers.image.version'] }}-${{ steps.format-labels-tag.outputs.replaced }}
           labels: ${{ steps.format-labels-2.outputs.replaced }}"
 
-      - uses: sigstore/cosign-installer@v3.1.0
+      - uses: sigstore/cosign-installer@v3.1.1
       - if: ${{ steps.dockerfileexists.outcome == 'success' }}
         run: cosign sign --yes ${{ steps.build-push.outputs.imageFullName }}:${{ steps.build-push.outputs.tags }}
       
@@ -231,5 +231,5 @@ jobs:
         images: ${{ fromJson(steps.tags.outputs.tags)['images'] }}
         push: true
 
-    - uses: sigstore/cosign-installer@v3.1.0
+    - uses: sigstore/cosign-installer@v3.1.1
     - run: cosign sign --yes ${{ fromJson(steps.tags.outputs.tags)['tag'] }}
