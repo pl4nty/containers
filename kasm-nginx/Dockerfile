@@ -14,5 +14,5 @@ COPY kasm_nginx.key /etc/ssl/private
 
 RUN sed -i -e 's/http:/https:/' \
 -e "s/kasm_api/localhost/g" \
--e "\#location /desktop/ {#a if (\$request_method = 'OPTIONS') {\n                    add_header 'Access-Control-Allow-Origin' 'https://localhost' always;\n                    add_header 'Access-Control-Allow-Methods' 'GET, POST, OPTIONS';\n                    add_header 'Access-Control-Allow-Headers' 'Authorization,Content-Type,Accept,Origin,User-Agent,DNT,Cache-Control,X-Mx-ReqToken,Keep-Alive,X-Requested-With,If-Modified-Since';\n                    add_header 'Access-Control-Allow-Credentials' 'true';\n                    \n                    return 204;\n                } " \
+-e "\#location /desktop/ {#a if (\$request_method = 'OPTIONS') {\n                    add_header 'Access-Control-Allow-Origin' 'https://kasm.tplant.au' always;\n                    add_header 'Access-Control-Allow-Methods' 'GET, POST, OPTIONS';\n                    add_header 'Access-Control-Allow-Headers' 'Authorization,Content-Type,Accept,Origin,User-Agent,DNT,Cache-Control,X-Mx-ReqToken,Keep-Alive,X-Requested-With,If-Modified-Since';\n                    add_header 'Access-Control-Allow-Credentials' 'true';\n                    \n                    return 204;\n                } " \
 -e 's/^if/                if/g' /etc/nginx/conf.d/services.d/upstream_proxy.conf
