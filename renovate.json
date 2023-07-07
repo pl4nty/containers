@@ -20,6 +20,11 @@
       "matchManagers": ["git-submodules"],
       "matchUpdateTypes": ["minor", "patch"],
       "automerge": true
+    },
+    {
+      "matchManagers": ["git-submodules"],
+      "matchPackagePrefixes": ["anudegreeapp", "excel2latex"],
+      "automerge": true
     }
   ],
   "git-submodules": {
