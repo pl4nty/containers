@@ -13,9 +13,12 @@
   },
   "packageRules": [
     {
-      "matchUpdateTypes": ["minor", "patch"],
       "matchManagers": ["git-submodules"],
-      "versioning": "semver-coerced",
+      "versioning": "semver-coerced"
+    },
+    {
+      "matchManagers": ["git-submodules"],
+      "matchUpdateTypes": ["minor", "patch"],
       "automerge": true
     }
   ],
