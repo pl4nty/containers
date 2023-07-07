@@ -94,7 +94,7 @@
 [submodule "crtsh-postgres/certlint"]
 	path = crtsh-postgres/certlint
 	url = https://github.com/certlint/certlint
-	branch = v1.7.0
+	branch = v1.6.4
 [submodule "crtsh-httpd/asn1js"]
 	path = crtsh-httpd/asn1js
 	url = https://github.com/lapo-luchini/asn1js
