@@ -15,6 +15,7 @@
     {
       "matchUpdateTypes": ["minor", "patch"],
       "matchManagers": ["git-submodules"],
+      "versioning": "semver",
       "automerge": true
     }
   ],
