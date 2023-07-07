@@ -14,8 +14,7 @@
   "packageRules": [
     {
       "matchManagers": ["git-submodules"],
-      "versioning": "semver-coerced",
-      "matchPackagePrefixes": ["mac_apt", "certlint", "volsync", "otel-operator-autoinstrumentation"]
+      "versioning": "semver-coerced"
     },
     {
       "matchManagers": ["git-submodules"],
