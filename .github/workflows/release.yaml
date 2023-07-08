@@ -136,7 +136,7 @@ jobs:
         username: ${{ github.actor }}
         password: ${{ github.token }}
         image: ${{ matrix.target }}
-        tags: ${{ steps.meta.outputs.tags }}
+        tags: ${{ steps.format.outputs.tags }}
         labels: ${{ steps.format.outputs.labels }}
         directory: ${{ steps.add-patches.outputs.context || matrix.target }}
         dockerfile: ${{ steps.add-patches.outputs.context || matrix.target }}\Dockerfile.windows
