@@ -132,7 +132,7 @@ jobs:
       id: format-labels
       with:
         pattern: '\n'
-        string: ${{ steps.meta.outputs.labels }}
+        string: ${{ steps.meta.tags.labels }}
         replace-with: '",'
         flags: 'g'
     - uses: frabert/replace-string-action@v2
