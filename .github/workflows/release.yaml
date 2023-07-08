@@ -29,13 +29,13 @@ jobs:
       contents: read
       pull-requests: read
     outputs:
-      targets: ${{ steps.targets.outputs.targets }}
-      targets-windows: ${{ steps.targets-windows.outputs.targets }}
+      linux: ${{ steps.targets.outputs.linux }}
+      windows: ${{ steps.targets.outputs.windows }}
     steps:
     - uses: actions/checkout@v3.5.3
       if: ${{ github.event_name != 'pull_request' && github.event_name != 'workflow_dispatch' }}
       with:
-        fetch-depth: 0
+        fetch-depth: 0 # tj-actions/changed-files#1335
         submodules: true
         token: ${{ secrets.GH_PAT }} # private submodules
 
@@ -68,18 +68,18 @@ jobs:
 
     - id: targets
       run: |
-        echo "targets=${{ github.event_name == 'workflow_dispatch' && inputs.targets || steps.changed-files.outputs.all_changed_and_modified_files }}" >> $GITHUB_OUTPUT
-        echo "targets-windows=${{ github.event_name == 'workflow_dispatch' && inputs.targets-windows || steps.changed-files-windows.outputs.all_changed_and_modified_files }}" >> $GITHUB_OUTPUT
+        echo "linux=${{ github.event_name == 'workflow_dispatch' && inputs.targets || steps.changed-files.outputs.all_changed_and_modified_files }}" >> $GITHUB_OUTPUT
+        echo "windows=${{ github.event_name == 'workflow_dispatch' && inputs.targets-windows || steps.changed-files-windows.outputs.all_changed_and_modified_files }}" >> $GITHUB_OUTPUT
 
   build-windows:
     needs: get-targets
-    if: ${{ needs.get-targets.outputs.targets-windows != '[]' }}
+    if: ${{ needs.get-targets.outputs.windows != '[]' }}
     permissions:
       packages: write # push images
       id-token: write # OIDC artifact signing
     strategy:
       matrix:
-        target: ${{ fromJson(needs.get-targets.outputs.targets-windows) }}
+        target: ${{ fromJson(needs.get-targets.outputs.windows) }}
     runs-on: windows-latest
     steps:
     - uses: actions/checkout@v3.5.3
@@ -132,7 +132,7 @@ jobs:
 
   build:
     needs: get-targets
-    if: ${{ needs.get-targets.outputs.targets != '[]' }}
+    if: ${{ needs.get-targets.outputs.linux != '[]' }}
     permissions:
       packages: write # push images
       id-token: write # OIDC artifact signing
@@ -140,7 +140,7 @@ jobs:
     strategy:
       fail-fast: false # allows visibility of multiarch support
       matrix:
-        image: ${{ fromJson(needs.get-targets.outputs.targets) }}
+        image: ${{ fromJson(needs.get-targets.outputs.linux) }}
         os:
         - ubuntu-latest
         - buildjet-2vcpu-ubuntu-2204-arm
