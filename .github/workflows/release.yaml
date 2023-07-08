@@ -259,6 +259,7 @@ jobs:
       run: echo "${{ steps.meta.outputs.tags }}" | xargs -d "," -I {} cosign sign --yes {} # @${{ steps.<build-and-push>.outputs.digest }}
 
     - uses: Chizkiyahu/delete-untagged-ghcr-action@v2.0.1
+      continue-on-error: true
       with:
         owner_type: user
         token: ${{ secrets.GH_PAT_DELETE_PACKAGES }}
