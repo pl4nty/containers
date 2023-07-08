@@ -97,7 +97,7 @@ jobs:
       run: |
         if (Test-Path ${{ matrix.target }}) {
           cp * ${{ matrix.target }} -r  -ErrorAction SilentlyContinue
-          echo "context=${{ matrix.target }}/${{ matrix.target }}" >> $GITHUB_OUTPUT
+          echo "context=${{ matrix.target }}/${{ matrix.target }}" >> $env:GITHUB_OUTPUT
         }
         
     - uses: docker/metadata-action@v4.6.0
@@ -126,8 +126,8 @@ jobs:
     - name: Format tags and labels
       id: format
       run: |
-        "tags=${{ steps.meta.outputs.tags }}" -replace 'ghcr.io/${{ github.repository_owner }}/${{ matrix.target }}:', '' >> $GITHUB_OUTPUT
-        "labels=" + ("${{ steps.meta.outputs.labels }}" -replace '\n', '",' -replace '=', '="') >> $GITHUB_OUTPUT
+        "tags=${{ steps.meta.outputs.tags }}" -replace 'ghcr.io/${{ github.repository_owner }}/${{ matrix.target }}:', '' >> $env:GITHUB_OUTPUT
+        "labels=" + ("${{ steps.meta.outputs.labels }}" -replace '\n', '",' -replace '=', '="') >> $env:GITHUB_OUTPUT
 
     - uses: mr-smithers-excellent/docker-build-push@v6.2
       id: build-push
@@ -144,7 +144,7 @@ jobs:
     # refactor (see Git history) if multi-OS images are needed
     # TODO tags@${{ steps.build-push.outputs.digest }} once implemented upstream
     - uses: sigstore/cosign-installer@v3.1.1
-    - run: ${{ steps.format.outputs.tags }} | % { cosign sign --yes $_ }
+    - run: ${{ steps.meta.outputs.tags }} | % { cosign sign --yes $_ }
 
   build:
     needs: get-targets
@@ -156,7 +156,7 @@ jobs:
     strategy:
       fail-fast: false # allows visibility of multiarch support
       matrix:
-        image: ${{ fromJson(needs.get-targets.outputs.linux) }}
+        target: ${{ fromJson(needs.get-targets.outputs.linux) }}
         os:
         - ubuntu-latest
         - buildjet-2vcpu-ubuntu-2204-arm
@@ -173,7 +173,7 @@ jobs:
       - name: Checkout image folder
         run: |
           git clone -n --depth=1 --filter=tree:0 ${{ github.server_url }}/${{ github.repository }} ./
-          git sparse-checkout set --no-cone ${{ matrix.image }}
+          git sparse-checkout set --no-cone ${{ matrix.target }}
           git checkout ${{ github.sha }}
 
       - name: Init submodule if present
@@ -182,17 +182,17 @@ jobs:
         # user.name and changing GITHUB_TOKEN doesn't work, since it defaults to SSH
         run: |
           git config --global --add url."https://oauth2:${{ secrets.GH_PAT }}@github.com/".insteadOf https://github.com/
-          git submodule update --init --recursive ${{ matrix.image }}
-          git submodule update --init --recursive ${{ matrix.image }}/${{ matrix.image }}
-          echo "context=${{ matrix.image }}/${{ matrix.image }}" >> $GITHUB_OUTPUT
+          git submodule update --init --recursive ${{ matrix.target }}
+          git submodule update --init --recursive ${{ matrix.target }}/${{ matrix.target }}
+          echo "context=${{ matrix.target }}/${{ matrix.target }}" >> $GITHUB_OUTPUT
 
       - name: Add patches to submodule
         if: ${{ steps.get-context.outputs.context }}
         continue-on-error: true
-        working-directory: ${{ matrix.image }}
+        working-directory: ${{ matrix.target }}
         run: |
           shopt -s extglob dotglob
-          cp !(${{ matrix.image }}) ${{ matrix.image }} -r
+          cp !(${{ matrix.target }}) ${{ matrix.target }} -r
 
       - uses: docker/login-action@v2.2.0
         with:
@@ -203,14 +203,14 @@ jobs:
       - uses: docker/setup-buildx-action@v2.9.0
       - uses: docker/build-push-action@v4.1.1
         with:
-          context: ${{ steps.get-context.outputs.context || matrix.image }}
+          context: ${{ steps.get-context.outputs.context || matrix.target }}
           push: true
           tags: ${{ env.image }}:${{ matrix.arch }} # TODO sign digests instead
           cache-from: ${{ startsWith(matrix.os, 'buildjet-') && format('type=registry,ref={0}:latest', env.image) || 'type=gha' }}
           cache-to: ${{ startsWith(matrix.os, 'buildjet-') && 'type=inline' || 'type=gha,mode=max' }}
           provenance: false # Noelware/docker-manifest-action#131
         env:
-          image: ghcr.io/${{ github.repository_owner }}/${{ matrix.image }}
+          image: ghcr.io/${{ github.repository_owner }}/${{ matrix.target }}
 
   manifest:
     needs:
@@ -219,7 +219,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        image: ${{ fromJson(needs.get-targets.outputs.linux) }}
+        target: ${{ fromJson(needs.get-targets.outputs.linux) }}
     runs-on: ubuntu-latest
     permissions:
       packages: write
@@ -229,7 +229,8 @@ jobs:
     - uses: docker/metadata-action@v4.6.0
       id: meta
       with:
-        images: ghcr.io/${{ github.repository_owner }}/${{ matrix.image }}
+        images: ghcr.io/${{ github.repository_owner }}/${{ matrix.target }}
+        sep-tags: ','
         tags: |
           type=schedule,pattern={{date 'YYYYMMDD-hhmmss'}}
           type=ref,event=pr
@@ -241,27 +242,25 @@ jobs:
         username: ${{ github.actor }}
         password: ${{ github.token }}
 
-    - name: Format tags
-      id: tags
-      run: |
-        echo "builds= amd64, arm64" | sed "s| |ghcr.io/${{ github.repository_owner }}/${{ matrix.image }}:|g" >> $GITHUB_OUTPUT
-        echo "manifests=${{ steps.meta.outputs.tags }}" | sed -z "s|\n|,|g" >> $GITHUB_OUTPUT
+    - name: Format build tags
+      id: build
+      run: echo "tags= amd64, arm64" | sed "s| |ghcr.io/${{ github.repository_owner }}/${{ matrix.target }}:|g" >> $GITHUB_OUTPUT
 
     - name: Create and push manifests
       uses: Noelware/docker-manifest-action@0.3.1
       with:
-        inputs: ${{ steps.tags.outputs.manifests }}
-        images: ${{ steps.tags.outputs.builds }}
+        inputs: ${{ steps.meta.outputs.tags }}
+        images: ${{ steps.build.outputs.tags }}
         push: true
 
     # TODO open issue for docker-manifest-action to output digests
     - uses: sigstore/cosign-installer@v3.1.1
     - name: Sign manifests
-      run: echo "${{ steps.meta.outputs.tags }}" | xargs -I {} cosign sign --yes {} # @${{ steps.<build-and-push>.outputs.digest }}
+      run: echo "${{ steps.meta.outputs.tags }}" | xargs -d "," -I {} cosign sign --yes {} # @${{ steps.<build-and-push>.outputs.digest }}
 
     - uses: Chizkiyahu/delete-untagged-ghcr-action@v2.0.1
       with:
         owner_type: user
         token: ${{ secrets.GH_PAT_DELETE_PACKAGES }}
-        package_name: ${{ matrix.image }}
+        package_name: ${{ matrix.target }}
         except_untagged_multiplatform: true
