@@ -205,8 +205,7 @@ jobs:
         with:
           context: ${{ steps.get-context.outputs.context || matrix.image }}
           push: true
-          tags: ${{ steps.meta.outputs.tags }}
-          labels: ${{ steps.meta.outputs.labels }}
+          tags: ${{ matrix.arch }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
           provenance: false # Noelware/docker-manifest-action#131
