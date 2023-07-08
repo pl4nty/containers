@@ -262,6 +262,6 @@ jobs:
     - uses: Chizkiyahu/delete-untagged-ghcr-action@v2.0.1
       with:
         owner_type: user
-        token: ${{ secrets.GH_PAT }}
+        token: ${{ secrets.GH_PAT_DELETE_PACKAGES }}
         package_name: ${{ matrix.image }}
         except_untagged_multiplatform: true
