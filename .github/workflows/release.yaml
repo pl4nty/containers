@@ -29,8 +29,8 @@ jobs:
       contents: read
       pull-requests: read
     outputs:
-      linux: ${{ github.event_name == 'workflow_dispatch' && inputs.targets || steps.changed-files.outputs.all_changed_and_modified_files }}
-      windows: ${{ github.event_name == 'workflow_dispatch' && inputs.targets-windows || steps.changed-files-windows.outputs.all_changed_and_modified_files }}
+      linux: ${{ steps.targets.outputs.linux }}
+      windows: ${{ steps.targets.outputs.windows }}
     steps:
     - uses: actions/checkout@v3.5.3
       if: ${{ github.event_name != 'pull_request' && github.event_name != 'workflow_dispatch' }}
@@ -67,6 +67,13 @@ jobs:
           archive/**
           ${{ env.TARGETS_WINDOWS }}
         json: true # output in matrix JSON format
+
+    # direct output results in []
+    - name: Write output
+      id: targets
+      run: |
+        linux=${{ github.event_name == 'workflow_dispatch' && inputs.targets || steps.changed-files.outputs.all_changed_and_modified_files }} >> $GITHUB_OUTPUT
+        windows=${{ github.event_name == 'workflow_dispatch' && inputs.targets-windows || steps.changed-files-windows.outputs.all_changed_and_modified_files }} >> $GITHUB_OUTPUT
 
   build-windows:
     needs: get-targets
