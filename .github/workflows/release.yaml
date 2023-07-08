@@ -29,8 +29,8 @@ jobs:
       contents: read
       pull-requests: read
     outputs:
-      linux: ${{ steps.targets.outputs.linux }}
-      windows: ${{ steps.targets.outputs.windows }}
+      linux: ${{ github.event_name == 'workflow_dispatch' && inputs.targets || steps.changed-files.outputs.all_changed_and_modified_files }}
+      windows: ${{ github.event_name == 'workflow_dispatch' && inputs.targets-windows || steps.changed-files-windows.outputs.all_changed_and_modified_files }}
     steps:
     - uses: actions/checkout@v3.5.3
       if: ${{ github.event_name != 'pull_request' && github.event_name != 'workflow_dispatch' }}
@@ -39,7 +39,8 @@ jobs:
         submodules: true
         token: ${{ secrets.GH_PAT }} # private submodules
 
-    - uses: tj-actions/changed-files@v37.0.5
+    - name: Linux changes
+      uses: tj-actions/changed-files@v37.0.5
       if: ${{ github.event_name != 'workflow_dispatch' }}
       id: changed-files
       with:
@@ -52,7 +53,8 @@ jobs:
           archive/**
         json: true # output in matrix JSON format
 
-    - uses: tj-actions/changed-files@v37.0.5
+    - name: Windows changes
+      uses: tj-actions/changed-files@v37.0.5
       if: ${{ github.event_name != 'workflow_dispatch' }}
       id: changed-files-windows
       with:
@@ -65,11 +67,6 @@ jobs:
           archive/**
           ${{ env.TARGETS_WINDOWS }}
         json: true # output in matrix JSON format
-
-    - id: targets
-      run: |
-        echo "linux=${{ github.event_name == 'workflow_dispatch' && inputs.targets || steps.changed-files.outputs.all_changed_and_modified_files }}" >> $GITHUB_OUTPUT
-        echo "windows=${{ github.event_name == 'workflow_dispatch' && inputs.targets-windows || steps.changed-files-windows.outputs.all_changed_and_modified_files }}" >> $GITHUB_OUTPUT
 
   build-windows:
     needs: get-targets
