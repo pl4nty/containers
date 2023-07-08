@@ -120,7 +120,8 @@ jobs:
 
     # newline-separated -> comma-separated
     # quote label values to allow spaces (eg repo description)
-    - run: |
+    - id: format
+      run: |
         "tags=${{ steps.meta.outputs.tags }}" -replace '\n', ',' >> $GITHUB_OUTPUT
         "labels=" + ("${{ steps.meta.outputs.labels }}" -replace '\n', '",' -replace '=', '="') >> $GITHUB_OUTPUT
 
