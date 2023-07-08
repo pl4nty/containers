@@ -143,7 +143,7 @@ jobs:
     # TODO tags@${{ steps.build-push.outputs.digest }} once implemented upstream
     - uses: sigstore/cosign-installer@v3.1.1
     - run: |
-      "${{ steps.meta.outputs.tags }}" | % { cosign sign --yes $_ }
+        "${{ steps.meta.outputs.tags }}" | % { cosign sign --yes $_ }
 
   build:
     needs: get-targets
