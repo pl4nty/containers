@@ -1,5 +1,5 @@
 # based on https://github.com/phadej/docker-haskell-example/blob/master/Dockerfile
-FROM haskell:8.6.5 AS build
+FROM haskell:9.4.5 AS build
 WORKDIR /app
 
 # required for dynamic build binary location eg ARM
