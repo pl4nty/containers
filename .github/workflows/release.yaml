@@ -228,6 +228,7 @@ jobs:
       id: meta
       with:
         images: ghcr.io/${{ github.repository_owner }}/${{ matrix.image }}
+        sep-tags: ','
         tags: |
           type=sha
           type=ref,event=pr
@@ -241,7 +242,7 @@ jobs:
 
     - name: Format platform tags
       id: platforms
-      run: echo "tags= amd64, arm64" | sed "s| |ghcr.io/${{ github.repository_owner }}/${{ matrix.image }}|g" >> $GITHUB_OUTPUT
+      run: echo "tags= amd64, arm64" | sed "s| |ghcr.io/${{ github.repository_owner }}/${{ matrix.image }}:|g" >> $GITHUB_OUTPUT
 
     - name: Create and push manifest
       uses: Noelware/docker-manifest-action@0.3.1
