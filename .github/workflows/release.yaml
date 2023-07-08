@@ -105,7 +105,7 @@ jobs:
         images: ghcr.io/${{ github.repository_owner }}/${{ matrix.target }}
         sep-tags: ','
         tags: |
-          type=sha
+          type=schedule,pattern={{date 'YYYYMMDDThhmmss'}}
           type=ref,event=pr
           type=raw,value=latest,enable={{is_default_branch}}
 
@@ -229,7 +229,7 @@ jobs:
       with:
         images: ghcr.io/${{ github.repository_owner }}/${{ matrix.image }}
         tags: |
-          type=sha
+          type=schedule,pattern={{date 'YYYYMMDDThhmmss'}}
           type=ref,event=pr
           type=raw,value=latest,enable={{is_default_branch}}
 
@@ -245,7 +245,7 @@ jobs:
         echo "builds= amd64, arm64" | sed "s| |ghcr.io/${{ github.repository_owner }}/${{ matrix.image }}:|g" >> $GITHUB_OUTPUT
         echo "manifests=${{ steps.meta.outputs.tags }}" | sed -z "s|\n|,|g" >> $GITHUB_OUTPUT
 
-    - name: Create and push manifest
+    - name: Create and push manifests
       uses: Noelware/docker-manifest-action@0.3.1
       with:
         inputs: ${{ steps.tags.outputs.manifests }}
@@ -254,4 +254,5 @@ jobs:
 
     # TODO open issue for docker-manifest-action to output digests
     - uses: sigstore/cosign-installer@v3.1.1
-    - run: echo "${{ steps.meta.outputs.tags }}" | xargs -I {} cosign sign --yes {} # @${{ steps.<build-and-push>.outputs.digest }}
+    - name: Sign manifests
+      run: echo "${{ steps.meta.outputs.tags }}" | xargs -I {} cosign sign --yes {} # @${{ steps.<build-and-push>.outputs.digest }}
