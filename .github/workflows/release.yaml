@@ -4,77 +4,151 @@ on:
   push:
     branches:
       - main
-    # can't find a way to ignore all root files
-    paths-ignore:
-      - .github/**
-      - .devcontainer.json
-      - renovate.json
-      - .gitmodules
-      - archive/**
-      - LICENSE
-      - README.md
+  pull_request:
+    branches:
+      - main
   workflow_dispatch:
     inputs:
-      images:
-        description: Image folder names as JSON array
-        required: true
+      targets:
+        description: Target folder names as JSON array
+        type: string
+      targets-windows:
+        description: Windows target folder names as JSON array
         type: string
 
+# changed-files filters aren't sufficient, and runtime filtering is expensive
+env:
+  TARGETS_WINDOWS: |
+    azure-ad-app-proxy/**
+    universal-print-connector/**
+
 jobs:
-  get-images:
+  get-targets:
     runs-on: ubuntu-latest
     permissions:
       contents: read
+      pull-requests: read
     outputs:
-      images: ${{ steps.folders-condition.outputs.folders }}
+      targets: ${{ steps.targets.outputs.targets }}
+      targets-windows: ${{ steps.targets-windows.outputs.targets }}
     steps:
-    - name: Checkout repository
-      if: ${{ github.event_name != 'workflow_dispatch' }}
-      uses: actions/checkout@v3
+    - uses: actions/checkout@v3.5.3
+      if: ${{ github.event_name != 'pull_request' && github.event_name != 'workflow_dispatch' }}
       with:
-        token: ${{ secrets.GH_PAT }}
-        fetch-depth: 0 # fetch all, otherwise changed-files will and it's slower
+        fetch-depth: 2
         submodules: true
+        token: ${{ secrets.GH_PAT }} # private submodules
 
-    # TODO not detecting submodule changes properly. possibly related to checkout err on private repo?
-    # https://github.com/tj-actions/changed-files/pull/394/files
-    - name: Get changed files
+    - uses: tj-actions/changed-files@v37.0.5
       if: ${{ github.event_name != 'workflow_dispatch' }}
       id: changed-files
-      uses: tj-actions/changed-files@v37.0.5
       with:
+        fetch_depth: 2
         dir_names: true # output folders instead of files
         dir_names_max_depth: 1 # only return roots, not subfolders
+        dir_names_exclude_current_dir: true # exclude root files
+        files_ignore: |
+          .github/**
+          archive/**
         json: true # output in matrix JSON format
-        files_ignore: .gitmodules
 
-    - id: folders-condition
-      run: echo "folders=${{ github.event_name == 'workflow_dispatch' && inputs.images || steps.changed-files.outputs.all_changed_and_modified_files }}" >> $GITHUB_OUTPUT
+    - uses: tj-actions/changed-files@v37.0.5
+      if: ${{ github.event_name != 'workflow_dispatch' }}
+      id: changed-files-windows
+      with:
+        fetch_depth: 2
+        dir_names: true # output folders instead of files
+        dir_names_max_depth: 1 # only return roots, not subfolders
+        dir_names_exclude_current_dir: true # exclude root files
+        files_ignore: |
+          .github/**
+          archive/**
+          ${{ env.TARGETS_WINDOWS }}
+        json: true # output in matrix JSON format
 
-  build:
-    needs: get-images
+    - id: targets
+      run: |
+        echo "targets=${{ github.event_name == 'workflow_dispatch' && inputs.targets || steps.changed-files.outputs.all_changed_and_modified_files }}" >> $GITHUB_OUTPUT
+        echo "targets-windows=${{ github.event_name == 'workflow_dispatch' && inputs.targets-windows || steps.changed-files-windows.outputs.all_changed_and_modified_files }}" >> $GITHUB_OUTPUT
+
+  build-windows:
+    needs: get-targets
+    permissions:
+      packages: write # push images
+      id-token: write # OIDC artifact signing
+    strategy:
+      matrix:
+        target: ${{ fromJson(needs.get-targets.outputs.targets-windows) }}
+    runs-on: windows-latest
+    steps:
+    - uses: actions/checkout@v3.5.3
+      with:
+        submodules: recursive
+        token: ${{ secrets.GH_PAT }} # private submodules
+
+    - name: Add patches to submodule
+      id: add-patches
+      working-directory: ${{ matrix.target }}
+      continue-on-error: true
+      run: |
+        cp * ${{ matrix.target }} -r
+        echo "context=${{ matrix.image }}/${{ matrix.image }}" >> $GITHUB_OUTPUT
+
+    - uses: docker/metadata-action@v4
+      id: meta
+      with:
+        images: ghcr.io/${{ github.repository_owner }}/${{ matrix.image }}
+        tags: |
+          type=sha
+          type=ref,event=pr
+          type=raw,value=latest,enable={{is_default_branch}}
+
+    # errors if cache doesn't exist
+    # needs custom restore keys: jpribyl/action-docker-layer-caching#38
+    - uses: jpribyl/action-docker-layer-caching@v0.1.1
+      continue-on-error: true
+      with:
+        concurrency: 10
+        key: docker-layer-cache-${{ matrix.image }}-windows-amd64-{hash}
+        restore-keys: |
+          docker-layer-cache-${{ matrix.image }}-windows-amd64-
+          layer-docker-layer-cache-${{ matrix.image }}-windows-amd64-
+
+    - uses: mr-smithers-excellent/docker-build-push@v6.2
+      with:
+        registry: ghcr.io
+        username: ${{ github.actor }}
+        password: ${{ github.token }}
+        image: ${{ matrix.image }}
+        tags: ${{ steps.meta.outputs.tags }}
+        labels: ${{ steps.meta.outputs.labels }}
+        directory: ${{ steps.add-patches.outputs.context || matrix.image }}
+        dockerfile: ${{ steps.add-patches.outputs.context || matrix.image }}\Dockerfile.windows
+
+    # refactor (see Git history) if multi-OS images are needed
+    - uses: sigstore/cosign-installer@v3.1.1
+    - run: cosign sign --yes ${{ steps.build-push.outputs.tags }}
+
+  build-linux:
+    needs: get-targets
+    permissions:
+      packages: write # push images
+      id-token: write # OIDC artifact signing
     continue-on-error: true # push tags even if some architectures fail
     strategy:
       fail-fast: false # allows visibility of multiarch support
       matrix:
-        image: ${{ fromJson(needs.get-images.outputs.images) }}
+        image: ${{ fromJson(needs.get-targets.outputs.targets) }}
         os:
         - ubuntu-latest
         - buildjet-2vcpu-ubuntu-2204-arm
-        - windows-latest
         include:
         - os: ubuntu-latest
           arch: linux/amd64
         - os: buildjet-2vcpu-ubuntu-2204-arm
           arch: linux/arm64
-        - os: windows-latest
-          arch: windows/amd64
-          ext: .windows
     runs-on: ${{ matrix.os }}
-    permissions:
-      packages: write
-      id-token: write # OIDC artifact signing
-    steps:    
+    steps:
       # required for builds with custom context
       # https://stackoverflow.com/a/52269934
       # can't use github.repositoryUrl - it uses git://, which seems to be blocked on Windows runners
@@ -101,12 +175,6 @@ jobs:
         run: |
           shopt -s extglob dotglob
           cp !(${{ matrix.image }}) ${{ matrix.image }} -r
-
-      - name: Copy patches to submodule (Windows)
-        if: ${{ steps.get-context.outputs.context && startsWith(matrix.arch, 'windows/') }}
-        continue-on-error: true
-        working-directory: ${{ matrix.image }}
-        run: cp * ${{ matrix.image }} -r
 
       - name: Generate image tags
         id: meta
@@ -191,12 +259,12 @@ jobs:
 
   manifest:
     needs:
-    - get-images
+    - get-targets
     - build
     strategy:
       fail-fast: false
       matrix:
-        image: ${{ fromJson(needs.get-images.outputs.images) }}
+        image: ${{ fromJson(needs.get-targets.outputs.images) }}
     runs-on: ubuntu-latest
     permissions:
       packages: write
