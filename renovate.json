@@ -24,7 +24,7 @@
     },
     {
       "matchManagers": ["git-submodules"],
-      "matchPackagePrefixes": ["anudegreeapp", "excel2latex"],
+      "matchPackagePrefixes": ["https://github.com/pl4nty/"],
       "automerge": true
     }
   ],
