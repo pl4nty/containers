@@ -117,14 +117,40 @@ jobs:
           docker-layer-cache-${{ matrix.target }}-windows-amd64-
           layer-docker-layer-cache-${{ matrix.target }}-windows-amd64-
 
+    # newline-separated -> comma-separated
+    - uses: frabert/replace-string-action@v2
+      id: format-tags
+      with:
+        pattern: '\n'
+        string: ${{ steps.meta.outputs.labels }}
+        replace-with: ','
+        flags: 'g'
+
+    # newline-separated -> comma-separated
+    # quote keys to prevent parsing issues from special characters
+    - uses: frabert/replace-string-action@v2
+      id: format-labels
+      with:
+        pattern: '\n'
+        string: ${{ steps.meta.outputs.labels }}
+        replace-with: '",'
+        flags: 'g'
+    - uses: frabert/replace-string-action@v2
+      id: format-labels-2
+      with:
+        pattern: '='
+        string: ${{ steps.format-labels.outputs.replaced }}
+        replace-with: '="'
+        flags: 'g'
+
     - uses: mr-smithers-excellent/docker-build-push@v6.2
       with:
         registry: ghcr.io
         username: ${{ github.actor }}
         password: ${{ github.token }}
         image: ${{ matrix.target }}
-        tags: ${{ steps.meta.outputs.tags }}
-        labels: ${{ steps.meta.outputs.labels }}
+        tags: ${{ steps.format-tags.outputs.replaced }}
+        labels: ${{ steps.format-labels-2.outputs.replaced }}
         directory: ${{ steps.add-patches.outputs.context || matrix.target }}
         dockerfile: ${{ steps.add-patches.outputs.context || matrix.target }}\Dockerfile.windows
 
