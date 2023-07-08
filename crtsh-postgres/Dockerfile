@@ -44,7 +44,7 @@ WORKDIR /app
 COPY libx509pq .
 RUN make
 
-FROM golang:bullseye AS buildgo
+FROM golang:1.20.5-bullseye AS buildgo
 RUN apt-get update \
 && apt-get install -y --no-install-recommends postgresql-server-dev-13 \
 && rm -rf /var/lib/apt/lists/*
