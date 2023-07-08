@@ -252,6 +252,6 @@ jobs:
         images: ${{ steps.tags.outputs.builds }}
         push: true
 
-    # TODO open issue for docker-manifest-action to output digests, to sign with tags@digests
+    # TODO open issue for docker-manifest-action to output digests
     - uses: sigstore/cosign-installer@v3.1.1
-    - run: cosign sign --yes "${{ steps.meta.outputs.tags }}"
+    - run: echo "${{ steps.meta.outputs.tags }}" | xargs -I {} cosign sign {} # @${{ steps.<build-and-push>.outputs.digest }}
