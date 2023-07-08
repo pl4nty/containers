@@ -99,7 +99,7 @@ jobs:
           echo "context=${{ matrix.target }}/${{ matrix.target }}" >> $GITHUB_OUTPUT
         }
         
-    - uses: docker/metadata-action@v4
+    - uses: docker/metadata-action@v4.6.0
       id: meta
       with:
         images: ghcr.io/${{ github.repository_owner }}/${{ matrix.target }}
@@ -224,7 +224,7 @@ jobs:
       id-token: write # OIDC artifact signing
 
     steps:
-    - uses: docker/metadata-action@v4
+    - uses: docker/metadata-action@v4.6.0
       id: meta
       with:
         images: ghcr.io/${{ github.repository_owner }}/${{ matrix.image }}
