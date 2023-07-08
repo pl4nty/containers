@@ -70,8 +70,8 @@ jobs:
     - name: Write output
       id: targets
       run: |
-        linux=${{ github.event_name == 'workflow_dispatch' && inputs.targets || steps.changed-files.outputs.all_changed_and_modified_files }} >> $GITHUB_OUTPUT
-        windows=${{ github.event_name == 'workflow_dispatch' && inputs.targets-windows || steps.changed-files-windows.outputs.all_changed_and_modified_files }} >> $GITHUB_OUTPUT
+        echo "linux=${{ github.event_name == 'workflow_dispatch' && inputs.targets || steps.changed-files.outputs.all_changed_and_modified_files }}" >> $GITHUB_OUTPUT
+        echo "windows=${{ github.event_name == 'workflow_dispatch' && inputs.targets-windows || steps.changed-files-windows.outputs.all_changed_and_modified_files }}" >> $GITHUB_OUTPUT
 
   build-windows:
     needs: get-targets
