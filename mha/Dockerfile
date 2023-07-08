@@ -1,4 +1,4 @@
-FROM node:18 as build
+FROM node:18.16.1 as build
 WORKDIR /app
 
 # puppeteer dependency can't install ARM chromium by default
@@ -14,7 +14,7 @@ RUN npm ci
 COPY . .
 RUN npm run build --if-present
 
-FROM joseluisq/static-web-server:2
+FROM joseluisq/static-web-server:2.19.0
 
 COPY --from=build /app/Resources /public/Resources
 COPY --from=build /app/Pages /public/Pages

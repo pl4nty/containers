@@ -1,4 +1,4 @@
-FROM node:19 AS build-env
+FROM node:19.9.0 AS build
 WORKDIR /app
 
 COPY package*.json ./
@@ -10,9 +10,9 @@ COPY . .
 RUN ./node_modules/.bin/grunt build-website
 RUN ./node_modules/.bin/grunt pug:website 
 
-FROM joseluisq/static-web-server:2
+FROM joseluisq/static-web-server:2.19.0
 
-COPY --from=build-env /app/dist/website /public
+COPY --from=build /app/dist/website /public
 
 ENV SERVER_PORT=8080
 EXPOSE 8080
