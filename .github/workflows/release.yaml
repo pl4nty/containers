@@ -129,7 +129,7 @@ jobs:
     - uses: sigstore/cosign-installer@v3.1.1
     - run: cosign sign --yes ${{ steps.build-push.outputs.tags }}
 
-  build-linux:
+  build:
     needs: get-targets
     permissions:
       packages: write # push images
