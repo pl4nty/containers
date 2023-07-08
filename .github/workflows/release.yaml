@@ -73,6 +73,7 @@ jobs:
 
   build-windows:
     needs: get-targets
+    if: ${{ needs.get-targets.outputs.targets-windows != '[]' }}
     permissions:
       packages: write # push images
       id-token: write # OIDC artifact signing
@@ -131,6 +132,7 @@ jobs:
 
   build:
     needs: get-targets
+    if: ${{ needs.get-targets.outputs.targets != '[]' }}
     permissions:
       packages: write # push images
       id-token: write # OIDC artifact signing
