@@ -62,9 +62,7 @@ jobs:
         dir_names: true # output folders instead of files
         dir_names_max_depth: 1 # only return roots, not subfolders
         dir_names_exclude_current_dir: true # exclude root files
-        files_ignore: |
-          .github/**
-          archive/**
+        files: |
           ${{ env.TARGETS_WINDOWS }}
         json: true # output in matrix JSON format
 
