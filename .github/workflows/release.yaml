@@ -93,15 +93,17 @@ jobs:
     - name: Add patches to submodule
       id: add-patches
       working-directory: ${{ matrix.target }}
-      continue-on-error: true
       run: |
-        cp * ${{ matrix.target }} -r
-        echo "context=${{ matrix.target }}/${{ matrix.target }}" >> $GITHUB_OUTPUT
-
+        if (Test-Path ${{ matrix.target }}) {
+          cp * ${{ matrix.target }} -r  -ErrorAction SilentlyContinue
+          echo "context=${{ matrix.target }}/${{ matrix.target }}" >> $GITHUB_OUTPUT
+        }
+        
     - uses: docker/metadata-action@v4
       id: meta
       with:
         images: ghcr.io/${{ github.repository_owner }}/${{ matrix.target }}
+        sep-tags: ','
         tags: |
           type=sha
           type=ref,event=pr
@@ -119,12 +121,10 @@ jobs:
           layer-docker-layer-cache-${{ matrix.target }}-windows-amd64-
 
     # newline-separated -> comma-separated
-    # quote label values to allow spaces (eg repo description)
-    - name: Format tags and labels
+    # quote values to allow spaces (eg repo description)
+    - name: Format labels
       id: format
-      run: |
-        "tags=${{ steps.meta.outputs.tags }}" -replace '\n', ',' >> $GITHUB_OUTPUT
-        "labels=" + ("${{ steps.meta.outputs.labels }}" -replace '\n', '",' -replace '=', '="') >> $GITHUB_OUTPUT
+      run: "labels=" + ("${{ steps.meta.outputs.labels }}" -replace '\n', '",' -replace '=', '="') >> $GITHUB_OUTPUT
 
     - uses: mr-smithers-excellent/docker-build-push@v6.2
       id: build-push
@@ -133,7 +133,7 @@ jobs:
         username: ${{ github.actor }}
         password: ${{ github.token }}
         image: ${{ matrix.target }}
-        tags: ${{ steps.format.outputs.tags }}
+        tags: ${{ steps.meta.outputs.tags }}
         labels: ${{ steps.format.outputs.labels }}
         directory: ${{ steps.add-patches.outputs.context || matrix.target }}
         dockerfile: ${{ steps.add-patches.outputs.context || matrix.target }}\Dockerfile.windows
@@ -159,9 +159,9 @@ jobs:
         - buildjet-2vcpu-ubuntu-2204-arm
         include:
         - os: ubuntu-latest
-          arch: linux/amd64
+          arch: amd64
         - os: buildjet-2vcpu-ubuntu-2204-arm
-          arch: linux/arm64
+          arch: arm64
     runs-on: ${{ matrix.os }}
     steps:
       # required for builds with custom context
@@ -183,94 +183,29 @@ jobs:
           git submodule update --init --recursive ${{ matrix.image }}/${{ matrix.image }}
           echo "context=${{ matrix.image }}/${{ matrix.image }}" >> $GITHUB_OUTPUT
 
-      - name: Copy patches to submodule (Linux)
-        if: ${{ steps.get-context.outputs.context && startsWith(matrix.arch, 'linux/') }}
+      - name: Add patches to submodule
+        if: ${{ steps.get-context.outputs.context }}
         continue-on-error: true
         working-directory: ${{ matrix.image }}
         run: |
           shopt -s extglob dotglob
           cp !(${{ matrix.image }}) ${{ matrix.image }} -r
 
-      - name: Generate image tags
-        id: meta
-        uses: docker/metadata-action@v4
+      - uses: docker/login-action@v2.2.0
         with:
-          images: ghcr.io/${{ github.repository_owner }}/${{ matrix.image }}
-          tags: type=sha
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ github.token }}
 
-      # format labels for build action
-      - uses: frabert/replace-string-action@v2
-        id: format-labels
+      - uses: docker/build-push-action@v4.1.1
         with:
-          pattern: '\n'
-          string: ${{ steps.meta.outputs.labels }}
-          replace-with: '",'
-          flags: 'g'
-      - uses: frabert/replace-string-action@v2
-        id: format-labels-2
-        with:
-          pattern: '='
-          string: ${{ steps.format-labels.outputs.replaced }}
-          replace-with: '="'
-          flags: 'g'
-
-      # format arch for image tag
-      - uses: frabert/replace-string-action@v2
-        id: format-labels-tag
-        with:
-          pattern: '/'
-          string: ${{ matrix.arch }}
-          replace-with: '-'
-          flags: 'g'
-
-      - name: Check if Dockerfile exists
-        id: dockerfileexists
-        working-directory: ${{ steps.get-context.outputs.context || matrix.image }}
-        run: ls Dockerfile${{ matrix.ext }}
-        continue-on-error: true
-
-      # can we use arch in here? suspect windows images could slow linux down otherwise
-      # confirmed - particularly bad for off-net ARM64 workers, 3+ minutes
-      # https://github.com/satackey/action-docker-layer-caching/issues/169#issuecomment-1217408538
-      - uses: jpribyl/action-docker-layer-caching@v0.1.1
-        if: ${{ steps.dockerfileexists.outcome == 'success' }}
-        continue-on-error: true
-        with:
-          concurrency: 10
-          key: docker-layer-cache-${{ matrix.image }}-${{ steps.format-labels-tag.outputs.replaced }}-{hash}
-          restore-keys: |
-            docker-layer-cache-${{ matrix.image }}-${{ steps.format-labels-tag.outputs.replaced }}-
-            layer-docker-layer-cache-${{ matrix.image }}-${{ steps.format-labels-tag.outputs.replaced }}-
-
-      # docker/build-push-action#18 doesn't support Windows
-      # this action doesn't have caching though
-      - uses: mr-smithers-excellent/docker-build-push@v6
-        if: ${{ steps.dockerfileexists.outcome == 'success' }}
-        id: build-push
-        with:
-          image: ${{ matrix.image }} #
-          registry: ghcr.io #
-          username: ${{ github.actor }} #
-          password: ${{ github.token }} #
-          directory: ${{ steps.get-context.outputs.context || matrix.image }}
-          dockerfile: ${{ steps.get-context.outputs.context || matrix.image }}/Dockerfile${{ matrix.ext }}
-          tags: ${{ fromJSON(steps.meta.outputs.json).labels['org.opencontainers.image.version'] }}-${{ steps.format-labels-tag.outputs.replaced }}
-          labels: ${{ steps.format-labels-2.outputs.replaced }}"
-
-      - uses: sigstore/cosign-installer@v3.1.1
-      - if: ${{ steps.dockerfileexists.outcome == 'success' }}
-        run: cosign sign --yes ${{ steps.build-push.outputs.imageFullName }}:${{ steps.build-push.outputs.tags }}
-      
-      # workaround for lack of matrix support in job.outputs. was almost done, but the team got laid off
-      # https://github.com/actions/runner/pull/2477#issuecomment-1501003600
-      - if: ${{ steps.dockerfileexists.outcome == 'success' }}
-        run: echo '["${{ fromJSON(steps.meta.outputs.json).labels['org.opencontainers.image.version'] }}","${{ steps.build-push.outputs.tags }}"]' > tags
-      - uses: actions/upload-artifact@v3
-        if: ${{ steps.dockerfileexists.outcome == 'success' }}
-        with:
-          name: ${{ matrix.image }}-${{ hashFiles('tags') || 'none' }}
-          path: tags
-          if-no-files-found: warn
+          context: ${{ steps.get-context.outputs.context || matrix.image }}
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          provenance: false # Noelware/docker-manifest-action#131
 
   manifest:
     needs:
@@ -284,36 +219,34 @@ jobs:
     permissions:
       packages: write
       id-token: write # OIDC artifact signing
+
     steps:
-    - name: Login to GitHub Container Registry
-      uses: docker/login-action@v2
+    - uses: docker/metadata-action@v4
+      id: meta
+      with:
+        images: ghcr.io/${{ github.repository_owner }}/${{ matrix.image }}
+        tags: |
+          type=sha
+          type=ref,event=pr
+          type=raw,value=latest,enable={{is_default_branch}}
+
+    - uses: docker/login-action@v2.2.0
       with:
         registry: ghcr.io
         username: ${{ github.actor }}
         password: ${{ github.token }}
-  
-    - uses: actions/download-artifact@v3
-    - id: tags
-      run: |
-        ls
-        shopt -s extglob
-        tags="$(cat ${{ matrix.image }}-*/tags | jq --slurp -c 'map(.[] |= "ghcr.io/${{ github.repository_owner }}/${{ matrix.image }}:\(.)") | { tag: .[0][0], images: ([.[][1]] | join(",")) }')"
-        echo "tags=$tags" >> $GITHUB_OUTPUT
-        echo $tags
 
-    - name: Create and push SHA manifest
+    - name: Format platform tags
+      id: platforms
+      run: echo "tags= amd64, arm64" | sed "s| |ghcr.io/${{ github.repository_owner }}/${{ matrix.image }}|g" >> $GITHUB_OUTPUT
+
+    - name: Create and push manifest
       uses: Noelware/docker-manifest-action@0.3.1
       with:
-        inputs: ${{ fromJson(steps.tags.outputs.tags)['tag'] }}
-        images: ${{ fromJson(steps.tags.outputs.tags)['images'] }}
-        push: true
-        
-    - name: Create and push latest manifest
-      uses: Noelware/docker-manifest-action@0.3.1
-      with:
-        inputs: ghcr.io/${{ github.repository_owner }}/${{ matrix.image }}:latest
-        images: ${{ fromJson(steps.tags.outputs.tags)['images'] }}
+        inputs: ${{ steps.meta.outputs.tags }}
+        images: ${{ steps.platforms.outputs.tags }}
         push: true
 
+    # TODO open issue for docker-manifest-action to output digests, to sign with tags@digests
     - uses: sigstore/cosign-installer@v3.1.1
-    - run: cosign sign --yes ${{ fromJson(steps.tags.outputs.tags)['tag'] }}
+    - run: cosign sign --yes "${{ steps.meta.outputs.tags }}"
