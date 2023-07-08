@@ -52,6 +52,7 @@ jobs:
         files_ignore: |
           .github/**
           archive/**
+          ${{ env.TARGETS_WINDOWS }}
         json: true # output in matrix JSON format
 
     - name: Windows changes
