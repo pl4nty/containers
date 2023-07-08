@@ -126,7 +126,7 @@ jobs:
     - name: Format labels
       id: format
       run: |
-        "tags=${{ steps.meta.outputs.tags }}" -replace 'ghcr.io/${{ github.repository_owner }}/${{ matrix.image }}:', '' >> $GITHUB_OUTPUT
+        "tags=${{ steps.meta.outputs.tags }}" -replace 'ghcr.io/${{ github.repository_owner }}/${{ matrix.target }}:', '' >> $GITHUB_OUTPUT
         "labels=" + ("${{ steps.meta.outputs.labels }}" -replace '\n', '",' -replace '=', '="') >> $GITHUB_OUTPUT
 
     - uses: mr-smithers-excellent/docker-build-push@v6.2
