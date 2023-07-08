@@ -76,7 +76,7 @@ jobs:
 
   build-windows:
     needs: get-targets
-    if: ${{ needs.get-targets.outputs.windows != '[]' }}
+    if: ${{ needs.get-targets.outputs.windows }}
     permissions:
       packages: write # push images
       id-token: write # OIDC artifact signing
