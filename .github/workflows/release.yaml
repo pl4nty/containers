@@ -120,12 +120,14 @@ jobs:
 
     # newline-separated -> comma-separated
     # quote label values to allow spaces (eg repo description)
-    - id: format
+    - name: Format tags and labels
+      id: format
       run: |
         "tags=${{ steps.meta.outputs.tags }}" -replace '\n', ',' >> $GITHUB_OUTPUT
         "labels=" + ("${{ steps.meta.outputs.labels }}" -replace '\n', '",' -replace '=', '="') >> $GITHUB_OUTPUT
 
     - uses: mr-smithers-excellent/docker-build-push@v6.2
+      id: build-push
       with:
         registry: ghcr.io
         username: ${{ github.actor }}
@@ -137,8 +139,9 @@ jobs:
         dockerfile: ${{ steps.add-patches.outputs.context || matrix.target }}\Dockerfile.windows
 
     # refactor (see Git history) if multi-OS images are needed
+    # TODO tags@${{ steps.build-push.outputs.digest }} once implemented upstream
     - uses: sigstore/cosign-installer@v3.1.1
-    - run: cosign sign --yes ${{ steps.build-push.outputs.tags }}
+    - run: cosign sign --yes ${{ steps.meta.outputs.tags }}
 
   build:
     needs: get-targets
