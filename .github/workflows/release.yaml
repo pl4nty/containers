@@ -217,7 +217,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        image: ${{ fromJson(needs.get-targets.outputs.images) }}
+        image: ${{ fromJson(needs.get-targets.outputs.linux) }}
     runs-on: ubuntu-latest
     permissions:
       packages: write
