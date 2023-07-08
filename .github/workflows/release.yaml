@@ -124,7 +124,8 @@ jobs:
     # quote values to allow spaces (eg repo description)
     - name: Format labels
       id: format
-      run: "labels=" + ("${{ steps.meta.outputs.labels }}" -replace '\n', '",' -replace '=', '="') >> $GITHUB_OUTPUT
+      run: |
+        "labels=" + ("${{ steps.meta.outputs.labels }}" -replace '\n', '",' -replace '=', '="') >> $GITHUB_OUTPUT
 
     - uses: mr-smithers-excellent/docker-build-push@v6.2
       id: build-push
