@@ -16,14 +16,15 @@ on:
         description: Windows target folder names as JSON array
         type: string
 
-# changed-files filters aren't sufficient, and runtime filtering is expensive
-env:
-  TARGETS_WINDOWS: |
-    azure-ad-app-proxy/**
-    universal-print-connector/**
+
 
 jobs:
   get-targets:
+    # changed-files filters aren't sufficient, and runtime filtering is expensive
+    env:
+      TARGETS_WINDOWS: |
+        azure-ad-app-proxy/**
+        universal-print-connector/**
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -118,30 +119,10 @@ jobs:
           layer-docker-layer-cache-${{ matrix.target }}-windows-amd64-
 
     # newline-separated -> comma-separated
-    - uses: frabert/replace-string-action@v2
-      id: format-tags
-      with:
-        pattern: '\n'
-        string: ${{ steps.meta.outputs.labels }}
-        replace-with: ','
-        flags: 'g'
-
-    # newline-separated -> comma-separated
-    # quote keys to prevent parsing issues from special characters
-    - uses: frabert/replace-string-action@v2
-      id: format-labels
-      with:
-        pattern: '\n'
-        string: ${{ steps.meta.tags.labels }}
-        replace-with: '",'
-        flags: 'g'
-    - uses: frabert/replace-string-action@v2
-      id: format-labels-2
-      with:
-        pattern: '='
-        string: ${{ steps.format-labels.outputs.replaced }}
-        replace-with: '="'
-        flags: 'g'
+    # quote label values to allow spaces (eg repo description)
+    - run: |
+        "tags=${{ steps.meta.outputs.tags }}" -replace '\n', ',' >> $GITHUB_OUTPUT
+        "labels=" + ("${{ steps.meta.outputs.labels }}" -replace '\n', '",' -replace '=', '="') >> $GITHUB_OUTPUT
 
     - uses: mr-smithers-excellent/docker-build-push@v6.2
       with:
@@ -149,8 +130,8 @@ jobs:
         username: ${{ github.actor }}
         password: ${{ github.token }}
         image: ${{ matrix.target }}
-        tags: ${{ steps.format-tags.outputs.replaced }}
-        labels: ${{ steps.format-labels-2.outputs.replaced }}
+        tags: ${{ steps.format.outputs.tags }}
+        labels: ${{ steps.format.outputs.labels }}
         directory: ${{ steps.add-patches.outputs.context || matrix.target }}
         dockerfile: ${{ steps.add-patches.outputs.context || matrix.target }}\Dockerfile.windows
 
