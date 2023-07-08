@@ -258,3 +258,10 @@ jobs:
     - uses: sigstore/cosign-installer@v3.1.1
     - name: Sign manifests
       run: echo "${{ steps.meta.outputs.tags }}" | xargs -I {} cosign sign --yes {} # @${{ steps.<build-and-push>.outputs.digest }}
+
+    - uses: Chizkiyahu/delete-untagged-ghcr-action@v2.0.1
+      with:
+        owner_type: user
+        token: ${{ secrets.GH_PAT }}
+        package_name: ${{ matrix.image }}
+        except_untagged_multiplatform: true
