@@ -90,12 +90,12 @@ jobs:
       continue-on-error: true
       run: |
         cp * ${{ matrix.target }} -r
-        echo "context=${{ matrix.image }}/${{ matrix.image }}" >> $GITHUB_OUTPUT
+        echo "context=${{ matrix.target }}/${{ matrix.target }}" >> $GITHUB_OUTPUT
 
     - uses: docker/metadata-action@v4
       id: meta
       with:
-        images: ghcr.io/${{ github.repository_owner }}/${{ matrix.image }}
+        images: ghcr.io/${{ github.repository_owner }}/${{ matrix.target }}
         tags: |
           type=sha
           type=ref,event=pr
@@ -107,21 +107,21 @@ jobs:
       continue-on-error: true
       with:
         concurrency: 10
-        key: docker-layer-cache-${{ matrix.image }}-windows-amd64-{hash}
+        key: docker-layer-cache-${{ matrix.target }}-windows-amd64-{hash}
         restore-keys: |
-          docker-layer-cache-${{ matrix.image }}-windows-amd64-
-          layer-docker-layer-cache-${{ matrix.image }}-windows-amd64-
+          docker-layer-cache-${{ matrix.target }}-windows-amd64-
+          layer-docker-layer-cache-${{ matrix.target }}-windows-amd64-
 
     - uses: mr-smithers-excellent/docker-build-push@v6.2
       with:
         registry: ghcr.io
         username: ${{ github.actor }}
         password: ${{ github.token }}
-        image: ${{ matrix.image }}
+        image: ${{ matrix.target }}
         tags: ${{ steps.meta.outputs.tags }}
         labels: ${{ steps.meta.outputs.labels }}
-        directory: ${{ steps.add-patches.outputs.context || matrix.image }}
-        dockerfile: ${{ steps.add-patches.outputs.context || matrix.image }}\Dockerfile.windows
+        directory: ${{ steps.add-patches.outputs.context || matrix.target }}
+        dockerfile: ${{ steps.add-patches.outputs.context || matrix.target }}\Dockerfile.windows
 
     # refactor (see Git history) if multi-OS images are needed
     - uses: sigstore/cosign-installer@v3.1.1
