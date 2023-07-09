@@ -104,7 +104,6 @@ jobs:
         images: ghcr.io/${{ github.repository_owner }}/${{ matrix.target }}
         sep-tags: ','
         tags: |
-          type=schedule,pattern={{date 'YYYYMMDD-hhmmss'}}
           type=ref,event=pr
           type=raw,value=latest,enable={{is_default_branch}}
 
@@ -231,7 +230,6 @@ jobs:
         images: ghcr.io/${{ github.repository_owner }}/${{ matrix.target }}
         sep-tags: ','
         tags: |
-          type=schedule,pattern={{date 'YYYYMMDD-hhmmss'}}
           type=ref,event=pr
           type=raw,value=latest,enable={{is_default_branch}}
 
