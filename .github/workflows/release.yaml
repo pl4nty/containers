@@ -160,9 +160,9 @@ jobs:
         - buildjet-2vcpu-ubuntu-2204-arm
         include:
         - os: ubuntu-latest
-          arch: amd64
+          arch: linux/amd64
         - os: buildjet-2vcpu-ubuntu-2204-arm
-          arch: arm64
+          arch: linux/arm64
     runs-on: ${{ matrix.os }}
     steps:
       # required for builds with custom context
@@ -241,7 +241,7 @@ jobs:
 
     - name: Format build tags
       id: build
-      run: echo "tags= amd64, arm64" | sed "s| |ghcr.io/${{ github.repository_owner }}/${{ matrix.target }}:|g" >> $GITHUB_OUTPUT
+      run: echo "tags= linux/amd64, linux/arm64" | sed "s| |ghcr.io/${{ github.repository_owner }}/${{ matrix.target }}:|g" >> $GITHUB_OUTPUT
 
     - name: Create and push manifests
       uses: Noelware/docker-manifest-action@0.3.1
