@@ -8,5 +8,3 @@ FROM joseluisq/static-web-server:2.19.0
 COPY --from=build /app/vnet-capacity-planner /public
 
 ENV SERVER_PORT=8080
-ENV SERVER_LOG_LEVEL=info
-EXPOSE 8080
