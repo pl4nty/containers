@@ -34,7 +34,7 @@ jobs:
     - uses: actions/checkout@v3.5.3
       if: ${{ github.event_name != 'pull_request' && github.event_name != 'workflow_dispatch' }}
       with:
-        fetch-depth: 0 # tj-actions/changed-files#1335
+        fetch-depth: 2
         submodules: true
         token: ${{ secrets.GH_PAT }} # private submodules
 
@@ -44,6 +44,7 @@ jobs:
       id: changed-files
       with:
         fetch_depth: 2
+        skip_initial_fetch: true
         dir_names: true # output folders instead of files
         dir_names_max_depth: 1 # only return roots, not subfolders
         dir_names_exclude_current_dir: true # exclude root files
@@ -59,6 +60,7 @@ jobs:
       id: changed-files-windows
       with:
         fetch_depth: 2
+        skip_initial_fetch: true
         dir_names: true # output folders instead of files
         dir_names_max_depth: 1 # only return roots, not subfolders
         dir_names_exclude_current_dir: true # exclude root files
@@ -245,13 +247,11 @@ jobs:
 
     - name: Create and push manifests
       id: manifest
-      uses: pl4nty/docker-manifest-action@patch-1
+      uses: pl4nty/docker-manifest-action@action
       with:
         inputs: ${{ steps.meta.outputs.tags }}
         images: ${{ steps.build.outputs.tags }}
         push: true
-        
-    - run: printf ${{ steps.manifest.outputs.images }}
 
     # TODO open issue for docker-manifest-action to output digests
     - uses: sigstore/cosign-installer@v3.1.1
