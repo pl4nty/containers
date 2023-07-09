@@ -244,16 +244,19 @@ jobs:
       run: echo "tags= linux-amd64, linux-arm64" | sed "s| |ghcr.io/${{ github.repository_owner }}/${{ matrix.target }}:|g" >> $GITHUB_OUTPUT
 
     - name: Create and push manifests
-      uses: Noelware/docker-manifest-action@0.3.1
+      id: manifest
+      uses: pl4nty/docker-manifest-action@patch-1
       with:
         inputs: ${{ steps.meta.outputs.tags }}
         images: ${{ steps.build.outputs.tags }}
         push: true
+        
+    - run: printf ${{ steps.manifest.outputs.images }}
 
     # TODO open issue for docker-manifest-action to output digests
     - uses: sigstore/cosign-installer@v3.1.1
     - name: Sign manifests
-      run: printf "${{ steps.meta.outputs.tags }}" | xargs -d "," -I {} cosign sign --yes {} # @${{ steps.<build-and-push>.outputs.digest }}
+      run: printf "${{ steps.manifest.outputs.images }}" | xargs -d "," -I {} cosign sign --yes {} # @${{ steps.<build-and-push>.outputs.digest }}
 
     - uses: Chizkiyahu/delete-untagged-ghcr-action@v2.0.1
       continue-on-error: true
