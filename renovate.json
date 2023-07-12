@@ -7,6 +7,7 @@
   "additionalBranchPrefix": "{{parentDir}}-", 
   "ignorePaths": ["archive"],
   "rangeStrategy": "pin",
+  "rebaseWhen": "conflicted",
   "lockFileMaintenance": {
     "enabled": true,
     "automerge": true
