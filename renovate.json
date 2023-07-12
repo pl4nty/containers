@@ -23,7 +23,7 @@
     },
     {
       "matchManagers": ["git-submodules"],
-      "matchPackagePrefixes": ["https://github.com/pl4nty/"],
+      "matchPackagePrefixes": ["https://github.com/pl4nty/", "https://github.com/stephenegriffin/MHA/"],
       "automerge": true
     }
   ],
