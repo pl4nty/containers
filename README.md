@@ -5,6 +5,6 @@ The contents of this repository are licensed under the MIT license. For dependen
 ## Usage
 
 ```bash
-git submodule add [url] [name]/[name] && cd [name]
+git submodule add -b [tag/branch] [url] [name]/[name] && cd [name]
 docker build -t [name] -f Dockerfile [name]
 ```
