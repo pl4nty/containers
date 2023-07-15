@@ -261,7 +261,7 @@ jobs:
 
     - name: Get manifest digest
       id: manifest-parsed
-      run: echo $IMAGES | cut -d "," -f1 | sed "s/.*@/digest=/"
+      run: echo $IMAGES | cut -d "," -f1 | sed "s/.*@/digest=/" >> $GITHUB_OUTPUT
       env:
         IMAGES: ${{ steps.manifest.outputs.images }}
 
@@ -303,7 +303,7 @@ jobs:
 
     - name: Create and sign provenance
       env:
-        UNTRUSTED_IMAGE: ${{ steps.meta.outputs.tags }}
+        UNTRUSTED_IMAGE: ghcr.io/${{ github.repository_owner }}/${{ matrix.target }}
         UNTRUSTED_DIGEST: ${{ steps.manifest-parsed.outputs.digest }}
         GITHUB_CONTEXT: ${{ toJSON(github) }}
       # COSIGN_EXPERIMENTAL=1
