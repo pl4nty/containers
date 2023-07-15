@@ -1,0 +1,31 @@
+name: cleanup after pull request
+
+on:
+  pull_request:
+    types:
+    - closed
+
+jobs:
+  clear_cache:
+    permissions:
+      actions: write
+    uses: actions/github-script@v6.4.1
+    with:
+      script: |
+        for (key of ["buildkit-", "index-"]) {
+          github.rest.actions.deleteActionsCacheByKey({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            key,
+            ref: context.ref
+          })
+        }
+
+  delete_images:
+    uses: snok/container-retention-policy@v2
+    with:
+      account-type: personal
+      token: ${{ secrets.GH_PAT_DELETE_PACKAGES }}
+      image-names: *
+      cut-off: One min ago UTC
+      filter-tags: pr-${{ github.event.pull_request.number }}

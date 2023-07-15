@@ -279,10 +279,10 @@ jobs:
         cosign attest --yes --predicate=predicate.json --type slsaprovenance \
           "${UNTRUSTED_IMAGE}@${UNTRUSTED_DIGEST}"
 
-    - uses: Chizkiyahu/delete-untagged-ghcr-action@v2.0.1
-      continue-on-error: true
+    - uses: snok/container-retention-policy@v2
       with:
-        owner_type: user
+        account-type: personal
         token: ${{ secrets.GH_PAT_DELETE_PACKAGES }}
-        package_name: ${{ matrix.target }}
-        except_untagged_multiplatform: true
+        image-names: ${{ matrix.target }}
+        cut-off: One min ago UTC
+        skip-tags: latest, linux-*, windows-*
