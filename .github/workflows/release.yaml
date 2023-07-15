@@ -225,9 +225,8 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       packages: write
-    outputs:
-      image: ${{ steps.meta.outputs.tags }}
-      digest: ${{ steps.manifest-parsed.outputs.digest }}
+      id-token: write # OIDC artifact signing
+
     steps:
     - uses: docker/metadata-action@v4.6.0
       id: meta
@@ -256,11 +255,10 @@ jobs:
         images: ${{ steps.build.outputs.tags }}
         push: true
 
-    - name: Get manifest digest
-      id: manifest-parsed
-      run: echo $IMAGES | cut -d "," -f1 | sed "s/.*@/digest=/"
-      env:
-        IMAGES: ${{ steps.manifest.outputs.images }}
+    # TODO open issue for docker-manifest-action to output digests
+    - uses: sigstore/cosign-installer@v3.1.1
+    - name: Sign manifests
+      run: printf "${{ steps.manifest.outputs.images }}" | xargs -d "," -I {} cosign sign --yes {} # @${{ steps.<build-and-push>.outputs.digest }}
 
     - uses: Chizkiyahu/delete-untagged-ghcr-action@v2.0.1
       continue-on-error: true
@@ -270,17 +268,3 @@ jobs:
         package_name: ${{ matrix.target }}
         except_untagged_multiplatform: true
         
-  provenance:
-    needs:
-    - manifest
-    permissions:
-      actions: read
-      id-token: write
-      packages: write
-    uses: slsa-framework/slsa-github-generator/.github/workflows/generator_container_slsa3.yml@v1.7.0
-    with:
-      image: ${{ needs.manifest.outputs.image }}
-      digest: ${{ needs.manifest.outputs.digest }}
-      registry-username: ${{ github.actor }}
-    secrets:
-      registry-password: ${{ github.token }}
