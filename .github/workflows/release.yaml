@@ -259,9 +259,6 @@ jobs:
         images: ${{ steps.build.outputs.tags }}
         push: true
 
-    - name: Generate manifest provenance
-      run: printf "${{ steps.manifest.outputs.images }}" | xargs -d "," -I {} cosign sign --yes {}
-
     - name: Get manifest digest
       id: manifest-parsed
       run: echo $IMAGES | cut -d "," -f1 | sed "s/.*@/digest=/"
