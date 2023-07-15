@@ -209,7 +209,7 @@ jobs:
           push: true
           tags: ${{ env.image }}:${{ matrix.arch }} # TODO sign digests instead
           cache-from: ${{ startsWith(matrix.os, 'buildjet-') && format('type=registry,ref={0}:latest', env.image) || 'type=gha' }}
-          cache-to: ${{ startsWith(matrix.os, 'buildjet-') && 'type=inline' || 'type=gha,mode=max' }}
+          cache-to: ${{ startsWith(matrix.os, 'buildjet-') && 'type=inline' || github.event_name == 'pull_request' && '' || 'type=gha,mode=max' }}
           provenance: false # Noelware/docker-manifest-action#131
         env:
           image: ghcr.io/${{ github.repository_owner }}/${{ matrix.target }}
