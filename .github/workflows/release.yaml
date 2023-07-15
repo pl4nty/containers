@@ -273,7 +273,7 @@ jobs:
         UNTRUSTED_IMAGE: ghcr.io/${{ github.repository_owner }}/${{ matrix.target }}
         GITHUB_CONTEXT: ${{ toJSON(github) }}
       run: |
-        UNTRUSTED_DIGEST=$(echo "${{ steps.manifest.outputs.images }}" | cut -d "," -f1 | sed "s/.*@/digest=/")
+        UNTRUSTED_DIGEST=$(echo "${{ steps.manifest.outputs.images }}" | cut -d "," -f1 | cut -d "@" -f2)
         "$GITHUB_WORKSPACE/slsa-generator-container-linux-amd64" generate --predicate=predicate.json
         cosign attest --yes --predicate=predicate.json --type slsaprovenance \
           "${UNTRUSTED_IMAGE}@${UNTRUSTED_DIGEST}"
