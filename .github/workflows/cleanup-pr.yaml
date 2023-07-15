@@ -26,6 +26,6 @@ jobs:
     with:
       account-type: personal
       token: ${{ secrets.GH_PAT_DELETE_PACKAGES }}
-      image-names: *
+      image-names: "*"
       cut-off: One min ago UTC
       filter-tags: pr-${{ github.event.pull_request.number }}
