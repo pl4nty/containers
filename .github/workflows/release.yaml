@@ -180,7 +180,7 @@ jobs:
 
       - name: Init submodule if present
         id: get-context
-        continue-on-error: true
+        continue-on-error: true # remove once Homebrew/homebrew-cask-fonts#7718 reaches GitHub's runners
         # user.name and changing GITHUB_TOKEN doesn't work, since it defaults to SSH
         run: |
           git config --global --add url."https://oauth2:${{ secrets.GH_PAT }}@github.com/".insteadOf https://github.com/
