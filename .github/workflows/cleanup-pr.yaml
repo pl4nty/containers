@@ -7,6 +7,7 @@ on:
 
 jobs:
   clear_cache:
+    runs-on: ubuntu-latest
     permissions:
       actions: write
     steps:
@@ -23,6 +24,7 @@ jobs:
           }
 
   delete_images:
+    runs-on: ubuntu-latest
     steps:
     - uses: snok/container-retention-policy@v2
       with:
