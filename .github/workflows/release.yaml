@@ -115,6 +115,7 @@ jobs:
     - uses: jpribyl/action-docker-layer-caching@v0.1.1
       continue-on-error: true
       with:
+        skip-save: github.event_name == 'pull_request'
         concurrency: 10
         key: docker-layer-cache-${{ matrix.target }}-windows-amd64-{hash}
         restore-keys: |
@@ -214,6 +215,7 @@ jobs:
           provenance: false # Noelware/docker-manifest-action#131
         env:
           image: ghcr.io/${{ github.repository_owner }}/${{ matrix.target }}
+          event: ${{ github.event_name }}
 
   manifest:
     needs:

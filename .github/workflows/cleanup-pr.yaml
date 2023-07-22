@@ -6,23 +6,6 @@ on:
     - closed
 
 jobs:
-  clear_cache:
-    runs-on: ubuntu-latest
-    permissions:
-      actions: write
-    steps:
-    - uses: actions/github-script@v6.4.1
-      with:
-        script: |
-          for (key of ["buildkit-", "index-"]) {
-            github.rest.actions.deleteActionsCacheByKey({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              key,
-              ref: context.ref
-            })
-          }
-
   delete_images:
     runs-on: ubuntu-latest
     steps:
