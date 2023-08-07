@@ -198,6 +198,13 @@ jobs:
           shopt -s extglob dotglob
           cp !(${{ matrix.target }}) ${{ matrix.target }} -r
 
+      # increase ratelimit
+      - uses: docker/login-action@v2.2.0
+        with:
+          registry: docker.io
+          username: ${{ vars.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
       - uses: docker/login-action@v2.2.0
         with:
           registry: ghcr.io
