@@ -261,7 +261,7 @@ jobs:
 
     - uses: sigstore/cosign-installer@v3.1.1
     - name: Setup provenance builder
-      uses: slsa-framework/slsa-github-generator/.github/actions/generate-builder@v1.7.0
+      uses: slsa-framework/slsa-github-generator/.github/actions/generate-builder@v1.8.0
       with:
         repository: slsa-framework/slsa-github-generator
         directory: internal/builders/container
