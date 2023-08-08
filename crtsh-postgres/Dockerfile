@@ -1,5 +1,5 @@
 # TODO linttbscert
-FROM golang:1.20.7 AS cert_validation_success_monitor
+FROM golang:1.21.0 AS cert_validation_success_monitor
 
 WORKDIR /app
 COPY cert_validation_success_monitor/go.* ./
@@ -9,7 +9,7 @@ COPY cert_validation_success_monitor/*.go ./
 # can't use Makefile, it references SVN
 RUN CGO_ENABLED=0 go build cert_validation_success_monitor.go
 
-FROM golang:1.20.7 AS test_websites_monitor
+FROM golang:1.21.0 AS test_websites_monitor
 
 WORKDIR /app
 COPY test_websites_monitor/go.* ./
@@ -44,7 +44,7 @@ WORKDIR /app
 COPY libx509pq .
 RUN make
 
-FROM golang:1.20.7-bullseye AS buildgo
+FROM golang:1.21.0-bullseye AS buildgo
 RUN apt-get update \
 && apt-get install -y --no-install-recommends postgresql-server-dev-13 \
 && rm -rf /var/lib/apt/lists/*
