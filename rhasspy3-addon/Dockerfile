@@ -1,11 +1,8 @@
 # from rhasspy3-en/Dockerfile
 FROM rhasspy/rhasspy3-addon-base:en-0.0.1 as build
+ARG TARGETOS TARGETARCH
 
-COPY rhasspy3-en/rhasspy3_configuration.yaml /app/config/configuration.yaml
-COPY rhasspy3-en/run.sh /app/
-RUN chmod a+x /app/run.sh
-
-# HTTP
-EXPOSE 13331
-
-ENTRYPOINT ["bash", "/app/run.sh"]
+COPY rhasspy3/programs/wake/porcupine1/ /app/config/programs/wake/porcupine1/
+RUN /app/config/programs/wake/porcupine1/script/setup && \
+    rm -rf /root/.cache/
+COPY Professor_en_${TARGETOS}-${TARGETARCH}_v2_2_0.ppn config/data/wake/porcupine1/porcupine_linux.ppn
