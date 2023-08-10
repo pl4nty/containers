@@ -2,6 +2,10 @@
 FROM rhasspy/rhasspy3-addon-base:en-0.0.1 as build
 ARG TARGETOS TARGETARCH
 
+RUN apt-get update && \
+    apt-get install --yes --no-install-recommends \
+    alsa-utils
+
 COPY rhasspy3/programs/wake/porcupine1/ /app/config/programs/wake/porcupine1/
 RUN /app/config/programs/wake/porcupine1/script/setup && \
     rm -rf /root/.cache/
