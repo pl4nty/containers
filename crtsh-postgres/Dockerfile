@@ -20,7 +20,7 @@ COPY test_websites_monitor/*.go test_websites_monitor/*.toml ./
 RUN CGO_ENABLED=0 go build -ldflags "-X main.build_date=`date -u +%Y-%m-%d.%H:%M:%S`" test_websites_monitor.go processor_main.go
 
 # 15 perms are incompatible with setup scripts (public schema)
-FROM postgres:13.12-bullseye AS buildpg
+FROM postgres:15.4-bullseye AS buildpg
 
 # build extensions
 RUN apt-get update \
@@ -78,7 +78,7 @@ WORKDIR /crlset-tools
 COPY crlset-tools/crlset.go .
 RUN CGO_ENABLED=0 go build -ldflags "-X main.build_date=`date -u +%Y-%m-%d.%H:%M:%S`" crlset.go
 
-FROM postgres:13.12-bullseye
+FROM postgres:15.4-bullseye
 
 # scripts: wget, ca-certificates, screen, cron, gcc
 # libcablintpq: ruby
