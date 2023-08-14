@@ -216,7 +216,7 @@ jobs:
         with:
           context: ${{ steps.get-context.outputs.context || matrix.target }}
           push: true
-          tags: ${{ env.image }}:${{ matrix.arch }} # TODO sign digests instead
+          tags: ${{ env.image }}:${{ matrix.arch }}${{ github.event_name == 'pull_request' && format('-{0}', github.ref_name) || '' }} # TODO sign digests instead
           cache-from: ${{ startsWith(matrix.os, 'buildjet-') && format('type=registry,ref={0}:latest', env.image) || 'type=gha' }}
           cache-to: ${{ startsWith(matrix.os, 'buildjet-') && 'type=inline' || github.event_name != 'pull_request' && 'type=gha,mode=max' || '' }}
           provenance: false # Noelware/docker-manifest-action#131
