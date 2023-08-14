@@ -1,4 +1,4 @@
-FROM kasmweb/kali-rolling-desktop:1.13.1
+FROM kasmweb/kali-rolling-desktop:1.13.1 as linux-amd64
 USER root
 
 RUN sed -ie 's/kali-rolling/kali-last-snapshot/g' /etc/apt/sources.list
@@ -19,3 +19,8 @@ RUN wget https://github.com/volatilityfoundation/volatility3/releases/download/v
 RUN wget https://github.com/icsharpcode/AvaloniaILSpy/releases/download/v7.2-rc/Linux.x64.Release.zip && \
     unzip Linux.x64.Release.zip && unzip ILSpy-linux-x64-Release.zip -d AvaloniaILSpy && \
     rm Linux.x64.Release.zip ILSpy-linux-x64-Release.zip
+
+FROM kasmweb/kali-rolling-desktop:1.13.1 as linux-arm64
+
+ARG TARGETOS TARGETARCH
+FROM ${TARGETOS}-${TARGETARCH}
