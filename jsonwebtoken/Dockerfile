@@ -10,7 +10,7 @@ COPY . .
 RUN ./node_modules/.bin/grunt build-website
 RUN ./node_modules/.bin/grunt pug:website 
 
-FROM joseluisq/static-web-server:2.21.0
+FROM joseluisq/static-web-server:2.21.1
 
 COPY --from=build /app/dist/website /public
 
