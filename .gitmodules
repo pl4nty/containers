@@ -111,3 +111,7 @@
 	path = pev2/pev2
 	url = https://github.com/dalibo/pev2
 	branch = v1.8.0
+[submodule "rhasspy3-addon/rhasspy3"]
+	path = rhasspy3-addon/rhasspy3
+	url = https://github.com/rhasspy/rhasspy3
+
