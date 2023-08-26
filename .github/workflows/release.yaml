@@ -5,9 +5,15 @@ on:
   push:
     branches:
       - main
+    paths-ignore:
+      - ".*/**"
+      - "archive/"
   pull_request:
     branches:
       - main
+    paths-ignore:
+      - ".*/**"
+      - "archive/"
   workflow_dispatch:
     inputs:
       targets:
@@ -32,6 +38,7 @@ jobs:
       linux: ${{ steps.targets.outputs.linux }}
       windows: ${{ steps.targets.outputs.windows }}
     steps:
+    # fetch-depth may cause issues with multi-commit submodule changes
     - uses: actions/checkout@v3.6.0
       if: ${{ github.event_name != 'pull_request' && github.event_name != 'workflow_dispatch' }}
       with:
@@ -44,15 +51,11 @@ jobs:
       if: ${{ github.event_name != 'workflow_dispatch' }}
       id: changed-files
       with:
-        # fetch_depth: 5
-        # skip_initial_fetch: true
+        skip_initial_fetch: true
         dir_names: true # output folders instead of files
         dir_names_max_depth: 1 # only return roots, not subfolders
         dir_names_exclude_current_dir: true # exclude root files
-        fetch_additional_submodule_history: true
         files_ignore: |
-          .github/**
-          archive/**
           ${{ env.TARGETS_WINDOWS }}
         json: true # output in matrix JSON format
 
@@ -61,7 +64,6 @@ jobs:
       if: ${{ github.event_name != 'workflow_dispatch' }}
       id: changed-files-windows
       with:
-        fetch_depth: 2
         skip_initial_fetch: true
         dir_names: true # output folders instead of files
         dir_names_max_depth: 1 # only return roots, not subfolders
