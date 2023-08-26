@@ -44,8 +44,8 @@ jobs:
       if: ${{ github.event_name != 'workflow_dispatch' }}
       id: changed-files
       with:
-        fetch_depth: 5
-        skip_initial_fetch: true
+        # fetch_depth: 5
+        # skip_initial_fetch: true
         dir_names: true # output folders instead of files
         dir_names_max_depth: 1 # only return roots, not subfolders
         dir_names_exclude_current_dir: true # exclude root files
