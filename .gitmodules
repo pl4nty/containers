@@ -115,3 +115,6 @@
 	path = rhasspy3-addon/rhasspy3
 	url = https://github.com/rhasspy/rhasspy3
 
+[submodule "markwhen/markwhen"]
+	path = markwhen/markwhen
+	url = https://github.com/mark-when/markwhen
