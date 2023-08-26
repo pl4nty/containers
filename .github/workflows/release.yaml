@@ -49,6 +49,7 @@ jobs:
         dir_names: true # output folders instead of files
         dir_names_max_depth: 1 # only return roots, not subfolders
         dir_names_exclude_current_dir: true # exclude root files
+        fetch_additional_submodule_history: true
         files_ignore: |
           .github/**
           archive/**
