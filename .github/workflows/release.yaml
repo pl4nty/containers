@@ -147,7 +147,7 @@ jobs:
 
     # refactor (see Git history) if multi-OS images are needed
     # TODO tags@${{ steps.build-push.outputs.digest }} once implemented upstream
-    - uses: sigstore/cosign-installer@v3.1.1
+    - uses: sigstore/cosign-installer@v3.1.2
     - name: Sign manifests
       run: |
         "${{ steps.meta.outputs.tags }}" | % { cosign sign --yes $_ }
@@ -269,7 +269,7 @@ jobs:
         images: ${{ steps.build.outputs.tags }}
         push: true
 
-    - uses: sigstore/cosign-installer@v3.1.1
+    - uses: sigstore/cosign-installer@v3.1.2
     - name: Setup provenance builder
       uses: slsa-framework/slsa-github-generator/.github/actions/generate-builder@v1.9.0
       with:
