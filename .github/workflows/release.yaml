@@ -296,6 +296,6 @@ jobs:
         account-type: personal
         token: ${{ secrets.GH_PAT_DELETE_PACKAGES }}
         image-names: ${{ matrix.target }}
-        cut-off: One min ago UTC
-        keep-at-least: 3
+        cut-off: One month ago UTC # 1 month to resolve any crashlooping images
+        keep-at-least: 6 # keep at least 2 previous versions
         skip-tags: latest, linux-*, windows-*, pr-*
