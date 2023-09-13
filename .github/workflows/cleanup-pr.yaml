@@ -1,9 +1,9 @@
 name: cleanup after pull request
 
-on:
-  pull_request:
-    types:
-    - closed
+on: []
+#   pull_request:
+#     types:
+#     - closed
 
 jobs:
   delete_images:
@@ -14,5 +14,6 @@ jobs:
         account-type: personal
         token: ${{ secrets.GH_PAT_DELETE_PACKAGES }}
         image-names: "*"
-        cut-off: One min ago UTC
+        cut-off: One month ago UTC # 1 month to resolve any crashlooping images
+        keep-at-least: 6 # keep at least 2 previous versions
         filter-tags: pr-${{ github.event.pull_request.number }}, *-pr-${{ github.event.pull_request.number }}
