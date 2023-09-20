@@ -1,2 +1,2 @@
-FROM joseluisq/static-web-server:2.22.0
+FROM joseluisq/static-web-server:2.22.1
 COPY . /public
