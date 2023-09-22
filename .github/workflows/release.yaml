@@ -39,7 +39,7 @@ jobs:
       windows: ${{ steps.targets.outputs.windows }}
     steps:
     # fetch-depth may cause issues with multi-commit submodule changes
-    - uses: actions/checkout@v4.0.0
+    - uses: actions/checkout@v4.1.0
       if: ${{ github.event_name != 'pull_request' && github.event_name != 'workflow_dispatch' }}
       with:
         fetch-depth: 2
@@ -90,7 +90,7 @@ jobs:
         target: ${{ fromJson(needs.get-targets.outputs.windows) }}
     runs-on: windows-latest
     steps:
-    - uses: actions/checkout@v4.0.0
+    - uses: actions/checkout@v4.1.0
       with:
         submodules: recursive
         token: ${{ secrets.GH_PAT }} # private submodules
