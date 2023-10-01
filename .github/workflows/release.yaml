@@ -47,7 +47,7 @@ jobs:
         token: ${{ secrets.GH_PAT }} # private submodules
 
     - name: Linux changes
-      uses: tj-actions/changed-files@v39.1.2
+      uses: tj-actions/changed-files@v39.2.0
       if: ${{ github.event_name != 'workflow_dispatch' }}
       id: changed-files
       with:
@@ -60,7 +60,7 @@ jobs:
         json: true # output in matrix JSON format
 
     - name: Windows changes
-      uses: tj-actions/changed-files@v39.1.2
+      uses: tj-actions/changed-files@v39.2.0
       if: ${{ github.event_name != 'workflow_dispatch' }}
       id: changed-files-windows
       with:
