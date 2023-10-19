@@ -1,4 +1,4 @@
-FROM httpd:2.4.57 AS run
+FROM httpd:2.4.58 AS run
 RUN apt-get update \
 && apt-get install -y --no-install-recommends gcc make libaprutil1-dev libpq5 \
 && rm -rf /var/lib/apt/lists/*
