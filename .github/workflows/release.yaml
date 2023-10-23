@@ -215,20 +215,19 @@ jobs:
             type=raw,value=latest,enable={{is_default_branch}}
       # can't use docker-container and remote drivers in the same builder
       - uses: docker/setup-buildx-action@v3.0.0
-        # id: local
+        id: local
       - uses: docker/setup-buildx-action@v3.0.0
         with:
           driver: remote
-          endpoint: tcp://buildkitd.tplant.com.au:1234 # unix:///var/run/docker.sock
+          endpoint: docker-container://${{ steps.local.outputs.name }} # unix:///var/run/docker.sock
           #platforms: linux/amd64,linux/amd64/v2,linux/amd64/v3,linux/amd64/v4,linux/386
           # buildkitd-flags: --allow-insecure-entitlement security.insecure --allow-insecure-entitlement network.host
-          # append: |
-          #   - endpoint: tcp://buildkitd.tplant.com.au:1234
-          #     platforms: linux/arm64,linux/arm/v7,linux/arm/v6
+          append: |
+            - endpoint: tcp://buildkitd.tplant.com.au:1234
         env:
-          BUILDER_NODE_0_AUTH_TLS_CACERT: ${{ secrets.BUILDKIT_ARM_CA }}
-          BUILDER_NODE_0_AUTH_TLS_CERT: ${{ secrets.BUILDKIT_ARM_CERT }}
-          BUILDER_NODE_0_AUTH_TLS_KEY: ${{ secrets.BUILDKIT_ARM_KEY }}
+          BUILDER_NODE_1_AUTH_TLS_CACERT: ${{ secrets.BUILDKIT_ARM_CA }}
+          BUILDER_NODE_1_AUTH_TLS_CERT: ${{ secrets.BUILDKIT_ARM_CERT }}
+          BUILDER_NODE_1_AUTH_TLS_KEY: ${{ secrets.BUILDKIT_ARM_KEY }}
 
       - uses: docker/build-push-action@v5.0.0
         with:
