@@ -219,8 +219,10 @@ jobs:
       - uses: docker/setup-buildx-action@v3.0.0
         with:
           driver: remote
-          endpoint: docker-container://${{ steps.local.outputs.name }}
-          platforms: linux/amd64
+          endpoint: unix:///var/run/docker.sock
+          platforms: linux/amd64,linux/amd64/v2,linux/amd64/v3,linux/amd64/v4,linux/386
+          buildkitd-flags: --allow-insecure-entitlement security.insecure --allow-insecure-entitlement network.host
+          use: false
           append: |
             - endpoint: tcp://buildkit.tplant.com.au:1234
               platforms: linux/arm64,linux/arm/v7,linux/arm/v6
