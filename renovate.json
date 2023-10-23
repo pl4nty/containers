@@ -23,10 +23,6 @@
     },
     {
       "matchManagers": ["git-submodules"],
-      "versioning": "semver-coerced"
-    },
-    {
-      "matchManagers": ["git-submodules"],
       "matchPackagePrefixes": ["https://github.com/pl4nty/", "https://github.com/stephenegriffin/MHA"],
       "automerge": true
     }
