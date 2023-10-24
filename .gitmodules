@@ -118,3 +118,6 @@
 [submodule "markwhen/markwhen"]
 	path = markwhen/markwhen
 	url = https://github.com/mark-when/markwhen
+[submodule "tls-rpt-monitor/tls-rpt-monitor"]
+	path = tls-rpt-monitor/tls-rpt-monitor
+	url = https://github.com/Neztore/tls-rpt-monitor
