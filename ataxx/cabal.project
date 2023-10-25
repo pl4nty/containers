@@ -1,7 +1,0 @@
-packages: .
-
-source-repository-package
-  type: git
-  location: https://github.com/pl4nty/codeworld
-  tag: af1856eaf56f984cb466572b962e9d33fcb5d109
-  subdir: codeworld-api

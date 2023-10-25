@@ -1,29 +1,16 @@
-# based on https://github.com/phadej/docker-haskell-example/blob/master/Dockerfile
 FROM haskell:8.10.7 AS build
-WORKDIR /app
 
-# required for dynamic build binary location eg ARM
-RUN cabal v2-update && cabal v2-install cabal-plan --constraint='cabal-plan ^>=0.5' --constraint='cabal-plan +exe'
-
-# static deps
+RUN --mount=type=cache,target=/root/.cabal \
+    cabal v2-update
+  
 COPY *.cabal .
-RUN cabal v2-build --only-dependencies
+RUN --mount=type=cache,target=/root/.cabal \
+    cabal v2-build --only-dependencies
+    
+COPY . .
+RUN --mount=type=cache,target=/root/.cabal \
+    cabal v2-build && \
+    cp -r /root/.cabal /tmp
+RUN mv /tmp/.cabal /root
 
-# CodeWorld fork
-COPY cabal.project .
-RUN cabal v2-build --only-dependencies
-
-COPY app app
-COPY src src
-COPY test test
-# couldn't get this to compile statically
-# --enable-static --disable-executable-dynamic
-RUN cabal v2-build game
-RUN cp $(cabal-plan list-bin game) .
-
-# FROM ubuntu
-# WORKDIR /app
-
-# COPY --from=build /app/game .
-
-ENTRYPOINT [ "/app/game" ]
+ENTRYPOINT [ "cabal", "v2-run" ]
