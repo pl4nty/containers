@@ -1,7 +1,4 @@
-# based on https://github.com/phadej/docker-haskell-example/blob/master/Dockerfile
 FROM haskell:8.10.7 AS build
-
-WORKDIR /app
 
 RUN --mount=type=cache,target=/root/.cabal \
     cabal v2-update
@@ -9,5 +6,11 @@ RUN --mount=type=cache,target=/root/.cabal \
 COPY *.cabal .
 RUN --mount=type=cache,target=/root/.cabal \
     cabal v2-build --only-dependencies
+    
+COPY . .
+RUN --mount=type=cache,target=/root/.cabal \
+    cabal v2-build && \
+    cp -r /root/.cabal /tmp
+RUN mv /tmp/.cabal /root
 
 ENTRYPOINT [ "cabal", "v2-run" ]
