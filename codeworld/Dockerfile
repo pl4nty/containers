@@ -1,4 +1,4 @@
-FROM debian:10.13
+FROM debian:12.2
 RUN useradd -ms /bin/bash codeworld \
   && apt-get update \
   && apt-get install -y sudo \
