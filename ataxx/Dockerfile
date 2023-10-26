@@ -13,4 +13,4 @@ RUN --mount=type=cache,target=/root/.cabal \
     cp -r /root/.cabal /tmp
 RUN mv /tmp/.cabal /root
 
-ENTRYPOINT [ "cabal", "v2-run" ]
+ENTRYPOINT [ "cabal", "v2-run", "game", "--" ]
