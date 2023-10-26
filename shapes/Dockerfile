@@ -1,4 +1,4 @@
-FROM haskell:8.10.7 AS build
+FROM haskell:9.8.1 AS build
 
 RUN --mount=type=cache,target=/root/.cabal \
     cabal v2-update
