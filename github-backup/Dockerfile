@@ -1,4 +1,4 @@
-FROM python:3.9.18-slim
+FROM python:3.12.0-slim
 
 RUN --mount=type=cache,target=/var/cache/apt \
     apt-get update && apt-get install -y git git-lfs
