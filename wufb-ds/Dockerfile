@@ -8,7 +8,7 @@ RUN npm install
 COPY . .
 RUN npm run build
 
-FROM joseluisq/static-web-server:2.23.0
+FROM joseluisq/static-web-server:2.24.0
 
 COPY --from=build-env /app/dist /public
 
