@@ -147,7 +147,7 @@ jobs:
 
     # refactor (see Git history) if multi-OS images are needed
     # TODO tags@${{ steps.build-push.outputs.digest }} once implemented upstream
-    - uses: sigstore/cosign-installer@v3.1.2
+    - uses: sigstore/cosign-installer@v3.2.0
     - name: Sign manifests
       run: |
         "${{ steps.meta.outputs.tags }}" | % { cosign sign --yes $_ }
