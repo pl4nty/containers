@@ -100,7 +100,7 @@
 	path = crtsh-httpd/asn1js
 	url = https://github.com/lapo-luchini/asn1js
 [submodule "volsync/volsync"]
-	path = volsync/volsync
+	path = archive/volsync/volsync
 	url = https://github.com/backube/volsync
 	branch = release-0.7
 [submodule "otel-operator-autoinstrumentation-apache-httpd/opentelemetry-cpp-contrib"]
