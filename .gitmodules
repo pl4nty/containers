@@ -124,3 +124,6 @@
 [submodule "github-backup/github-backup"]
 	path = github-backup/github-backup
 	url = https://github.com/josegonzalez/python-github-backup
+[submodule "image-factory/image-factory"]
+	path = image-factory/image-factory
+	url = https://github.com/siderolabs/image-factory
