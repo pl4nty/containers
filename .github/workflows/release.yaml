@@ -248,7 +248,8 @@ jobs:
           cache-to: ${{ github.event_name != 'pull_request' && 'type=gha,mode=max' || '' }}
 
       - uses: sigstore/cosign-installer@v3.2.0
-      - run: cosign sign --yes "ghcr.io/${{ github.repository_owner }}/${{ matrix.target }}@${{ steps.build.outputs.digest }}"
+      - name: Sign image manifest
+        run: cosign sign --yes "ghcr.io/${{ github.repository_owner }}/${{ matrix.target }}@${{ steps.build.outputs.digest }}"
 
       - uses: snok/container-retention-policy@v2
         with:
