@@ -236,6 +236,7 @@ jobs:
           BUILDER_NODE_1_AUTH_TLS_KEY: ${{ secrets.BUILDKIT_ARM_KEY }}
 
       - uses: docker/build-push-action@v5.1.0
+        id: build
         with:
           context: ${{ steps.get-context.outputs.context || matrix.target }}
           push: true
@@ -245,6 +246,9 @@ jobs:
           platforms: linux/amd64, linux/arm64
           cache-from: 'type=gha'
           cache-to: ${{ github.event_name != 'pull_request' && 'type=gha,mode=max' || '' }}
+
+      - uses: sigstore/cosign-installer@v3.2.0
+      - run: cosign sign --yes "ghcr.io/${{ github.repository_owner }}/${{ matrix.target }}@${{ steps.build.outputs.digest }}"
 
       - uses: snok/container-retention-policy@v2
         with:
