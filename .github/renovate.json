@@ -5,7 +5,7 @@
     ":disableRateLimiting"
   ],
   "additionalBranchPrefix": "{{parentDir}}-", 
-  "ignorePaths": ["archive"],
+  "ignorePaths": ["archive/**"],
   "rangeStrategy": "pin",
   "rebaseWhen": "conflicted",
   "lockFileMaintenance": {
