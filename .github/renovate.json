@@ -25,6 +25,11 @@
       "matchManagers": ["git-submodules"],
       "matchPackagePrefixes": ["https://github.com/pl4nty/", "https://github.com/stephenegriffin/MHA"],
       "automerge": true
+    },
+    {
+      "matchManagers": ["git-submodules"],
+      "matchPackagePrefixes": ["archive/"],
+      "enabled": false
     }
   ],
   "hostRules": [
