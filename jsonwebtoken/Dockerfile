@@ -1,6 +1,6 @@
 FROM node:21.5.0 AS build
-WORKDIR /app
 
+WORKDIR /app
 COPY package*.json ./
 RUN npm ci
 
@@ -10,9 +10,6 @@ COPY . .
 RUN ./node_modules/.bin/grunt build-website
 RUN ./node_modules/.bin/grunt pug:website 
 
-FROM joseluisq/static-web-server:2.24.2
+FROM nginx:1.24.0
 
-COPY --from=build /app/dist/website /public
-
-ENV SERVER_PORT=8080
-EXPOSE 8080
+COPY --from=build /app/dist/website /usr/share/nginx/html
