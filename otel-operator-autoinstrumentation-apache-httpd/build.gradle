@@ -6,6 +6,9 @@ apply plugin: 'cpp'
 apply from: 'common.gradle'
 apply plugin: 'de.undercouch.download'
 
+// fill xml template
+import org.apache.tools.ant.filters.ReplaceTokens
+
 def coverageEnabled = System.getenv('enableCoverage')
 def target_system = System.getProperty('targetSystem') ?: 'centos6'
 def buildType = System.getProperty('buildType') ?: 'release'
@@ -189,8 +192,14 @@ task stageLibrary(type: Copy) {
     from("${modDepDir}/opentelemetry/${cppSDKVersion}/lib/libopentelemetry_otlp_recordable.so") { it.into "sdk_lib/lib" }
     from("${modDepDir}/opentelemetry/${cppSDKVersion}/lib/libopentelemetry_exporter_ostream_span.so") { it.into "sdk_lib/lib" }
     from("${modDepDir}/opentelemetry/${cppSDKVersion}/lib/libopentelemetry_exporter_otlp_grpc.so") { it.into "sdk_lib/lib" }
-    // autoinstrumentation requires v1.0.3 name (appdynamics)
-    from("dist/opentelemetry_sdk_log4cxx.xml.template") { it.into "conf" rename "opentelemetry(.*)", "appdynamics\$1" } 
+    // autoinstrumentation init requires v1.0.3 name (appdynamics)
+    from("dist/opentelemetry_sdk_log4cxx.xml.template") { it.into "conf" rename "opentelemetry(.*)", "appdynamics\$1" }
+    // instrumentation module requires v1.0.4 named xml
+    from("dist/opentelemetry_sdk_log4cxx.xml.template") {
+        it.into "conf"
+        filter { line -> line.replaceAll("__agent_log_dir__", "/opt/opentelemetry-webserver/agent/logs") }
+        rename "(.*).template", "\$1"
+    }
     from("dist/install.${scriptExt}") { it.fileMode 0700 }
 
     into libraryStageDir
