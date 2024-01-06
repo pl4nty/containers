@@ -95,7 +95,7 @@
 [submodule "otel-operator-autoinstrumentation-apache-httpd/opentelemetry-cpp-contrib"]
 	path = otel-operator-autoinstrumentation-apache-httpd/opentelemetry-cpp-contrib
 	url = https://github.com/open-telemetry/opentelemetry-cpp-contrib
-	branch = webserver/v1.0.3
+	branch = main
 [submodule "pev2/pev2"]
 	path = archive/pev2/pev2
 	url = https://github.com/dalibo/pev2

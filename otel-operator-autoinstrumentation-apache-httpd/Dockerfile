@@ -1,4 +1,4 @@
-# https://github.com/open-telemetry/opentelemetry-cpp-contrib/blob/main/instrumentation/otel-webserver-module/Dockerfile
+# https://github.com/open-telemetry/opentelemetry-cpp-contrib/blob/webserver/v1.0.4/instrumentation/otel-webserver-module/docker/ubuntu20.04/Dockerfile
 FROM ubuntu:20.04 AS build
 ENV DEBIAN_FRONTEND noninteractive
 
@@ -39,7 +39,7 @@ ARG APRUTIL_VERSION="1.6.1"
 ARG LOG4CXX_VERSION="0.11.0"
 ARG GTEST_VERSION="1.10.0"
 ARG PCRE_VERSION="8.44"
-ARG NGINX_VERSION="1.22.0"
+ARG NGINX_VERSION="1.24.0"
 
 # Install GRPC
 RUN git clone --shallow-submodules --depth 1 --recurse-submodules -b v${GRPC_VERSION} \
@@ -202,20 +202,23 @@ RUN cp -r /dependencies /otel-webserver-module/ \
     && cd otel-webserver-module \
     && ./gradlew assembleWebServerModule -DtargetSystem=ubuntu
 
-# https://github.com/open-telemetry/opentelemetry-operator/blob/main/autoinstrumentation/apache-httpd/Dockerfile
+# https://github.com/open-telemetry/opentelemetry-operator/blob/v0.91.0/autoinstrumentation/apache-httpd/Dockerfile
 # images were originally :latest
 FROM alpine:3.19.0 AS agent
+
+RUN mkdir /opt/opentelemetry
 WORKDIR /opt/opentelemetry
 
-COPY --from=build /otel-webserver-module/build/opentelemetry-webserver-sdk-x64-linux.tgz .
 RUN mkdir agent
+COPY --from=build /otel-webserver-module/build/opentelemetry-webserver-sdk-x64-linux.tgz .
+# unzip fails: short read
 RUN tar -xvf opentelemetry-webserver-sdk-x64-linux.tgz -C agent
 
 FROM alpine:3.19.0
+
 COPY --from=agent /opt/opentelemetry/agent/opentelemetry-webserver-sdk /opt/opentelemetry
+
+RUN chmod 775 -R /opt/opentelemetry/
 RUN chmod a+w /opt/opentelemetry/logs
 
 CMD ["cat", "Just delivering the Opentelemetry Apache/Nginx agent"]
-
-# checkout at v1.0.3 5c0cc9c88b60ec48d0f6f8a11523c97d9079a9f8
-# breaking change in 470b8f78175442e72d87aed14a63de5b604cacb0
