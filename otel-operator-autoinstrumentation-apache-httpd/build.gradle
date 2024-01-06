@@ -190,7 +190,7 @@ task stageLibrary(type: Copy) {
     from("${modDepDir}/opentelemetry/${cppSDKVersion}/lib/libopentelemetry_exporter_ostream_span.so") { it.into "sdk_lib/lib" }
     from("${modDepDir}/opentelemetry/${cppSDKVersion}/lib/libopentelemetry_exporter_otlp_grpc.so") { it.into "sdk_lib/lib" }
     // autoinstrumentation requires v1.0.3 name (appdynamics)
-    from("dist/opentelemetry_sdk_log4cxx.xml.template") { it.into "conf/appdynamics_sdk_log4cxx.xml.template" }
+    from("dist/opentelemetry_sdk_log4cxx.xml.template") { it.into "conf" rename "opentelemetry(.*)", "appdynamics\$1" } 
     from("dist/install.${scriptExt}") { it.fileMode 0700 }
 
     into libraryStageDir
