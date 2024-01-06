@@ -6,9 +6,6 @@ apply plugin: 'cpp'
 apply from: 'common.gradle'
 apply plugin: 'de.undercouch.download'
 
-// fill xml template
-import org.apache.tools.ant.filters.ReplaceTokens
-
 def coverageEnabled = System.getenv('enableCoverage')
 def target_system = System.getProperty('targetSystem') ?: 'centos6'
 def buildType = System.getProperty('buildType') ?: 'release'
