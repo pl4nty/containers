@@ -1,3 +1,3 @@
-FROM node:18.19.0
+FROM node:20
 RUN npm install -g wrangler && npm cache clean --force
 ENTRYPOINT ["wrangler"]
