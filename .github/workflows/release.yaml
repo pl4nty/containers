@@ -147,7 +147,7 @@ jobs:
 
     # refactor (see Git history) if multi-OS images are needed
     # TODO tags@${{ steps.build-push.outputs.digest }} once implemented upstream
-    - uses: sigstore/cosign-installer@v3.3.0
+    - uses: sigstore/cosign-installer@v3.4.0
     - name: Sign manifests
       run: |
         "${{ steps.meta.outputs.tags }}" | % { cosign sign --yes $_ }
@@ -247,7 +247,7 @@ jobs:
           cache-from: 'type=gha'
           cache-to: ${{ github.event_name != 'pull_request' && 'type=gha,mode=max' || '' }}
 
-      - uses: sigstore/cosign-installer@v3.3.0
+      - uses: sigstore/cosign-installer@v3.4.0
       - name: Sign image manifest
         run: cosign sign --yes "ghcr.io/${{ github.repository_owner }}/${{ matrix.target }}@${{ steps.build.outputs.digest }}"
 
