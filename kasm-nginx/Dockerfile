@@ -1,4 +1,4 @@
-FROM kasmweb/nginx:1.25.1
+FROM kasmweb/nginx:1.25.3
 
 RUN wget https://kasm-static-content.s3.amazonaws.com/kasm_release_1.13.1.421524.tar.gz \
 && tar -xf kasm_release_1.13.1.421524.tar.gz \
