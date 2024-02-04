@@ -35,7 +35,7 @@ RUN --mount=type=cache,target=/var/cache/apt \
 USER kasm-user
 
 RUN git clone https://github.com/RsaCtfTool/RsaCtfTool.git && \
-    cd RsaCtfTool
+    cd RsaCtfTool && \
     pip3 install -r requirements.txt
 
 RUN python3 -m pip install --upgrade pwntools
