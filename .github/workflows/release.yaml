@@ -173,13 +173,15 @@ jobs:
     steps:
       # for >15GB images, including layers
       - if: ${{ matrix.target == 'kasm-kali-rolling' }}
-        uses: easimon/maximize-build-space@master
+        uses: jlumbroso/free-disk-space@main
         with:
-          root-reserve-mb: 512
-          swap-size-mb: 1024
-          remove-dotnet: true
-          remove-android: true
-          remove-haskell: true
+          tool-cache: false
+          android: true
+          dotnet: true
+          haskell: true
+          large-packages: true
+          docker-images: false
+          swap-storage: true
 
       # required for builds with custom context
       # https://stackoverflow.com/a/52269934
