@@ -171,15 +171,6 @@ jobs:
         - 1234:1234
         options: --name=buildkit --privileged
     steps:
-      # required for builds with custom context
-      # https://stackoverflow.com/a/52269934
-      # can't use github.repositoryUrl - it uses git://, which seems to be blocked on Windows runners
-      - name: Checkout image folder
-        run: |
-          git clone -n --depth=1 --filter=tree:0 ${{ github.server_url }}/${{ github.repository }} ./
-          git sparse-checkout set --no-cone ${{ matrix.target }}
-          git checkout ${{ github.sha }}
-
       # for >15GB images, including layers
       - if: ${{ matrix.target == 'kasm-kali-rolling' }}
         uses: easimon/maximize-build-space@master
@@ -189,6 +180,16 @@ jobs:
           remove-dotnet: true
           remove-android: true
           remove-haskell: true
+
+      # required for builds with custom context
+      # https://stackoverflow.com/a/52269934
+      # can't use github.repositoryUrl - it uses git://, which seems to be blocked on Windows runners
+      - name: Checkout image folder
+        run: |
+          rm ./ -r
+          git clone -n --depth=1 --filter=tree:0 ${{ github.server_url }}/${{ github.repository }} ./
+          git sparse-checkout set --no-cone ${{ matrix.target }}
+          git checkout ${{ github.sha }}
 
       - name: Init submodule if present
         id: get-context
