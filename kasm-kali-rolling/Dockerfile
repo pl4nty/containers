@@ -12,16 +12,51 @@ FROM base as linux-amd64
 RUN --mount=type=cache,target=/var/cache/apt \
     apt-get update && apt-get install -y --no-install-recommends \
     sudo \
-    torbrowser-launcher=0.3.6-2
+    kali-linux-default \
+    torbrowser-launcher \
+    # RSACTFTool
+    libgmp3-dev libmpc-dev \
+    # pwntools
+    python3 python3-pip python3-dev git libssl-dev libffi-dev build-essential \
+    autopsy \
+    ghidra \
+    burpsuite \
+    steghide \
+    radare2 \
+    hashcat \
+    binwalk \
+    wireshark \
+    gdb gdb-peda \
+    libimage-exiftool-perl \
+    ltrace \
+    gimp \
+    audacity
 
 USER kasm-user
+
+RUN git clone https://github.com/RsaCtfTool/RsaCtfTool.git && \
+    cd RsaCtfTool
+    pip3 install -r requirements.txt
+
+RUN python3 -m pip install --upgrade pwntools
+
+RUN gem install zsteg
+
+RUN wget http://www.caesum.com/handbook/Stegsolve.jar -O stegsolve/stegsolve.jar && \
+    chmod +x stegsolve/stegsolve.jar
+
+RUN git clone https://github.com/pwndbg/pwndbg && \
+    cd pwndbg && \
+    ./setup.sh
+RUN wget -O ~/.gdbinit-gef.py -q https://gef.blah.cat/py && \
+    echo source ~/.gdbinit-gef.py >> ~/.gdbinit
+
+RUN wget https://github.com/volatilityfoundation/volatility3/releases/download/v2.5.0/volatility3-2.5.0-py3-none-any.whl && \
+    pip install volatility3-2.5.0-py3-none-any.whl
 
 RUN wget https://github.com/icsharpcode/AvaloniaILSpy/releases/download/v7.2-rc/Linux.x64.Release.zip && \
     unzip Linux.x64.Release.zip && unzip ILSpy-linux-x64-Release.zip -d AvaloniaILSpy && \
     rm Linux.x64.Release.zip ILSpy-linux-x64-Release.zip
-
-RUN wget https://github.com/volatilityfoundation/volatility3/releases/download/v2.5.0/volatility3-2.5.0-py3-none-any.whl && \
-    pip install volatility3-2.5.0-py3-none-any.whl
 
 FROM base as linux-arm64
 
