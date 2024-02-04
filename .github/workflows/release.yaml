@@ -232,7 +232,7 @@ jobs:
           BUILDER_NODE_1_AUTH_TLS_KEY: ${{ secrets.BUILDKIT_ARM_KEY }}
 
       # for >15GB images, including layers
-      - if: ${{ matrix.target == "kasm-kali-rolling" }}
+      - if: ${{ matrix.target == 'kasm-kali-rolling' }}
         uses: easimon/maximize-build-space@master
         with:
           root-reserve-mb: 512
