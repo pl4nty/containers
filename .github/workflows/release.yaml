@@ -219,21 +219,27 @@ jobs:
           tags: |
             type=ref,event=pr
             type=raw,value=latest,enable={{is_default_branch}}
-      # can't use docker-container and remote drivers in the same builder
-      # - uses: docker/setup-buildx-action@v3.0.0
-      #   id: local
+
       - uses: docker/setup-buildx-action@v3.0.0
         with:
           driver: remote
-          endpoint: docker-container://buildkit # unix:///var/run/docker.sock
-          #platforms: linux/amd64,linux/amd64/v2,linux/amd64/v3,linux/amd64/v4,linux/386
-          # buildkitd-flags: --allow-insecure-entitlement security.insecure --allow-insecure-entitlement network.host
+          endpoint: docker-container://buildkit
           append: |
             - endpoint: tcp://buildkitd.tplant.com.au:1234
         env:
           BUILDER_NODE_1_AUTH_TLS_CACERT: ${{ secrets.BUILDKIT_ARM_CA }}
           BUILDER_NODE_1_AUTH_TLS_CERT: ${{ secrets.BUILDKIT_ARM_CERT }}
           BUILDER_NODE_1_AUTH_TLS_KEY: ${{ secrets.BUILDKIT_ARM_KEY }}
+
+      # for >15GB images, including layers
+      - if: ${{ matrix.target == "kasm-kali-rolling" }}
+        uses: easimon/maximize-build-space@master
+        with:
+          root-reserve-mb: 512
+          swap-size-mb: 1024
+          remove-dotnet: true
+          remove-android: true
+          remove-haskell: true
 
       - uses: docker/build-push-action@v5.1.0
         id: build
