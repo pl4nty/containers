@@ -60,9 +60,5 @@ RUN wget https://github.com/icsharpcode/AvaloniaILSpy/releases/download/v7.2-rc/
 
 FROM base as linux-arm64
 
-RUN wget https://github.com/icsharpcode/AvaloniaILSpy/releases/download/v7.2-rc/Linux.arm64.Release.zip && \
-    unzip Linux.arm64.Release.zip && unzip ILSpy-linux-arm64-Release.zip -d AvaloniaILSpy && \
-    rm Linux.arm64.Release.zip ILSpy-linux-arm64-Release.zip
-
 ARG TARGETOS TARGETARCH
 FROM ${TARGETOS}-${TARGETARCH}
