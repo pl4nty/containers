@@ -32,6 +32,8 @@ RUN --mount=type=cache,target=/var/cache/apt \
     gimp \
     audacity
 
+RUN gem install zsteg
+
 USER kasm-user
 
 RUN git clone https://github.com/RsaCtfTool/RsaCtfTool.git && \
@@ -39,8 +41,6 @@ RUN git clone https://github.com/RsaCtfTool/RsaCtfTool.git && \
     pip3 install -r requirements.txt
 
 RUN python3 -m pip install --upgrade pwntools
-
-RUN gem install zsteg
 
 RUN wget http://www.caesum.com/handbook/Stegsolve.jar -O stegsolve/stegsolve.jar && \
     chmod +x stegsolve/stegsolve.jar
