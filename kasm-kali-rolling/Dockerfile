@@ -42,8 +42,8 @@ RUN git clone https://github.com/RsaCtfTool/RsaCtfTool.git && \
 
 RUN python3 -m pip install --upgrade pwntools
 
-RUN wget http://www.caesum.com/handbook/Stegsolve.jar -O stegsolve/stegsolve.jar && \
-    chmod +x stegsolve/stegsolve.jar
+RUN wget http://www.caesum.com/handbook/Stegsolve.jar -O stegsolve.jar && \
+    chmod +x stegsolve.jar
 
 RUN git clone https://github.com/pwndbg/pwndbg && \
     cd pwndbg && \
