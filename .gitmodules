@@ -107,6 +107,3 @@
 [submodule "tls-rpt-monitor/tls-rpt-monitor"]
 	path = tls-rpt-monitor/tls-rpt-monitor
 	url = https://github.com/Neztore/tls-rpt-monitor
-[submodule "github-backup/github-backup"]
-	path = github-backup/github-backup
-	url = https://github.com/josegonzalez/python-github-backup

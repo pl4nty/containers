@@ -18,3 +18,12 @@ Unused images are archived in case someone else finds them useful. However, they
 ```bash
 git mv [name] archive/[name]
 ```
+
+## Delete
+
+Images may be deleted if an upstream image becomes available.
+
+```bash
+git rm -r [name]/[name]
+rm -r [name]
+```
