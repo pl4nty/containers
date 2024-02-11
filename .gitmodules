@@ -111,3 +111,6 @@
 	path = forgejo/forgejo
 	url = https://codeberg.org/forgejo/forgejo
 	branch = forgejo-f3
+[submodule "flares/flares"]
+	path = flares/flares
+	url = https://github.com/lfaoro/flares
