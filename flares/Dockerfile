@@ -1,10 +1,10 @@
-FROM --platform=$BUILDPLATFORM golang:alpine as builder
+FROM --platform=$BUILDPLATFORM golang:1.22-alpine as builder
 WORKDIR /build
 COPY . .
 RUN apk add --update git gcc
 ARG TARGETOS TARGETARCH
 RUN GOOS=$TARGETOS GOARCH=$TARGETARCH CGO_ENABLED=0 \
-  go install -mod vendor -gcflags "-N -l" ./cmd/flares
+  go install -gcflags "-N -l" ./cmd/flares
 
 FROM alpine:latest
 RUN apk add --update --no-cache \
