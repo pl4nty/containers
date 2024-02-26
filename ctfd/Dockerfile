@@ -8,7 +8,7 @@ RUN curl -L https://github.com/sigpwny/ctfd-discord-webhook-plugin/archive/c8fac
 # TODO implement users mode and fix any bugs with latest CTFd version
 # RUN curl -L https://github.com/pl4nty/CTFd_Split_Scoreboard/archive/master.tar.gz | tar xz -C /tmp/plugins
 
-FROM ghcr.io/ctfd/ctfd:3.6.1
+FROM ghcr.io/ctfd/ctfd:3.7.0
 
 COPY --from=plugins /tmp/plugins CTFd/plugins
 RUN for d in CTFd/plugins/*; do \
