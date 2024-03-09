@@ -114,6 +114,3 @@
 [submodule "flares/flares"]
 	path = flares/flares
 	url = https://github.com/lfaoro/flares
-[submodule "volsync/volsync"]
-	path = volsync/volsync
-	url = https://github.com/backube/volsync
