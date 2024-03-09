@@ -244,7 +244,7 @@ jobs:
           BUILDER_NODE_1_AUTH_TLS_CERT: ${{ secrets.BUILDKIT_ARM_CERT }}
           BUILDER_NODE_1_AUTH_TLS_KEY: ${{ secrets.BUILDKIT_ARM_KEY }}
 
-      - uses: docker/build-push-action@v5.1.0
+      - uses: docker/build-push-action@v5.2.0
         id: build
         with:
           context: ${{ steps.get-context.outputs.context || matrix.target }}
