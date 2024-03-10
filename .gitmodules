@@ -114,3 +114,7 @@
 [submodule "flares/flares"]
 	path = flares/flares
 	url = https://github.com/lfaoro/flares
+[submodule "external-mdns/external-mdns"]
+	path = external-mdns/external-mdns
+	url = https://github.com/iamasmith/external-mdns
+	branch = multi-hostnames-by-annotation
