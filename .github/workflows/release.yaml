@@ -213,13 +213,13 @@ jobs:
           cp !(${{ matrix.target }}) ${{ matrix.target }} -r
 
       # increase ratelimit
-      - uses: docker/login-action@v3.0.0
+      - uses: docker/login-action@v3.1.0
         with:
           registry: docker.io
           username: ${{ vars.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
-      - uses: docker/login-action@v3.0.0
+      - uses: docker/login-action@v3.1.0
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
