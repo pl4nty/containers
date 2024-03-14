@@ -233,10 +233,14 @@ jobs:
             type=ref,event=pr
             type=raw,value=latest,enable={{is_default_branch}}
 
+      - run: |
+          wget https://github.com/docker/buildx/releases/download/v0.13.1/buildx-v0.13.1.linux-amd64 -O /usr/libexec/docker/cli-plugins/docker-buildx
+          chmod +x /usr/libexec/docker/cli-plugins/docker-buildx
+
       - uses: docker/setup-buildx-action@v3.2.0
         with:
           driver: remote
-          endpoint: tcp://localhost:1234
+          endpoint: docker-container://buildkit
           append: |
             - endpoint: tcp://buildkitd.tplant.com.au:1234
         env:
