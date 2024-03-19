@@ -2,7 +2,7 @@ FROM mcr.microsoft.com/dotnet/sdk:8.0-nanoserver-ltsc2022 AS build
 WORKDIR /source
 
 # Copy files
-COPY . .
+COPY ./ ./
 RUN dotnet restore
 RUN dotnet build -c Release
 
