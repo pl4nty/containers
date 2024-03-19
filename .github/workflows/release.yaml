@@ -29,7 +29,6 @@ jobs:
     env:
       TARGETS_WINDOWS: |
         azure-ad-app-proxy/**
-        garnet/**
         universal-print-connector/**
     runs-on: ubuntu-latest
     permissions:
