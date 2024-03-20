@@ -22,9 +22,6 @@
 [submodule "excel2latex/excel2latex"]
 	path = excel2latex/excel2latex
 	url = https://github.com/pl4nty/excel2latex
-[submodule "codeworld/codeworld"]
-	path = archive/codeworld/codeworld/codeworld
-	url = https://github.com/google/codeworld
 [submodule "ataxx/ataxx"]
 	path = ataxx/ataxx
 	url = https://github.com/pl4nty/ataxx
@@ -37,72 +34,10 @@
 [submodule "anudegreeapp/anudegreeapp"]
 	path = anudegreeapp/anudegreeapp
 	url = https://github.com/pl4nty/anudegreeapp
-[submodule "caissuer-monitor/caissuer-monitor"]
-	path = archive/caissuer-monitor/caissuer-monitor/caissuer-monitor
-	url = https://github.com/crtsh/caissuer_monitor
-[submodule "crl-monitor/crl-monitor"]
-	path = archive/crl-monitor/crl-monitor/crl-monitor
-	url = https://github.com/crtsh/crl_monitor
-[submodule "ct-monitor/ct-monitor"]
-	path = archive/ct-monitor/ct-monitor/ct-monitor
-	url = https://github.com/crtsh/ct_monitor
-[submodule "crtsh-postgres/libx509pq"]
-	path = archive/crtsh-postgres/libx509pq
-	url = https://github.com/crtsh/libx509pq
-[submodule "crtsh-postgres/libzlintpq"]
-	path = archive/crtsh-postgres/libzlintpq
-	url = https://github.com/crtsh/libzlintpq
-[submodule "crtsh-postgres/certwatch_db"]
-	path = archive/crtsh-postgres/certwatch_db
-	url = https://github.com/crtsh/certwatch_db
-[submodule "crtsh-httpd/mod_certwatch"]
-	path = archive/crtsh-httpd/crtsh-httpd/mod_certwatch
-	url = https://github.com/crtsh/mod_certwatch
-[submodule "crtsh-httpd/mod_pgconn"]
-	path = archive/crtsh-httpd/crtsh-httpd/mod_pgconn
-	url = https://github.com/crtsh/mod_pgconn
-[submodule "crtsh-postgres/cert_validation_success_monitor"]
-	path = archive/crtsh-postgres/cert_validation_success_monitor
-	url = https://github.com/crtsh/cert_validation_success_monitor
-[submodule "ocsp-monitor/ocsp-monitor"]
-	path = archive/ocsp-monitor/ocsp-monitor
-	url = https://github.com/crtsh/ocsp_monitor
-[submodule "crtsh-postgres/libocsppq"]
-	path = archive/crtsh-postgres/libocsppq
-	url = https://github.com/crtsh/libocsppq
-[submodule "crtsh-postgres/libcablintpq"]
-	path = archive/crtsh-postgres/libcablintpq
-	url = https://github.com/crtsh/libcablintpq
-[submodule "crtsh-postgres/libx509lintpq"]
-	path = archive/crtsh-postgres/libx509lintpq
-	url = https://github.com/crtsh/libx509lintpq
-[submodule "crtsh-postgres/x509lint"]
-	path = archive/crtsh-postgres/x509lint
-	url = https://github.com/kroeckx/x509lint.git
-[submodule "crtsh-postgres/test_websites_monitor"]
-	path = archive/crtsh-postgres/test_websites_monitor
-	url = https://github.com/crtsh/test_websites_monitor
-[submodule "crtsh-postgres/crlset-tools"]
-	path = archive/crtsh-postgres/crlset-tools
-	url = https://github.com/agl/crlset-tools
-[submodule "crtsh-postgres/certlint"]
-	path = archive/crtsh-postgres/certlint
-	url = https://github.com/certlint/certlint
-	branch = v1.7.0
-[submodule "crtsh-httpd/asn1js"]
-	path = archive/crtsh-httpd/crtsh-httpd/asn1js
-	url = https://github.com/lapo-luchini/asn1js
 [submodule "otel-operator-autoinstrumentation-apache-httpd/opentelemetry-cpp-contrib"]
 	path = otel-operator-autoinstrumentation-apache-httpd/opentelemetry-cpp-contrib
 	url = https://github.com/open-telemetry/opentelemetry-cpp-contrib
 	branch = main
-[submodule "pev2/pev2"]
-	path = archive/pev2/pev2
-	url = https://github.com/dalibo/pev2
-	branch = v1.8.0
-[submodule "rhasspy3-addon/rhasspy3"]
-	path = archive/rhasspy3-addon/rhasspy3
-	url = https://github.com/rhasspy/rhasspy3
 [submodule "tls-rpt-monitor/tls-rpt-monitor"]
 	path = tls-rpt-monitor/tls-rpt-monitor
 	url = https://github.com/Neztore/tls-rpt-monitor
