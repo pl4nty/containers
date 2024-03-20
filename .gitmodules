@@ -118,5 +118,5 @@
 	url = https://github.com/iamasmith/external-mdns
 	branch = multi-hostnames-by-annotation
 [submodule "garnet/garnet"]
-	path = forgejo/forgejo
+	path = garnet/garnet
 	url = https://github.com/microsoft/garnet
