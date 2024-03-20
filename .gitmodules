@@ -118,6 +118,3 @@
 	path = external-mdns/external-mdns
 	url = https://github.com/iamasmith/external-mdns
 	branch = multi-hostnames-by-annotation
-[submodule "garnet/garnet"]
-	path = garnet/garnet
-	url = https://github.com/microsoft/garnet
