@@ -103,7 +103,6 @@
 [submodule "rhasspy3-addon/rhasspy3"]
 	path = archive/rhasspy3-addon/rhasspy3
 	url = https://github.com/rhasspy/rhasspy3
-
 [submodule "tls-rpt-monitor/tls-rpt-monitor"]
 	path = tls-rpt-monitor/tls-rpt-monitor
 	url = https://github.com/Neztore/tls-rpt-monitor
@@ -118,3 +117,6 @@
 	path = external-mdns/external-mdns
 	url = https://github.com/iamasmith/external-mdns
 	branch = multi-hostnames-by-annotation
+[submodule "garnet/garnet"]
+	path = forgejo/forgejo
+	url = https://github.com/microsoft/garnet
