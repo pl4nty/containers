@@ -1,175 +1,61 @@
-name: release
+name: Build
 
 on:
-  merge_group:
   push:
-    branches:
-      - main
-    paths-ignore:
-      - ".*/**"
-      - "archive/"
-  pull_request:
-    branches:
-      - main
-    paths-ignore:
-      - ".*/**"
-      - "archive/"
+    # branches:
+    #   - main
+    paths:
+      - '*/**'
+      - '!.*/**'
+      - "!archive/**"
+  # pull_request:
+  #   paths:
+  #     - '*/**'
+  #     - '!.*/**'
+  #     - "!archive/**"
+  merge_group:
   workflow_dispatch:
     inputs:
       targets:
         description: Target folder names as JSON array
         type: string
-      targets-windows:
-        description: Windows target folder names as JSON array
-        type: string
 
 jobs:
-  get-targets:
-    # changed-files filters aren't sufficient, and runtime filtering is expensive
-    env:
-      TARGETS_WINDOWS: |
-        azure-ad-app-proxy/**
-        universal-print-connector/**
+  targets:
     runs-on: ubuntu-latest
     permissions:
       contents: read
       pull-requests: read
     outputs:
-      linux: ${{ steps.targets.outputs.linux }}
-      windows: ${{ steps.targets.outputs.windows }}
+      targets: ${{ github.event_name == 'workflow_dispatch' && inputs.targets || steps.targets.outputs.all_modified_files }}
     steps:
     # fetch-depth may cause issues with multi-commit submodule changes
     - uses: actions/checkout@v4.1.1
-      if: ${{ github.event_name != 'pull_request' && github.event_name != 'workflow_dispatch' }}
       with:
         fetch-depth: 5
         submodules: true
         token: ${{ secrets.GH_PAT }} # private submodules
 
-    - name: Linux changes
+    - name: Find changed folders
       uses: tj-actions/changed-files@v43.0.0
-      if: ${{ github.event_name != 'workflow_dispatch' }}
-      id: changed-files
-      with:
-        skip_initial_fetch: true
-        dir_names: true # output folders instead of files
-        dir_names_max_depth: 1 # only return roots, not subfolders
-        dir_names_exclude_current_dir: true # exclude root files
-        files_ignore: |
-          ${{ env.TARGETS_WINDOWS }}
-        json: true # output in matrix JSON format
-
-    - name: Windows changes
-      uses: tj-actions/changed-files@v43.0.0
-      if: ${{ github.event_name != 'workflow_dispatch' }}
-      id: changed-files-windows
-      with:
-        skip_initial_fetch: true
-        dir_names: true # output folders instead of files
-        dir_names_max_depth: 1 # only return roots, not subfolders
-        dir_names_exclude_current_dir: true # exclude root files
-        files: |
-          ${{ env.TARGETS_WINDOWS }}
-        json: true # output in matrix JSON format
-
-    # direct output results in []
-    - name: Write output
       id: targets
-      run: |
-        echo "linux=${{ github.event_name == 'workflow_dispatch' && inputs.targets || steps.changed-files.outputs.all_changed_and_modified_files }}" >> $GITHUB_OUTPUT
-        echo "windows=${{ github.event_name == 'workflow_dispatch' && inputs.targets-windows || steps.changed-files-windows.outputs.all_changed_and_modified_files }}" >> $GITHUB_OUTPUT
-
-  build-windows:
-    needs: get-targets
-    if: ${{ needs.get-targets.outputs.windows && needs.get-targets.outputs.windows != '[]' }}
-    permissions:
-      packages: write # push images
-      id-token: write # OIDC artifact signing
-    strategy:
-      matrix:
-        target: ${{ fromJson(needs.get-targets.outputs.windows) }}
-    runs-on: windows-latest
-    steps:
-    - uses: actions/checkout@v4.1.1
       with:
-        # submodules: recursive # not needed yet, and some linux modules exceed path length limit
-        token: ${{ secrets.GH_PAT }} # private submodules
+        skip_initial_fetch: true
+        dir_names: true # output folders instead of files
+        dir_names_max_depth: 1 # only return roots, not subfolders
+        dir_names_exclude_current_dir: true # exclude root files
+        matrix: true
 
-    - name: Add patches to submodule
-      id: add-patches
-      working-directory: ${{ matrix.target }}
-      run: |
-        if (Test-Path ${{ matrix.target }}) {
-          cp * ${{ matrix.target }} -r  -ErrorAction SilentlyContinue
-          echo "context=${{ matrix.target }}/${{ matrix.target }}" >> $env:GITHUB_OUTPUT
-        }
-        
-    - uses: docker/metadata-action@v5.5.1
-      id: meta
-      with:
-        images: ghcr.io/${{ github.repository_owner }}/${{ matrix.target }}
-        sep-tags: ','
-        tags: |
-          type=ref,event=pr
-          type=raw,value=latest,enable={{is_default_branch}}
-
-    # errors if cache doesn't exist
-    # needs custom restore keys: jpribyl/action-docker-layer-caching#38
-    - uses: jpribyl/action-docker-layer-caching@v0.1.1
-      continue-on-error: true
-      with:
-        skip-save: github.event_name == 'pull_request'
-        concurrency: 10
-        key: docker-layer-cache-${{ matrix.target }}-windows-amd64-{hash}
-        restore-keys: |
-          docker-layer-cache-${{ matrix.target }}-windows-amd64-
-          layer-docker-layer-cache-${{ matrix.target }}-windows-amd64-
-
-    # newline-separated -> comma-separated
-    # quote values to allow spaces (eg repo description)
-    - name: Format tags and labels
-      id: format
-      run: |
-        "tags=${{ steps.meta.outputs.tags }}" -replace 'ghcr.io/${{ github.repository_owner }}/${{ matrix.target }}:', '' >> $env:GITHUB_OUTPUT
-        "labels=" + ("${{ steps.meta.outputs.labels }}" -replace '\n', '",' -replace '=', '="') >> $env:GITHUB_OUTPUT
-
-    - uses: mr-smithers-excellent/docker-build-push@v6.3
-      id: build-push
-      with:
-        registry: ghcr.io
-        username: ${{ github.actor }}
-        password: ${{ github.token }}
-        image: ${{ matrix.target }}
-        tags: ${{ steps.format.outputs.tags }}
-        labels: ${{ steps.format.outputs.labels }}"
-        directory: ${{ steps.add-patches.outputs.context || matrix.target }}
-        dockerfile: ${{ steps.add-patches.outputs.context || matrix.target }}\Dockerfile.windows
-
-    # refactor (see Git history) if multi-OS images are needed
-    # TODO tags@${{ steps.build-push.outputs.digest }} once implemented upstream
-    - uses: sigstore/cosign-installer@v3.4.0
-    - name: Sign manifests
-      run: |
-        "${{ steps.meta.outputs.tags }}" | % { cosign sign --yes $_ }
-
-  build:
-    needs: get-targets
-    if: ${{ needs.get-targets.outputs.linux && needs.get-targets.outputs.linux != '[]' }}
-    permissions:
-      packages: write # push images
-      id-token: write # OIDC artifact signing
-    continue-on-error: true # push tags even if some architectures fail
-    strategy:
-      fail-fast: false # allows visibility of multiarch support
-      matrix:
-        target: ${{ fromJson(needs.get-targets.outputs.linux) }} # TODO generate bakefile
+  main:
     runs-on: ubuntu-latest
-    services:
-      buildkit:
-        image: moby/buildkit
-        ports:
-        - 1234:1234
-        options: --name=buildkit --privileged
+    needs: targets
+    permissions:
+      packages: write # push images
+      id-token: write # OIDC artifact signing
+    strategy:
+      fail-fast: false # allows visibility of failing apps
+      matrix:
+        target: ${{ fromJson(needs.targets.outputs.targets) }} # TODO bakefile for cache sharing?
     steps:
       # for >15GB images, including layers
       - if: ${{ matrix.target == 'kasm-kali-rolling' }}
@@ -183,34 +69,38 @@ jobs:
           docker-images: false
           swap-storage: true
 
-      # required for builds with custom context
-      # https://stackoverflow.com/a/52269934
-      # can't use github.repositoryUrl - it uses git://, which seems to be blocked on Windows runners
-      - name: Checkout image folder
+      # manual checkout to only checkout target submodule
+      - name: Checkout
         run: |
-          rm -rf ./*
           git clone -n --depth=1 --filter=tree:0 ${{ github.server_url }}/${{ github.repository }} ./
           git sparse-checkout set --no-cone ${{ matrix.target }}
           git checkout ${{ github.sha }}
-
-      - name: Init submodule if present
-        id: get-context
-        continue-on-error: true # remove once Homebrew/homebrew-cask-fonts#7718 reaches GitHub's runners
-        # user.name and changing GITHUB_TOKEN doesn't work, since it defaults to SSH
-        run: |
           git config --global --add url."https://oauth2:${{ secrets.GH_PAT }}@github.com/".insteadOf https://github.com/
           git submodule update --init --recursive ${{ matrix.target }}
-          if [ -d "${{ matrix.target }}/${{ matrix.target }}" ]; then
-            echo "context=${{ matrix.target }}/${{ matrix.target }}" >> $GITHUB_OUTPUT
-          fi
 
-      - name: Add patches to submodule
-        if: ${{ steps.get-context.outputs.context }}
-        continue-on-error: true
+      - name: Add any patches to submodule
+        id: context
         working-directory: ${{ matrix.target }}
         run: |
-          shopt -s extglob dotglob
-          cp !(${{ matrix.target }}) ${{ matrix.target }} -r
+          shopt -s extglob
+          if [ -d "${{ matrix.target }}" ]; then
+            cp !(${{ matrix.target }}) ${{ matrix.target }} -r
+            echo "context=${{ matrix.target }}/${{ matrix.target }}" >> $GITHUB_OUTPUT
+          fi
+          if [ -f "Dockerfile.windows" ]; then
+            echo "file=Dockerfile.windows" >> $GITHUB_OUTPUT
+          fi
+        # run: |
+        #   if (Test-Path "${{ matrix.target }}") {
+        #     cp * ${{ matrix.target }} -r  -ErrorAction SilentlyContinue
+        #     echo "context=${{ matrix.target }}/${{ matrix.target }}" >> $env:GITHUB_OUTPUT
+        #   }
+
+      - uses: docker/login-action@v3.1.0
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ github.token }}
 
       # increase ratelimit
       - uses: docker/login-action@v3.1.0
@@ -219,24 +109,72 @@ jobs:
           username: ${{ vars.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
-      - uses: docker/login-action@v3.1.0
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ github.token }}
-
       - uses: docker/metadata-action@v5.5.1
         id: meta
         with:
           images: ghcr.io/${{ github.repository_owner }}/${{ matrix.target }}
           tags: |
+            type=ref,event=branch
             type=ref,event=pr
             type=raw,value=latest,enable={{is_default_branch}}
 
-      - run: |
-          sudo wget https://github.com/docker/buildx/releases/download/v0.13.1/buildx-v0.13.1.linux-amd64 -O /usr/libexec/docker/cli-plugins/docker-buildx
-          sudo chmod +x /usr/libexec/docker/cli-plugins/docker-buildx
+      # - name: Setup containerd
+      #   run: |
+      #     $Version="1.7.14" # update to your preferred version
+      #     curl.exe -L https://github.com/containerd/containerd/releases/download/v$Version/containerd-$Version-windows-amd64.tar.gz -o containerd-windows-amd64.tar.gz
+      #     tar.exe xvf .\containerd-windows-amd64.tar.gz
 
+      #     .\bin\containerd.exe config default | Out-File .\bin\config.toml -Encoding ascii
+      #     .\bin\containerd.exe --register-service
+      #     Start-Service containerd
+
+      # - name: Setup BuildKit
+      #   run: |
+      #     $version = "v0.13.1" # specify the release version, v0.13+
+      #     $arch = "amd64" # arm64 binary available too
+      #     curl.exe -LO https://github.com/moby/buildkit/releases/download/$version/buildkit-$version.windows-$arch.tar.gz
+      #     tar.exe xvf .\buildkit-$version.windows-$arch.tar.gz
+          
+      #     .\bin\buildkitd.exe --register-service --debug --containerd-worker=true --service-name buildkitd
+      #     Start-Service buildkitd
+
+      # - name: Setup Docker Buildx
+      #   run: |
+      #     $version = "v0.13.1" # specify the release version, v0.13+
+      #     $arch = "amd64" # arm64 binary available too
+      #     curl.exe -LO https://github.com/docker/buildx/releases/download/$version/buildx-$version.windows-$arch.exe
+      #     mv .\buildx-$version.windows-$arch.exe $env:ProgramData\Docker\cli-plugins\docker-buildx.exe
+
+      # - name: Setup builders
+      #   run: |
+      #     $arch = "amd64"
+      #     curl.exe -LO https://github.com/pl4nty/containers/releases/download/nsc/nsc_0.0.351_windows_$arch.exe
+      #     mv .\nsc_0.0.351_windows_$arch.exe nsc.exe
+
+      #     .\nsc.exe auth exchange-github-token --ensure=5m
+      #     .\nsc.exe docker buildx setup --background --use --create_at_startup
+      #     docker buildx create --append --name nsc-remote npipe:////./pipe/buildkitd
+
+      # - uses: docker/setup-buildx-action@v3.2.0
+      #   with:
+      #     driver: remote
+      #     endpoint: tcp://buildkitd-amd.tplant.com.au:1234
+      #     append: |
+      #       - endpoint: tcp://buildkitd.tplant.com.au:1234
+      #     # - endpoint: npipe:////./pipe/buildkitd
+      #   env:
+      #     BUILDER_NODE_0_AUTH_TLS_CACERT: ${{ secrets.BUILDKIT_AMD_CA }}
+      #     BUILDER_NODE_0_AUTH_TLS_CERT: ${{ secrets.BUILDKIT_AMD_CERT }}
+      #     BUILDER_NODE_0_AUTH_TLS_KEY: ${{ secrets.BUILDKIT_AMD_KEY }}
+      #     BUILDER_NODE_1_AUTH_TLS_CACERT: ${{ secrets.BUILDKIT_ARM_CA }}
+      #     BUILDER_NODE_1_AUTH_TLS_CERT: ${{ secrets.BUILDKIT_ARM_CERT }}
+      #     BUILDER_NODE_1_AUTH_TLS_KEY: ${{ secrets.BUILDKIT_ARM_KEY }}
+
+      # - uses: namespacelabs/nscloud-setup@v0
+      # - uses: namespacelabs/nscloud-setup-buildx-action@v0
+
+      - name: Setup BuildKit container
+        run: docker run --privileged --rm -d --name buildkit -p 1234:1234 --security-opt seccomp=unconfined --security-opt apparmor=unconfined moby/buildkit:v0.13.1
       - uses: docker/setup-buildx-action@v3.2.0
         with:
           driver: remote
@@ -251,14 +189,15 @@ jobs:
       - uses: docker/build-push-action@v5.3.0
         id: build
         with:
-          context: ${{ steps.get-context.outputs.context || matrix.target }}
+          context: ${{ steps.context.outputs.context || matrix.target }}
+          file: ${{ steps.context.outputs.context || matrix.target }}/${{ steps.context.outputs.file || 'Dockerfile' }}
           push: true
+          platforms: linux/amd64, linux/arm64${{ steps.context.outputs.file && ', windows/amd64' || '' }}
+          cache-from: 'type=gha'
+          cache-to: ${{ github.event_name != 'pull_request' && 'type=gha,mode=max' || '' }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           annotations: ${{ steps.meta.outputs.annotations }}
-          platforms: linux/amd64, linux/arm64
-          cache-from: 'type=gha'
-          cache-to: ${{ github.event_name != 'pull_request' && 'type=gha,mode=max' || '' }}
 
       - uses: sigstore/cosign-installer@v3.4.0
       - name: Sign image manifest
