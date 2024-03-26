@@ -84,7 +84,7 @@ jobs:
         run: |
           shopt -s extglob
           if [ -d "${{ matrix.target }}" ]; then
-            cp !(${{ matrix.target }}) ${{ matrix.target }} -r 2>/dev/null
+            cp !(${{ matrix.target }}) ${{ matrix.target }} -r || true
             echo "context=${{ matrix.target }}/${{ matrix.target }}" >> $GITHUB_OUTPUT
           fi
           if [ -f "Dockerfile.windows" ]; then
