@@ -1,4 +1,4 @@
-FROM node:21.7.1 AS build-env
+FROM node:21.7.2 AS build-env
 WORKDIR /app
 
 COPY package*.json ./
