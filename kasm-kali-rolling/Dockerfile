@@ -33,6 +33,9 @@ RUN --mount=type=cache,target=/var/cache/apt \
     audacity \
     qsstv
 
+RUN wget https://github.com/pwndbg/pwndbg/releases/download/2024.02.14/pwndbg_2024.02.14_amd64.deb && \
+    apt-get install -y pwndbg_2024.02.14_amd64.deb
+
 RUN gem install zsteg
 
 USER kasm-user
@@ -45,9 +48,6 @@ RUN python3 -m pip install --upgrade pwntools
 
 RUN wget http://www.caesum.com/handbook/Stegsolve.jar -O stegsolve.jar && \
     chmod +x stegsolve.jar
-
-RUN wget https://github.com/pwndbg/pwndbg/releases/download/2024.02.14/pwndbg_2024.02.14_amd64.deb && \
-    apt-get install -y pwndbg_2024.02.14_amd64.deb
 
 RUN wget https://github.com/volatilityfoundation/volatility3/releases/download/v2.5.0/volatility3-2.5.0-py3-none-any.whl && \
     pip install volatility3-2.5.0-py3-none-any.whl
