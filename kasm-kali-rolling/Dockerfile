@@ -30,7 +30,8 @@ RUN --mount=type=cache,target=/var/cache/apt \
     libimage-exiftool-perl \
     ltrace \
     gimp \
-    audacity
+    audacity \
+    qsstv
 
 RUN gem install zsteg
 
