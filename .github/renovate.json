@@ -23,7 +23,12 @@
     },
     {
       "matchManagers": ["git-submodules"],
-      "matchPackagePrefixes": ["https://github.com/pl4nty/", "https://github.com/stephenegriffin/MHA"],
+      "matchPackagePrefixes": [
+        "https://github.com/pl4nty/",
+        "https://github.com/stephenegriffin/MHA",
+        "https://github.com/microsoft/garnet",
+        "https://github.com/open-telemetry/opentelemetry-cpp-contrib"
+      ],
       "automerge": true
     },
     {
