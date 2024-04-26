@@ -41,10 +41,6 @@
 [submodule "tls-rpt-monitor/tls-rpt-monitor"]
 	path = tls-rpt-monitor/tls-rpt-monitor
 	url = https://github.com/Neztore/tls-rpt-monitor
-[submodule "forgejo/forgejo"]
-	path = forgejo/forgejo
-	url = https://codeberg.org/forgejo/forgejo
-	branch = forgejo-f3
 [submodule "flares/flares"]
 	path = flares/flares
 	url = https://github.com/lfaoro/flares
