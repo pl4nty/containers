@@ -1,4 +1,4 @@
-# syntax=pl4nty/dockerfile:master
+# syntax=ghcr.io/pl4nty/dockerfile:master
 ARG FLAG=${TARGETOS#linux}
 ARG TAG=8.0${FLAG:+-nanoserver-ltsc2022}
 FROM --platform=$BUILDPLATFORM mcr.microsoft.com/dotnet/sdk:8.0 AS build
