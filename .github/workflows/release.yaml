@@ -96,6 +96,9 @@ jobs:
             cp * ${{ matrix.target }} -r  -ErrorAction SilentlyContinue
             echo "context=${{ matrix.target }}/${{ matrix.target }}" >> $env:GITHUB_OUTPUT
           }
+          if (Test-Path "Dockerfile.windows") {
+            echo "file=Dockerfile.windows" >> $env:GITHUB_OUTPUT
+          }
 
       - uses: docker/login-action@v3.1.0
         with:
