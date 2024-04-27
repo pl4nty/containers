@@ -1,9 +1,12 @@
-FROM ubuntu:22.04
+FROM ubuntu:24.04
 
-RUN apt-get update 
-RUN apt-get -y install openssh-server iputils-ping traceroute iproute2
+RUN --mount=type=cache,target=/var/cache/apt \
+    apt-get update && apt-get install -y --no-install-recommends \
+    openssh-server \
+    iputils-ping \
+    traceroute \
+    iproute2
 
-RUN useradd -rm -d /home/ubuntu -s /bin/bash -g root -G sudo -u 1001 ubuntu -p "$(openssl passwd -6 ubuntu)"
 RUN service ssh restart
 
 USER ubuntu
