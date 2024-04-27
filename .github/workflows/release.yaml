@@ -48,7 +48,7 @@ jobs:
         fetch_additional_submodule_history: true
 
   main:
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
     needs: targets
     permissions:
       packages: write # push images
@@ -82,20 +82,23 @@ jobs:
       - name: Add any patches to submodule
         id: context
         working-directory: ${{ matrix.target }}
-        run: |
-          shopt -s extglob
-          if [ -d "${{ matrix.target }}" ]; then
-            cp !(${{ matrix.target }}) ${{ matrix.target }} -r || true
-            echo "context=${{ matrix.target }}/${{ matrix.target }}" >> $GITHUB_OUTPUT
-          fi
-          if [ -f "Dockerfile.windows" ]; then
-            echo "file=Dockerfile.windows" >> $GITHUB_OUTPUT
-          fi
         # run: |
-        #   if (Test-Path "${{ matrix.target }}") {
-        #     cp * ${{ matrix.target }} -r  -ErrorAction SilentlyContinue
-        #     echo "context=${{ matrix.target }}/${{ matrix.target }}" >> $env:GITHUB_OUTPUT
-        #   }
+        #   shopt -s extglob
+        #   if [ -d "${{ matrix.target }}" ]; then
+        #     cp !(${{ matrix.target }}) ${{ matrix.target }} -r || true
+        #     echo "context=${{ matrix.target }}/${{ matrix.target }}" >> $GITHUB_OUTPUT
+        #   fi
+        #   if [ -f "Dockerfile.windows" ]; then
+        #     echo "file=Dockerfile.windows" >> $GITHUB_OUTPUT
+        #   fi
+        run: |
+          if (Test-Path "${{ matrix.target }}") {
+            cp * ${{ matrix.target }} -r  -ErrorAction SilentlyContinue
+            echo "context=${{ matrix.target }}/${{ matrix.target }}" >> $env:GITHUB_OUTPUT
+          }
+          if (Test-Path "PLATFORMS") {
+            echo "platforms=$(cat PLATFORMS)" >> $env:GITHUB_OUTPUT
+          }
 
       - uses: docker/login-action@v3.1.0
         with:
@@ -119,42 +122,37 @@ jobs:
             type=ref,event=pr
             type=raw,value=latest,enable={{is_default_branch}}
 
-      # - name: Setup containerd
-      #   run: |
-      #     $Version="1.7.14" # update to your preferred version
-      #     curl.exe -L https://github.com/containerd/containerd/releases/download/v$Version/containerd-$Version-windows-amd64.tar.gz -o containerd-windows-amd64.tar.gz
-      #     tar.exe xvf .\containerd-windows-amd64.tar.gz
+      - name: Setup containerd
+        run: |
+          $version = "1.7.14"
+          curl.exe -L https://github.com/containerd/containerd/releases/download/v$version/containerd-$version-windows-amd64.tar.gz -o containerd.tar.gz
+          tar.exe xvf containerd.tar.gz
 
-      #     .\bin\containerd.exe config default | Out-File .\bin\config.toml -Encoding ascii
-      #     .\bin\containerd.exe --register-service
-      #     Start-Service containerd
+          .\bin\containerd.exe --register-service
+          Start-Service containerd
 
-      # - name: Setup BuildKit
-      #   run: |
-      #     $version = "v0.13.1" # specify the release version, v0.13+
-      #     $arch = "amd64" # arm64 binary available too
-      #     curl.exe -LO https://github.com/moby/buildkit/releases/download/$version/buildkit-$version.windows-$arch.tar.gz
-      #     tar.exe xvf .\buildkit-$version.windows-$arch.tar.gz
+      - name: Setup BuildKit
+        run: |
+          $version = "v0.13.2"
+          curl.exe -L https://github.com/moby/buildkit/releases/download/$version/buildkit-$version.windows-amd64.tar.gz -o buildkit.tar.gz
+          tar.exe xvf buildkit.tar.gz
           
-      #     .\bin\buildkitd.exe --register-service --debug --containerd-worker=true --service-name buildkitd
-      #     Start-Service buildkitd
+          .\bin\buildkitd.exe --register-service
+          Start-Service buildkitd
 
-      # - name: Setup Docker Buildx
-      #   run: |
-      #     $version = "v0.13.1" # specify the release version, v0.13+
-      #     $arch = "amd64" # arm64 binary available too
-      #     curl.exe -LO https://github.com/docker/buildx/releases/download/$version/buildx-$version.windows-$arch.exe
-      #     mv .\buildx-$version.windows-$arch.exe $env:ProgramData\Docker\cli-plugins\docker-buildx.exe
+      - name: Setup Docker Buildx
+        run: |
+          $version = "v0.14.0"
+          curl.exe -L https://github.com/docker/buildx/releases/download/$version/buildx-$version.windows-amd64.exe -o $env:ProgramData\Docker\cli-plugins\docker-buildx.exe
 
-      # - name: Setup builders
-      #   run: |
-      #     $arch = "amd64"
-      #     curl.exe -LO https://github.com/pl4nty/containers/releases/download/nsc/nsc_0.0.351_windows_$arch.exe
-      #     mv .\nsc_0.0.351_windows_$arch.exe nsc.exe
+      - name: Setup builders
+        run: |
+          $version = "0.0.361-089b6dd"
+          curl.exe -L https://github.com/pl4nty/containers/releases/download/nsc/nsc_${version}_windows_amd64.tar.gz -o nsc.tar.gz
+          tar.exe xvf nsc.tar.gz
 
-      #     .\nsc.exe auth exchange-github-token --ensure=5m
-      #     .\nsc.exe docker buildx setup --background --use --create_at_startup
-      #     docker buildx create --append --name nsc-remote npipe:////./pipe/buildkitd
+          .\nsc.exe auth exchange-github-token --ensure=5m
+          .\nsc.exe docker buildx setup --name nsc-remote --use --background
 
       # - uses: docker/setup-buildx-action@v3.2.0
       #   with:
@@ -173,27 +171,34 @@ jobs:
 
       # - uses: namespacelabs/nscloud-setup@v0
       # - uses: namespacelabs/nscloud-setup-buildx-action@v0
-
-      - name: Setup BuildKit container
-        run: docker run --privileged --rm -d --name buildkit -p 1234:1234 --security-opt seccomp=unconfined --security-opt apparmor=unconfined moby/buildkit:v0.13.1
-      - uses: docker/setup-buildx-action@v3.3.0
-        with:
-          driver: remote
-          endpoint: docker-container://buildkit
-          append: |
-            - endpoint: tcp://buildkitd.tplant.com.au:1234
-        env:
-          BUILDER_NODE_1_AUTH_TLS_CACERT: ${{ secrets.BUILDKIT_ARM_CA }}
-          BUILDER_NODE_1_AUTH_TLS_CERT: ${{ secrets.BUILDKIT_ARM_CERT }}
-          BUILDER_NODE_1_AUTH_TLS_KEY: ${{ secrets.BUILDKIT_ARM_KEY }}
+      # - name: Setup BuildKit container
+      #   run: |
+      #     docker run --privileged --rm -d --name buildkit -p 1234:1234 --security-opt seccomp=unconfined --security-opt apparmor=unconfined moby/buildkit:v0.13.2
+      #     docker buildx create --append --name nsc-remote --bootstrap --use docker-container://buildkit
 
       - uses: docker/build-push-action@v5.3.0
         id: build
+        continue-on-error: ${{ contains(steps.context.outputs.platforms, 'windows') }}
         with:
           context: ${{ steps.context.outputs.context || matrix.target }}
-          file: ${{ steps.context.outputs.context || matrix.target }}/${{ steps.context.outputs.file || 'Dockerfile' }}
+          file: ${{ steps.context.outputs.context || matrix.target }}/Dockerfile
           push: true
-          platforms: linux/amd64, linux/arm64${{ steps.context.outputs.file && ', windows/amd64' || '' }}
+          platforms: ${{ steps.context.outputs.platforms || 'linux/amd64, linux/arm64' }}
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          annotations: ${{ steps.meta.outputs.annotations }}
+
+      # Windows BuildKit still has a lot of bugs, so we only attempt it if cross-compiled build fails
+      - if: steps.build.outcome == 'failure'
+        run: docker buildx create --append --name nsc-remote npipe:////./pipe/buildkitd --bootstrap
+      - uses: docker/build-push-action@v5.3.0
+        id: build1
+        if: steps.build.outcome == 'failure'
+        with:
+          context: ${{ steps.context.outputs.context || matrix.target }}
+          file: ${{ steps.context.outputs.context || matrix.target }}/Dockerfile
+          push: true
+          platforms: ${{ steps.context.outputs.platforms || 'linux/amd64, linux/arm64' }}
           cache-from: 'type=gha'
           cache-to: ${{ github.event_name != 'pull_request' && 'type=gha,mode=max' || '' }}
           tags: ${{ steps.meta.outputs.tags }}
@@ -202,7 +207,7 @@ jobs:
 
       - uses: sigstore/cosign-installer@v3.5.0
       - name: Sign image manifest
-        run: cosign sign --yes "ghcr.io/${{ github.repository_owner }}/${{ matrix.target }}@${{ steps.build.outputs.digest }}"
+        run: cosign sign --yes "ghcr.io/${{ github.repository_owner }}/${{ matrix.target }}@${{ steps.build.outputs.digest || steps.build1.outputs.digest }}"
 
       - uses: snok/container-retention-policy@v2
         with:
