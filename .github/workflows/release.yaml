@@ -150,7 +150,7 @@ jobs:
           mv .\nsc_0.0.351_windows_$arch.exe nsc.exe
 
           .\nsc.exe auth exchange-github-token --ensure=5m
-          .\nsc.exe docker buildx setup --background --use
+          .\nsc.exe docker buildx setup --background --use --use_grpc_proxy
           docker buildx create --append --name nsc-remote --bootstrap --use npipe:////./pipe/buildkitd
 
       # - uses: docker/setup-buildx-action@v3.2.0
