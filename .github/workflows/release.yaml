@@ -73,6 +73,7 @@ jobs:
       # manual checkout to only checkout target submodule
       - name: Checkout
         run: |
+          git config --system core.longpaths true
           git clone -n --depth=1 --filter=tree:0 ${{ github.server_url }}/${{ github.repository }} ./
           git sparse-checkout set --no-cone ${{ matrix.target }}
           git checkout ${{ github.sha }}
