@@ -145,7 +145,7 @@ jobs:
       - name: Setup builders
         run: |
           $version = "0.0.361-089b6dd"
-          curl.exe -L https://github.com/pl4nty/containers/releases/download/nsc/$version_windows_amd64.tar.gz -o nsc.tar.gz
+          curl.exe -L https://github.com/pl4nty/containers/releases/download/nsc/nsc_${version}_windows_amd64.tar.gz -o nsc.tar.gz
           tar.exe xvf nsc.tar.gz
 
           .\nsc.exe auth exchange-github-token --ensure=5m
