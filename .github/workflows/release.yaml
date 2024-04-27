@@ -208,12 +208,3 @@ jobs:
       - uses: sigstore/cosign-installer@v3.5.0
       - name: Sign image manifest
         run: cosign sign --yes "ghcr.io/${{ github.repository_owner }}/${{ matrix.target }}@${{ steps.build.outputs.digest || steps.build1.outputs.digest }}"
-
-      - uses: snok/container-retention-policy@v2
-        with:
-          account-type: personal
-          token: ${{ secrets.GH_PAT_DELETE_PACKAGES }}
-          image-names: ${{ matrix.target }}
-          cut-off: One month ago UTC # 1 month to resolve any crashlooping images
-          keep-at-least: 6 # keep at least 2 previous versions
-          skip-tags: latest, linux-*, windows-*, pr-*
