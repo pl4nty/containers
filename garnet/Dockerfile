@@ -27,7 +27,7 @@ COPY metrics/ metrics/
 COPY test/testcerts test/testcerts
 
 WORKDIR /src/main/GarnetServer
-RUN dotnet build -c RELEASE
+RUN dotnet build -c Release
 
 ARG TARGETOS TARGETARCH
 ARG RELEASE=${TARGETOS/windows/win}-$TARGETARCH
@@ -35,7 +35,7 @@ RUN dotnet publish -r $RELEASE -c Release -o /app --self-contained false -f net8
 RUN mv /app/GarnetServer.exe /app/GarnetServer || exit 0
 
 # Final stage/image
-FROM mcr.microsoft.com/dotnet/runtime:${TAG}
+FROM mcr.microsoft.com/dotnet/runtime:${TAG} AS runtime
 WORKDIR /app
 COPY --from=build /app .
 
