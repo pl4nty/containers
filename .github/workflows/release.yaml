@@ -30,7 +30,7 @@ jobs:
       targets: ${{ github.event_name == 'workflow_dispatch' && inputs.targets || steps.targets.outputs.all_modified_files }}
     steps:
     # fetch-depth may cause issues with multi-commit submodule changes
-    - uses: actions/checkout@v4.1.5
+    - uses: actions/checkout@v4.1.6
       with:
         fetch-depth: 5
         submodules: true
