@@ -1,4 +1,4 @@
-FROM alpine/git:2.45.1 AS build
+FROM alpine/git:2.45.2 AS build
 WORKDIR /app
 
 RUN git clone -b gh-pages https://github.com/chunliu/vnet-capacity-planner
