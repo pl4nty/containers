@@ -1,4 +1,4 @@
-# syntax=docker/dockerfile:1.8
+# syntax=docker/dockerfile:1.9
 ARG FLAG=${TARGETOS#linux}
 ARG TAG=8.0${FLAG:+-nanoserver-ltsc2022}
 FROM --platform=$BUILDPLATFORM mcr.microsoft.com/dotnet/sdk:8.0 AS build
