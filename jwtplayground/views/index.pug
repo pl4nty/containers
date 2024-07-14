@@ -171,15 +171,19 @@ block content
     };
     var issuingProvider = {
       Unknown: 'unknown',
-      AADV1:       AADV2:       MSA: 'msa',
+      AADV1: 'aadv1',
+      AADV2: 'aadv2',
+      MSA: 'msa',
       B2C: 'b2c',
       IEF: 'ief',
       Google: 'google'
     }
     var issuingProviderDescriptions =
     {
-      'This is a <a href="https://docs.microsoft.com/en-us/azure/active-directory/develop/active-directory-token-and-claims">Microsoft Entra v1.0</a> token.',
-      'This is a <a href="https://docs.microsoft.com/en-us/azure/active-directory/develop/active-directory-v2-tokens">Microsoft Entra v2.0</a> token.',
+      'aadv1':
+        'This is a <a href="https://docs.microsoft.com/en-us/azure/active-directory/develop/active-directory-token-and-claims">Microsoft Entra v1.0</a> token.',
+      'aadv2':
+        'This is a <a href="https://docs.microsoft.com/en-us/azure/active-directory/develop/active-directory-v2-tokens">Microsoft Entra v2.0</a> token.',
       'msa': 'This is a Microsoft Account (MSA) token.',
       'b2c':
         'This is a <a href="https://docs.microsoft.com/en-us/azure/active-directory-b2c/active-directory-b2c-reference-tokens">Microsoft Azure AD B2C</a> token.',
@@ -328,7 +332,7 @@ block content
       var description = window.descriptions[key];
       if (!description) {
         // try aadv2 if v1, b2c or msa aren't found, since it's better-documented
-        if (issuingProvider in ['aadv1', 'b2c', 'msa'])
+        if (['aadv1', 'b2c', 'msa'].includes(issuingProvider)) {
           description = window.descriptions['aadv2_' + claimType];
         } else {
           description = window.descriptions[claimType];
