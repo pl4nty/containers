@@ -81,7 +81,7 @@ block content
       "aadv2_rh": "An internal claim used by Azure to revalidate tokens. Resources shouldn't use this claim.",
       "aadv2_ver": "Indicates the version of the access token.",
       "aadv2_xms_cc": "Indicates whether the client application that acquired the token is capable of handling claims challenges. It's often used along with claim acrs. This claim is commonly used in Conditional Access and Continuous Access Evaluation scenarios. The resource server or service application that the token is issued for controls the presence of this claim in a token. A value of cp1 in the access token is the authoritative way to identify that a client application is capable of handling a claims challenge.",
-      
+
       // https://learn.microsoft.com/en-us/entra/identity-platform/optional-claims-reference
       "aadv2_acct": "Users account status in tenant. If the user is a member of the tenant, the value is 0. If they're a guest, the value is 1.",
       "aadv2_acrs": "Auth Context IDs. Indicates the Auth Context IDs of the operations that the bearer is eligible to perform. Auth Context IDs can be used to trigger a demand for step-up authentication from within your application and services. Often used along with the xms_cc claim.",
@@ -115,7 +115,7 @@ block content
       "aadv2_upn": "User Principal Name. An identifier for the user that can be used with the username_hint parameter. Not a durable identifier for the user and shouldn't be used for authorization or to uniquely identity user information (for example, as a database key). For more information, see Secure applications and APIs by validating claims. Instead, use the user object ID (oid) as a database key. Users signing in with an alternate login ID shouldn't be shown their User Principal Name (UPN). Instead, use the following preferred_username claim for displaying sign-in state to the user. Requires the profile scope.",
       "aadv1_aud": "Audience. Always present in JWTs, but in v1 access tokens it can be emitted in various ways - any appID URI, with or without a trailing slash, and the client ID of the resource. This randomization can be hard to code against when performing token validation. Use additionalProperties for this claim to ensure it's always set to the resource's client ID in v1 access tokens.",
       "aadv1_preferred_username": "Preferred Username. Provides the preferred username claim within v1 tokens. This claim makes it easier for apps to provide username hints and show human readable display names, regardless of their token type. It's recommended that you use this optional claim instead of using, upn or unique_name.",
-      
+
       // https://learn.microsoft.com/en-us/azure/active-directory-b2c/tokens-overview
       "b2c_aud": "Audience. Identifies the intended recipient of the token. For Azure AD B2C, the audience is the application ID. Your application should validate this value and reject the token if it doesn't match. Audience is synonymous with resource.",
       "b2c_iss": "Issuer. Identifies the security token service (STS) that constructs and returns the token. It also identifies the directory in which the user was authenticated. Your application should validate the issuer claim to make sure that the token came from the appropriate endpoint.",
@@ -131,7 +131,7 @@ block content
       "b2c_tfp": "Trust framework policy. The name of the policy that was used to acquire the ID token.",
       "b2c_auth_time": "Authentication time. The time at which a user last entered credentials, represented in epoch time. There's no discrimination between that authentication being a fresh sign-in, a single sign-on (SSO) session, or another sign-in type. The auth_time is the last time the application (or user) initiated an authentication attempt against Azure AD B2C. The method used to authenticate isn't differentiated.",
       "b2c_scp": "Scope. The permissions granted to the resource for an access token. Multiple granted permissions are separated by a space.",
-      "b2c_azp": "Authorized Party. The application ID of the client application that initiated the request."
+      "b2c_azp": "Authorized Party. The application ID of the client application that initiated the request.",
 
       'b2c_streetAddress': 'The street address where the user is located.',
       'b2c_country': 'The country in which the user is located.',
@@ -167,7 +167,7 @@ block content
       'sub': 'The "sub" (subject) claim identifies the principal that is the subject of the JWT. The claims in a JWT are normally statements about the subject. The subject value MUST either be scoped to be locally unique in the context of the issuer or be globally unique. The processing of this claim is generally application specific. The "sub" value is a case-sensitive string containing a StringOrURI value. (<a href="https://tools.ietf.org/html/rfc7519">RFC 7519</a>)',
       'auth_time': 'The time at which the user authorized. (<a href="https://tools.ietf.org/html/rfc7519">RFC 7519</a>)',
       'at_hash': 'The access token hash is included in ID tokens when the ID token is issued with an OAuth 2.0 access token. It can be used to validate the authenticity of an access token. See the <a href="http://openid.net/specs/openid-connect-core-1_0.html">OpenID Connect specification</a> for more details on how to perform this validation.',
-      'c_hash': 'The code hash is included in ID tokens only when the ID token is issued with an OAuth 2.0 authorization code. It can be used to validate the authenticity of an authorization code. See the <a href="http://openid.net/specs/openid-connect-core-1_0.html">OpenID Connect specification</a> for more details on how to perform this validation.',
+      'c_hash': 'The code hash is included in ID tokens only when the ID token is issued with an OAuth 2.0 authorization code. It can be used to validate the authenticity of an authorization code. See the <a href="http://openid.net/specs/openid-connect-core-1_0.html">OpenID Connect specification</a> for more details on how to perform this validation.'
     };
     var issuingProvider = {
       Unknown: 'unknown',
