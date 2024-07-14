@@ -3,7 +3,7 @@
 	url = https://github.com/jsonwebtoken/jsonwebtoken.github.io
 [submodule "jwtplayground/jwtplayground"]
 	path = jwtplayground/jwtplayground
-	url = https://github.com/pl4nty/JWTPlayground
+	url = https://github.com/maliksahil/JWTPlayground
 [submodule "mha/mha"]
 	path = mha/mha
 	url = https://github.com/stephenegriffin/MHA
