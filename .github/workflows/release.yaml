@@ -2,18 +2,10 @@ name: Build
 
 on:
   push:
-    # branches:
-    #   - main
     paths:
       - '*/**'
       - '!.github/**'
-      - "!archive/**"
-  # pull_request:
-  #   paths:
-  #     - '*/**'
-  #     - '!.*/**'
-  #     - "!archive/**"
-  merge_group:
+      - '!archive/**'
   workflow_dispatch:
     inputs:
       targets:
@@ -37,7 +29,7 @@ jobs:
         token: ${{ secrets.GH_PAT }} # private submodules
 
     - name: Find changed folders
-      uses: tj-actions/changed-files@v44.5.3
+      uses: tj-actions/changed-files@v44.5.5
       id: targets
       with:
         skip_initial_fetch: true
