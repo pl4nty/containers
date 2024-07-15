@@ -2,18 +2,10 @@ name: Build
 
 on:
   push:
-    # branches:
-    #   - main
     paths:
       - '*/**'
       - '!.github/**'
-      - "!archive/**"
-  # pull_request:
-  #   paths:
-  #     - '*/**'
-  #     - '!.*/**'
-  #     - "!archive/**"
-  merge_group:
+      - '!archive/**'
   workflow_dispatch:
     inputs:
       targets:
