@@ -50,18 +50,6 @@ jobs:
       matrix:
         target: ${{ fromJson(needs.targets.outputs.targets) }} # TODO bakefile for cache sharing?
     steps:
-      # for >15GB images, including layers
-      - if: ${{ matrix.target == 'kasm-kali-rolling' }}
-        uses: jlumbroso/free-disk-space@main
-        with:
-          tool-cache: false
-          android: true
-          dotnet: true
-          haskell: true
-          large-packages: true
-          docker-images: false
-          swap-storage: true
-
       # manual checkout to only checkout target submodule
       - name: Checkout
         run: |
