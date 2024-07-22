@@ -1,4 +1,4 @@
-FROM kasmweb/kali-rolling-desktop:1.15.0 as base
+FROM kasmweb/kali-rolling-desktop:1.15.0-rolling as base
 
 USER root
 # RUN sed -ie 's/kali-rolling/kali-last-snapshot/g' /etc/apt/sources.list
@@ -49,8 +49,13 @@ RUN python3 -m pip install --upgrade pwntools
 RUN wget http://www.caesum.com/handbook/Stegsolve.jar -O stegsolve.jar && \
     chmod +x stegsolve.jar
 
-RUN wget https://github.com/volatilityfoundation/volatility3/releases/download/v2.5.0/volatility3-2.5.0-py3-none-any.whl && \
-    pip install volatility3-2.5.0-py3-none-any.whl
+RUN wget https://github.com/volatilityfoundation/volatility/releases/download/2.6.1/volatility_2.6_lin64_standalone.zip && \
+    unzip volatility_2.6_lin64_standalone.zip volatility_2.6_lin64_standalone && \
+    mv volatility_2.6_lin64_standalone vol.py && \
+    chmod +x vol.py
+
+# RUN wget https://github.com/volatilityfoundation/volatility3/releases/download/v2.5.0/volatility3-2.5.0-py3-none-any.whl && \
+#     pip install volatility3-2.5.0-py3-none-any.whl
 
 RUN wget https://github.com/icsharpcode/AvaloniaILSpy/releases/download/v7.2-rc/Linux.x64.Release.zip && \
     unzip Linux.x64.Release.zip && unzip ILSpy-linux-x64-Release.zip -d AvaloniaILSpy && \
