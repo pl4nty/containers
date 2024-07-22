@@ -170,7 +170,7 @@ jobs:
       #     docker run --privileged --rm -d --name buildkit -p 1234:1234 --security-opt seccomp=unconfined --security-opt apparmor=unconfined moby/buildkit:v0.13.2
       #     docker buildx create --append --name nsc-remote --bootstrap --use docker-container://buildkit
 
-      - uses: docker/build-push-action@v6.4.0
+      - uses: docker/build-push-action@v6.5.0
         id: build
         continue-on-error: ${{ contains(steps.context.outputs.platforms, 'windows') }}
         with:
@@ -185,7 +185,7 @@ jobs:
       # Windows BuildKit still has a lot of bugs, so we only attempt it if cross-compiled build fails
       - if: steps.build.outcome == 'failure'
         run: docker buildx create --append --name nsc-remote npipe:////./pipe/buildkitd --bootstrap
-      - uses: docker/build-push-action@v6.4.0
+      - uses: docker/build-push-action@v6.5.0
         id: build1
         if: steps.build.outcome == 'failure'
         with:
