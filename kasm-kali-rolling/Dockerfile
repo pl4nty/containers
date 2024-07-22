@@ -50,8 +50,8 @@ RUN wget http://www.caesum.com/handbook/Stegsolve.jar -O stegsolve.jar && \
     chmod +x stegsolve.jar
 
 RUN wget https://github.com/volatilityfoundation/volatility/releases/download/2.6.1/volatility_2.6_lin64_standalone.zip && \
-    unzip volatility_2.6_lin64_standalone.zip volatility_2.6_lin64_standalone && \
-    mv volatility_2.6_lin64_standalone vol.py && \
+    unzip volatility_2.6_lin64_standalone.zip volatility_2.6_lin64_standalone/volatility_2.6_lin64_standalone && \
+    mv volatility_2.6_lin64_standalone/volatility_2.6_lin64_standalone vol.py && \
     chmod +x vol.py
 
 # RUN wget https://github.com/volatilityfoundation/volatility3/releases/download/v2.5.0/volatility3-2.5.0-py3-none-any.whl && \
