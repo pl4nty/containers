@@ -4,7 +4,7 @@ USER root
 # RUN sed -ie 's/kali-rolling/kali-last-snapshot/g' /etc/apt/sources.list
 # remove desktop background, might improve performance# /tmp/dbus-KA37XaRP1n
 # RUN xfconf-query -c xfce4-desktop -p /backdrop/screen0/monitorVNC-0/workspace0/image-style -s 0
-RUN sed -ie 's/(image-style.*)5/\\10/' /etc/xdg/xfce4/xfconf/xfce-perchannel-xml/xfce4-desktop.xml
+# RUN sed -ie 's/(image-style.*)5/\\10/' /etc/xdg/xfce4/xfconf/xfce-perchannel-xml/xfce4-desktop.xml
 RUN echo 'kasm-user ALL=(ALL) NOPASSWD: ALL' >> /etc/sudoers
 
 FROM base as linux-amd64
