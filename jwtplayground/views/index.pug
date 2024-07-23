@@ -333,7 +333,7 @@ block content
         };
       }
       return {
-        formattedValue: JSON.stringify(value),
+        formattedValue: typeof value === 'string' ? value : JSON.stringify(value),
         classes: 'wrap'
       };
     }
