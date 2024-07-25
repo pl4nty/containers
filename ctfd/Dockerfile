@@ -1,4 +1,4 @@
-FROM quay.io/curl/curl:8.8.0 AS plugins
+FROM quay.io/curl/curl:8.9.0 AS plugins
 
 RUN mkdir /tmp/plugins
 RUN curl -L https://github.com/CTFd/public_challenges/archive/36667c9f0dffc37e42a1cd3df874daf762425d1e.tar.gz | tar xz -C /tmp/plugins
