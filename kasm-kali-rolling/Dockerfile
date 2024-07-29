@@ -47,7 +47,7 @@ RUN git clone https://github.com/RsaCtfTool/RsaCtfTool.git && \
     cd RsaCtfTool && \
     pip3 install -r requirements.txt
 
-RUN python3 -m pip install --upgrade pwntools
+RUN python3 -m pip install --upgrade pwntools pypykatz
 
 RUN wget http://www.caesum.com/handbook/Stegsolve.jar -O stegsolve.jar && \
     chmod +x stegsolve.jar
