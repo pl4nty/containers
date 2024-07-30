@@ -34,7 +34,8 @@ RUN --mount=type=cache,target=/var/cache/apt \
     qsstv \
     strace \
     gfortran \
-    qemu-system-x86
+    qemu-system-x86 \
+    jq
 
 RUN wget https://github.com/pwndbg/pwndbg/releases/download/2024.02.14/pwndbg_2024.02.14_amd64.deb && \
     apt-get install -y ./pwndbg_2024.02.14_amd64.deb && \
