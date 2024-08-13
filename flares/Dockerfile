@@ -1,4 +1,4 @@
-FROM --platform=$BUILDPLATFORM golang:1.22-alpine as builder
+FROM --platform=$BUILDPLATFORM golang:1.23-alpine as builder
 WORKDIR /build
 COPY . .
 RUN apk add --update git gcc
