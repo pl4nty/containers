@@ -187,6 +187,6 @@ jobs:
           labels: ${{ steps.meta.outputs.labels }}
           annotations: ${{ steps.meta.outputs.annotations }}
 
-      - uses: sigstore/cosign-installer@v3.5.0
+      - uses: sigstore/cosign-installer@v3.6.0
       - name: Sign image manifest
         run: cosign sign --yes "ghcr.io/${{ github.repository_owner }}/${{ matrix.target }}@${{ steps.build.outputs.digest || steps.build1.outputs.digest }}"
