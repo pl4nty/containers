@@ -161,6 +161,9 @@ function lookupTenant() {
                     case 'OC':
                         tenantRegion = "Azure AD Global: Oceania";
                         break;
+                    case 'SA':
+                        tenantRegion = "Azure AD Global: South America";
+                        break;
                     case 'DE':
                         tenantRegion = "Azure AD Germany";
                         break;
