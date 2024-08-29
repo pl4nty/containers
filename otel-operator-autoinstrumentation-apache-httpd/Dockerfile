@@ -156,7 +156,7 @@ RUN rm -rf apr-util-${APRUTIL_VERSION} && rm -rf apr-util-${APRUTIL_VERSION}.tar
     && rm -rf apr-${APR_VERSION} && rm -rf apr-${APR_VERSION}.tar.gz
 
 RUN apt-get install libpcre3 libpcre3-dev -y
-RUN apt-get install apache2 -y && a2enmod proxy && a2enmod proxy_http \
+RUN apt-get -y update && apt-get install apache2 -y && a2enmod proxy && a2enmod proxy_http \
     && a2enmod proxy_balancer && a2enmod dav
 
 #Build and install boost
