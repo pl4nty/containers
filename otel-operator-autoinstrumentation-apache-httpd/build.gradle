@@ -1,3 +1,4 @@
+// https://github.com/Fydon/opentelemetry-cpp-contrib/blob/feature/webserver-arm64/instrumentation/otel-webserver-module/build.gradle
 plugins {
     id "de.undercouch.download" version "3.4.3"
 }
@@ -22,8 +23,8 @@ project.ext {
     }
 
     ansdkOsName = osName
-// adds aarch64 support
-    gccArchFlag = (System.properties['os.arch'] == 'aarch64' ? '-march=armv8-a' : (osArch == 'x86' ? '-m32' : '-m64'))
+    ansdkArch = (osArch == 'x86' ? 'i686' : osArch)
+    gccArchFlag = (osArch == 'x86' ? '-m32' : (osArch == 'arm64' ? '-march=armv8-a' : '-m64'))
     headSHA1 = "<dev>"
 
     try {
@@ -189,14 +190,7 @@ task stageLibrary(type: Copy) {
     from("${modDepDir}/opentelemetry/${cppSDKVersion}/lib/libopentelemetry_otlp_recordable.so") { it.into "sdk_lib/lib" }
     from("${modDepDir}/opentelemetry/${cppSDKVersion}/lib/libopentelemetry_exporter_ostream_span.so") { it.into "sdk_lib/lib" }
     from("${modDepDir}/opentelemetry/${cppSDKVersion}/lib/libopentelemetry_exporter_otlp_grpc.so") { it.into "sdk_lib/lib" }
-    // autoinstrumentation init requires v1.0.3 name (appdynamics)
-    from("dist/opentelemetry_sdk_log4cxx.xml.template") { it.into "conf" rename "opentelemetry(.*)", "appdynamics\$1" }
-    // instrumentation module requires v1.0.4 named xml
-    from("dist/opentelemetry_sdk_log4cxx.xml.template") {
-        it.into "conf"
-        filter { line -> line.replaceAll("__agent_log_dir__", "/opt/opentelemetry-webserver/agent/logs") }
-        rename "(.*).template", "\$1"
-    }
+    from("dist/opentelemetry_sdk_log4cxx.xml.template") { it.into "conf" }
     from("dist/install.${scriptExt}") { it.fileMode 0700 }
 
     into libraryStageDir
@@ -506,7 +500,7 @@ task gypUnitTest(type: Exec) {
         ANSDK_DIR: modDepDir,
         BOOST_LIB: BOOST_LIB,
         BOOST_INCLUDE: BOOST_INCLUDE,
-        GTEST_LIB_DIR: target_system == "ubuntu" ?
+        GTEST_LIB_DIR: target_system == "ubuntu" || osArch == "arm64" ?
             "${modDepDir}/googletest/1.10.0/lib" : "${modDepDir}/googletest/1.10.0/lib64",
         LIBRARY_FLAGS: libraryFlags,
         CPP_SDK_VERSION: cppSDKVersion,
@@ -543,7 +537,7 @@ task runApacheServer(type: Exec) {
     dependsOn assembleApacheModule
 
     workingDir 'test'
-    commandLine './ApacheTesting.sh', "${target_system}"
+    commandLine './ApacheTesting.sh', "${target_system}", "${osArch}"
 }
 
 // Code Coverage
@@ -609,6 +603,9 @@ model {
         release
     }
     platforms {
+        arm {
+            architecture "arm64"
+        }
         x86 {
             architecture "x86"
         }
