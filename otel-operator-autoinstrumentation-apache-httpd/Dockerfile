@@ -214,9 +214,9 @@ ARG ARCH=${TARGETARCH/amd64/x64}
 
 RUN mkdir agent
 COPY --from=build /otel-webserver-module/build/opentelemetry-webserver-sdk-$ARCH-linux.tgz .
-RUN unzip -p opentelemetry-webserver-sdk-$ARCH-linux.tgz | tar -zx -C agent
 # unzip fails: short read
-# RUN tar -xvf opentelemetry-webserver-sdk-$ARCH-linux.tgz -C agent
+# RUN unzip -p opentelemetry-webserver-sdk-$ARCH-linux.tgz | tar -zx -C agent
+RUN tar -xvf opentelemetry-webserver-sdk-$ARCH-linux.tgz -C agent
 
 FROM alpine:3.20.2
 
