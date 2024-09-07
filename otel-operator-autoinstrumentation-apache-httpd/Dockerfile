@@ -206,7 +206,7 @@ RUN cp -r /dependencies /otel-webserver-module/ \
 
 # https://github.com/open-telemetry/opentelemetry-operator/blob/v0.107.0/autoinstrumentation/apache-httpd/Dockerfile
 # images were originally :latest
-FROM alpine:3.20.2 AS agent
+FROM alpine:3.20.3 AS agent
 
 RUN mkdir /opt/opentelemetry
 WORKDIR /opt/opentelemetry
@@ -220,7 +220,7 @@ COPY --from=build /otel-webserver-module/build/opentelemetry-webserver-sdk-$ARCH
 # RUN unzip -p opentelemetry-webserver-sdk-$ARCH-linux.tgz | tar -zx -C agent
 RUN tar -xvf opentelemetry-webserver-sdk-$ARCH-linux.tgz -C agent
 
-FROM alpine:3.20.2
+FROM alpine:3.20.3
 
 COPY --from=agent /opt/opentelemetry/agent/opentelemetry-webserver-sdk /opt/opentelemetry
 
