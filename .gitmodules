@@ -51,3 +51,6 @@
 [submodule "garnet/garnet"]
 	path = garnet/garnet
 	url = https://github.com/microsoft/garnet
+[submodule "admxgen/admxgen"]
+	path = admxgen/admxgen
+	url = https://github.com/pl4nty/admxgen
