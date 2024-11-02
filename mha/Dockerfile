@@ -14,7 +14,7 @@ RUN npm ci
 COPY . .
 RUN npm run build --if-present
 
-FROM joseluisq/static-web-server:2.33.0
+FROM joseluisq/static-web-server:2.33.1
 
 COPY --from=build /app/Resources /public/Resources
 COPY --from=build /app/Pages /public/Pages
