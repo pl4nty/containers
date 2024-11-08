@@ -29,7 +29,7 @@ jobs:
         token: ${{ secrets.GH_PAT }} # private submodules
 
     - name: Find changed folders
-      uses: tj-actions/changed-files@v45.0.3
+      uses: tj-actions/changed-files@v45.0.4
       id: targets
       with:
         skip_initial_fetch: true
