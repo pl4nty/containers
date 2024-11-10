@@ -16,7 +16,7 @@
 #    used and must be availabe in the image.
 FROM busybox as downloader
 
-ARG version
+ARG version=1.9.0
 
 WORKDIR /autoinstrumentation
 
@@ -27,7 +27,7 @@ ADD https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/relea
 
 RUN unzip opentelemetry-dotnet-instrumentation-linux-glibc-x64.zip &&\
   unzip opentelemetry-dotnet-instrumentation-linux-musl-x64.zip "linux-musl-x64/*" -d . &&\
-  unzip opentelemetry-dotnet-instrumentation-linux-glibc-arm64.zip &&\
+  unzip opentelemetry-dotnet-instrumentation-linux-glibc-arm64.zip "linux-musl-arm64/*" -d . &&\
   unzip opentelemetry-dotnet-instrumentation-linux-musl-arm64.zip "linux-musl-arm64/*" -d . &&\
   rm opentelemetry-dotnet-instrumentation-linux-glibc-x64.zip opentelemetry-dotnet-instrumentation-linux-musl-x64.zip &&\
   rm opentelemetry-dotnet-instrumentation-linux-glibc-arm64.zip opentelemetry-dotnet-instrumentation-linux-musl-arm64.zip &&\
