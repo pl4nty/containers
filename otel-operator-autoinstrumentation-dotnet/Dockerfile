@@ -25,9 +25,13 @@ ADD https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/relea
 ADD https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases/download/v$version/opentelemetry-dotnet-instrumentation-linux-glibc-arm64.zip .
 ADD https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases/download/v$version/opentelemetry-dotnet-instrumentation-linux-musl-arm64.zip .
 
+# AdditionalDeps, net, instrument.sh, LICENSE from x64 glibc
+# store from glibcs
+# native .so files from each arch/lib
 RUN unzip opentelemetry-dotnet-instrumentation-linux-glibc-x64.zip &&\
   unzip opentelemetry-dotnet-instrumentation-linux-musl-x64.zip "linux-musl-x64/*" -d . &&\
   unzip opentelemetry-dotnet-instrumentation-linux-glibc-arm64.zip "linux-arm64/*" -d . &&\
+  unzip opentelemetry-dotnet-instrumentation-linux-glibc-arm64.zip "store/*" -d . &&\
   unzip opentelemetry-dotnet-instrumentation-linux-musl-arm64.zip "linux-musl-arm64/*" -d . &&\
   rm opentelemetry-dotnet-instrumentation-linux-glibc-x64.zip opentelemetry-dotnet-instrumentation-linux-musl-x64.zip &&\
   rm opentelemetry-dotnet-instrumentation-linux-glibc-arm64.zip opentelemetry-dotnet-instrumentation-linux-musl-arm64.zip &&\
