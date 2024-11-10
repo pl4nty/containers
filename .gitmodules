@@ -54,3 +54,6 @@
 [submodule "admxgen/admxgen"]
 	path = admxgen/admxgen
 	url = https://github.com/pl4nty/admxgen
+[submodule "reg2ps/reg2ps"]
+	path = reg2ps/reg2ps
+	url = https://github.com/pl4nty/Reg2CI
