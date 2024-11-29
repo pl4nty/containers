@@ -5,8 +5,7 @@ RUN curl -L https://github.com/CTFd/public_challenges/archive/36667c9f0dffc37e42
 RUN curl -L https://github.com/SunshineCTF/CTFd-scores-ctftime/archive/4b9eaf8f96041980b27625e1deb0725281d9d864.tar.gz | tar xz -C /tmp/plugins
 # requires DISCORD_WEBHOOK_URL: https://github.com/sigpwny/ctfd-discord-webhook-plugin/blob/master/config.py
 RUN curl -L https://github.com/sigpwny/ctfd-discord-webhook-plugin/archive/c8fac3f999c3028e178de0b376e1981dea7db370.tar.gz | tar xz -C /tmp/plugins
-# TODO implement users mode and fix any bugs with latest CTFd version
-# RUN curl -L https://github.com/pl4nty/CTFd_Split_Scoreboard/archive/master.tar.gz | tar xz -C /tmp/plugins
+RUN curl -L https://github.com/adb014/CTFd-solutions/archive/8a646c7f08175b271cfc9bf80ddcd8d9a0191ac6.tar.gz | tar xz -C /tmp/plugins
 
 FROM ghcr.io/ctfd/ctfd:3.7.4
 
