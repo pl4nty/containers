@@ -1,4 +1,4 @@
-FROM mcr.microsoft.com/microsoftgraph/powershell:2.24.0
+FROM mcr.microsoft.com/microsoftgraph/powershell:2.25.0
 
 SHELL [ "pwsh", "-Command", "$ErrorActionPreference = 'Stop'; $ProgressPreference = 'Continue'; $verbosePreference='Continue';" ]
 RUN Set-PSRepository PSGallery -InstallationPolicy Trusted; Install-Module AADInternals, DnsClient-PS, Pode
