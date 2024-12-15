@@ -15,3 +15,4 @@ RUN for d in CTFd/plugins/*; do \
     pip install --no-cache-dir -r "$d/requirements.txt";\
   fi; \
 done;
+COPY CTFd-isolated-challenges CTFd/plugins/CTFd-isolated-challenges
