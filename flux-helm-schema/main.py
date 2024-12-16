@@ -11,9 +11,9 @@ with requests.get("https://raw.githubusercontent.com/fluxcd-community/flux2-sche
     helm_release_schema = response.json()
 
 @app.get("/")
-def merge_schema(schema: str):
+def merge_schema(values: str):
     # Insert the downloaded schema under spec.values in the helm release schema
-    helm_release_schema["properties"]["spec"]["properties"]["values"]["$ref"] = schema
+    helm_release_schema["properties"]["spec"]["properties"]["values"]["$ref"] = values
 
     # Return the merged schema in the response body
     return helm_release_schema
