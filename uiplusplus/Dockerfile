@@ -20,7 +20,7 @@ COPY website/. .
 RUN bundle exec jekyll build
 
 # Use the static web server image to serve the built files
-FROM joseluisq/static-web-server:2.24.1
+FROM joseluisq/static-web-server:2.34.0
 
 # Copy the built site to the public directory
 COPY --from=build /usr/src/app/_site /public
