@@ -57,3 +57,6 @@
 [submodule "reg2ps/reg2ps"]
 	path = reg2ps/reg2ps
 	url = https://github.com/pl4nty/Reg2CI
+[submodule "uiplusplus/uiplusplus"]
+	path = uiplusplus/uiplusplus
+	url = https://github.com/jason4tw/UIPlusPlusDocs
