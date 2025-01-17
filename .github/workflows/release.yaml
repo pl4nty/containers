@@ -149,6 +149,7 @@ jobs:
               }
           }
           "@
+          mkdir $cniConfPath -Force
           Set-Content -Path $cniConfPath -Value $natConfig
 
       - name: Setup containerd
