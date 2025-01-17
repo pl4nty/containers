@@ -40,7 +40,7 @@ jobs:
         fetch_additional_submodule_history: true
 
   main:
-    runs-on: windows-latest
+    runs-on: windows-2025
     needs: targets
     permissions:
       packages: write # push images
