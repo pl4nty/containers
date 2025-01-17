@@ -104,6 +104,11 @@ jobs:
             type=ref,event=pr
             type=raw,value=latest,enable={{is_default_branch}}
 
+      - name: Setup Docker Buildx
+        run: |
+          $version = "v0.14.0"
+          curl.exe -L https://github.com/docker/buildx/releases/download/$version/buildx-$version.windows-amd64.exe -o $env:ProgramData\Docker\cli-plugins\docker-buildx.exe
+
       - name: Setup builders
         run: |
           $version = "0.0.361-089b6dd"
