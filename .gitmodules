@@ -60,3 +60,6 @@
 [submodule "uiplusplus/uiplusplus"]
 	path = uiplusplus/uiplusplus
 	url = https://github.com/jason4tw/UIPlusPlusDocs
+[submodule "azureresourceexplorer/azureresourceexplorer"]
+	path = azureresourceexplorer/azureresourceexplorer
+	url = https://github.com/pl4nty/AzureResourceExplorer
