@@ -104,6 +104,24 @@ jobs:
             type=ref,event=pr
             type=raw,value=latest,enable={{is_default_branch}}
 
+      - name: Setup containerd
+        run: |
+          $version = "2.0.2"
+          curl.exe -L https://github.com/containerd/containerd/releases/download/v$version/containerd-$version-windows-amd64.tar.gz -o containerd.tar.gz
+          tar.exe xvf containerd.tar.gz
+
+          .\bin\containerd.exe --register-service
+          Start-Service containerd
+
+      # - name: Setup BuildKit
+      #   run: |
+      #     $version = "v0.13.2"
+      #     curl.exe -L https://github.com/moby/buildkit/releases/download/$version/buildkit-$version.windows-amd64.tar.gz -o buildkit.tar.gz
+      #     tar.exe xvf buildkit.tar.gz
+          
+      #     .\bin\buildkitd.exe --register-service
+      #     Start-Service buildkitd
+
       - name: Setup Docker Buildx
         run: |
           $version = "v0.14.0"
