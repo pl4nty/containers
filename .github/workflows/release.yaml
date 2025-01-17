@@ -120,7 +120,7 @@ jobs:
           $gateway = $natInfo.Subnets[0].GatewayAddress
           $subnet = $natInfo.Subnets[0].AddressPrefix
 
-          $cniConfPath = "$env:ProgramFiles\containerd\cni\conf\0-containerd-nat.conf"
+          $cniConfPath = "$env:ProgramFiles\containerd\cni\conf"
           $cniBinDir = "$env:ProgramFiles\containerd\cni\bin"
           $cniVersion = "0.3.0"
 
@@ -150,7 +150,7 @@ jobs:
           }
           "@
           mkdir $cniConfPath -Force
-          Set-Content -Path $cniConfPath -Value $natConfig
+          Set-Content -Path "$cniConfPath\0-containerd-nat.conf" -Value $natConfig
 
       - name: Setup containerd
         run: |
