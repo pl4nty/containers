@@ -63,3 +63,6 @@
 [submodule "azureresourceexplorer/azureresourceexplorer"]
 	path = azureresourceexplorer/azureresourceexplorer
 	url = https://github.com/pl4nty/AzureResourceExplorer
+[submodule "metaxplore/metaxplore"]
+	path = metaxplore/metaxplore
+	url = https://github.com/nbel15/MetaXplore
