@@ -156,7 +156,7 @@ RUN rm -rf apr-util-${APRUTIL_VERSION} && rm -rf apr-util-${APRUTIL_VERSION}.tar
     && rm -rf apr-${APR_VERSION} && rm -rf apr-${APR_VERSION}.tar.gz
 
 RUN apt-get install libpcre3 libpcre3-dev -y
-RUN apt-get -y update && apt-get install apache2 -y && a2enmod proxy && a2enmod proxy_http \
+RUN apt-get install apache2 -y && a2enmod proxy && a2enmod proxy_http \
     && a2enmod proxy_balancer && a2enmod dav
 
 #Build and install boost
@@ -186,10 +186,9 @@ RUN apt install curl gnupg2 ca-certificates lsb-release ubuntu-keyring -y \
     && curl https://nginx.org/keys/nginx_signing.key | gpg --dearmor \
     | tee /usr/share/keyrings/nginx-archive-keyring.gpg >/dev/null \
     && gpg --dry-run --quiet --import --import-options import-show /usr/share/keyrings/nginx-archive-keyring.gpg; exit 0
-RUN rm /usr/share/pyshared/lsb_release.py && echo "deb [signed-by=/usr/share/keyrings/nginx-archive-keyring.gpg] \
+RUN echo "deb [signed-by=/usr/share/keyrings/nginx-archive-keyring.gpg] \
     http://nginx.org/packages/ubuntu `lsb_release -cs` nginx" \
     | tee /etc/apt/sources.list.d/nginx.list \
-    && cat /etc/apt/sources.list.d/nginx.list \
     && echo "Package: *\nPin: origin nginx.org\nPin: release o=nginx\nPin-Priority: 900\n" \
     | tee /etc/apt/preferences.d/99nginx \
     && apt update -y && apt install nginx -y
@@ -206,7 +205,6 @@ RUN cp -r /dependencies /otel-webserver-module/ \
     && ./gradlew assembleWebServerModule -DtargetSystem=ubuntu
 
 # https://github.com/open-telemetry/opentelemetry-operator/blob/v0.107.0/autoinstrumentation/apache-httpd/Dockerfile
-# images were originally :latest
 FROM alpine:3.21.0 AS agent
 
 RUN mkdir /opt/opentelemetry
@@ -217,8 +215,6 @@ ARG ARCH=${TARGETARCH/amd64/x64}
 
 RUN mkdir agent
 COPY --from=build /otel-webserver-module/build/opentelemetry-webserver-sdk-$ARCH-linux.tgz .
-# unzip fails: short read
-# RUN unzip -p opentelemetry-webserver-sdk-$ARCH-linux.tgz | tar -zx -C agent
 RUN tar -xvf opentelemetry-webserver-sdk-$ARCH-linux.tgz -C agent
 
 FROM alpine:3.21.0
