@@ -30,8 +30,16 @@ app.get('/api', async (req, res) => {
             .api(`/tenantRelationships/findTenantInformationByTenantId(tenantId='${tenantId}')`)
             .get();
 
-        // Send the response back to the client
-        res.json(tenantInfo);
+        // Use tenantInfo.defaultDomainName to call another API
+        const domain = tenantInfo.defaultDomainName;
+        const response = await fetch(`https://login.microsoftonline.com/common/userrealm/${domain}?api-version=2.1`);
+        const domainInfo = await response.json();
+
+        // Merge the resulting JSON with tenantInfo
+        const mergedInfo = { ...tenantInfo, ...domainInfo };
+
+        // Send the merged response back to the client
+        res.json(mergedInfo);
     } catch (error) {
         console.error('Error fetching tenant information:', error);
         res.status(500).send('Error fetching tenant information');
