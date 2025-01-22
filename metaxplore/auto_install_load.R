@@ -13,7 +13,13 @@ installed.cran.all <- allpkgs[grepl("cran",allpkgs$source,ignore.case = TRUE),]
 installed.bioc.all <- allpkgs[grepl("Bioconductor",allpkgs$source),]
 installed.github.all <-allpkgs[grepl("Github",allpkgs$source),]
 
-
+# Print currently installed packages before additional installations
+cat("\nCurrently installed CRAN packages:\n")
+print(installed.cran.all$package)
+cat("\nCurrently installed Bioconductor packages:\n")
+print(installed.bioc.all$package)
+cat("\nCurrently installed GitHub packages:\n")
+print(installed.github.all$package)
 
 # Install Cran packages not yet installed
 pkgs.cran <- c("curl", "littler", "RNetCDF", "sf", "systemfonts", "terra", "lwgeom", "magick", "textshaping", "gdtools", "ragg", "flextable",

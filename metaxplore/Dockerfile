@@ -1,7 +1,16 @@
 FROM ghcr.io/rocker-org/shiny-verse:4.4.2
 WORKDIR /srv/shiny-server
 
-RUN rm -r ./* && sudo apt-get update && sudo apt-get install -y libglpk-dev
+RUN rm -r ./* 
+RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
+  --mount=type=cache,target=/var/lib/apt,sharing=locked \
+  apt update && apt-get --no-install-recommends install -y \
+  libglpk-dev libudunits2-dev libnetcdf-dev libproj-dev libgdal-dev libmagick++-dev
+
+RUN mv /usr/local/lib/R/site-library /usr/local/lib/R/site-library-2
 COPY auto_install_load.R .
-RUN Rscript auto_install_load.R
+RUN --mount=type=cache,target=/usr/local/lib/R/site-library cp -r /usr/local/lib/R/site-library-2/* /usr/local/lib/R/site-library \
+&& Rscript auto_install_load.R && cp -r /usr/local/lib/R/site-library/* /usr/local/lib/R/site-library-2
+RUN mv /usr/local/lib/R/site-library-2 /usr/local/lib/R/site-library
+
 COPY . .
