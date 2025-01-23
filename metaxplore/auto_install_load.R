@@ -55,8 +55,8 @@ if (any(installed.pkgs.bioc == FALSE)) {
 #These packages only available in Github, use devtools to install them!
 pkgs.github <- c("QsRutils", "pairwiseAdonis", "mattsUtils", "microeco", "file2meco") 
 installed.pkgs.github <- pkgs.github %in% installed.github.all$package
-# if("QsRutils" %in% installed.github.all$package==F)
-#   devtools::install_github("jfq3/QsRutils", build_vignettes = TRUE)
+if("QsRutils" %in% installed.github.all$package==F)
+  devtools::install_github("jfq3/QsRutils", build_vignettes = TRUE)
 
 if("pairwiseAdonis" %in% installed.github.all$package==F)
   devtools::install_github("pmartinezarbizu/pairwiseAdonis/pairwiseAdonis")
