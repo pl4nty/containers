@@ -1,11 +1,13 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": [
-    "config:base",
+    "config:recommended",
     ":disableRateLimiting"
   ],
-  "additionalBranchPrefix": "{{parentDir}}-", 
-  "ignorePaths": ["archive/**"],
+  "additionalBranchPrefix": "{{parentDir}}-",
+  "ignorePaths": [
+    "archive/**"
+  ],
   "rangeStrategy": "pin",
   "rebaseWhen": "conflicted",
   "lockFileMaintenance": {
@@ -17,24 +19,33 @@
   },
   "packageRules": [
     {
-      "matchUpdateTypes": ["minor", "patch"],
+      "matchUpdateTypes": [
+        "minor",
+        "patch"
+      ],
       "matchCurrentVersion": "!/^0/",
       "automerge": true
     },
     {
-      "matchManagers": ["git-submodules"],
-      "matchPackagePrefixes": [
-        "https://github.com/pl4nty/",
-        "https://github.com/stephenegriffin/MHA",
-        "https://github.com/microsoft/garnet",
-        "https://github.com/open-telemetry/opentelemetry-cpp-contrib"
+      "matchManagers": [
+        "git-submodules"
       ],
-      "automerge": true
+      "automerge": true,
+      "matchPackageNames": [
+        "https://github.com/pl4nty/{/,}**",
+        "https://github.com/stephenegriffin/MHA{/,}**",
+        "https://github.com/microsoft/garnet{/,}**",
+        "https://github.com/open-telemetry/opentelemetry-cpp-contrib{/,}**"
+      ]
     },
     {
-      "matchManagers": ["git-submodules"],
-      "matchPackagePrefixes": ["archive/"],
-      "enabled": false
+      "matchManagers": [
+        "git-submodules"
+      ],
+      "enabled": false,
+      "matchPackageNames": [
+        "archive/{/,}**"
+      ]
     }
   ],
   "hostRules": [
