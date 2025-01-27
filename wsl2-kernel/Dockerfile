@@ -5,7 +5,7 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
   --mount=type=cache,target=/var/lib/apt,sharing=locked \
   apt update && apt-get --no-install-recommends install -y \
   build-essential flex bison dwarves libssl-dev libelf-dev cpio \
-  libncurses-dev bc python3
+  libncurses-dev bc python3 openssl
 
 WORKDIR /app
 ADD https://github.com/microsoft/WSL2-Linux-Kernel.git /app
