@@ -15,4 +15,4 @@ RUN --mount=type=cache,target=/usr/local/lib/R/site-library cp -r /usr/local/lib
 RUN mv /usr/local/lib/R/site-library-2 /usr/local/lib/R/site-library && usermod -a -G staff shiny
 
 COPY . .
-RUN sed -i 's|source.+||g' ui.R
+RUN sed -i 's|source.*||g' ui.R
