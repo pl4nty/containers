@@ -12,6 +12,6 @@ COPY auto_install_load.R .
 RUN --mount=type=cache,target=/usr/local/lib/R/site-library cp -r /usr/local/lib/R/site-library-2/* /usr/local/lib/R/site-library \
 && Rscript auto_install_load.R && cp -r /usr/local/lib/R/site-library/* /usr/local/lib/R/site-library-2
 # shiny user can't write to /usr/local/lib/R/site-library
-RUN mv /usr/local/lib/R/site-library-2 /usr/local/lib/R/site-library && sed -i 's|source.+||g' ui.R
+RUN mv /usr/local/lib/R/site-library-2 /usr/local/lib/R/site-library && usermod -a -G staff shiny
 
 COPY . .
