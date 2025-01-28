@@ -11,6 +11,11 @@ const port = 3000;
 // Serve static files (e.g., index.html, css/site.css)
 app.use(express.static(__dirname));
 
+// Create an instance of the TokenCredential class that is imported
+const credential = new ClientSecretCredential(process.env.AZURE_TENANT_ID, process.env.AZURE_CLIENT_ID, process.env.AZURE_CLIENT_SECRET);
+const authProvider = new TokenCredentialAuthenticationProvider(credential, { scopes: [".default"] });
+const client = Client.initWithMiddleware({ authProvider });
+
 // Handle GET requests to /api with tenantId query parameter
 app.get('/api', async (req, res) => {
     const tenantId = req.query.tenantId;
@@ -20,11 +25,6 @@ app.get('/api', async (req, res) => {
     }
 
     try {
-        // Create an instance of the TokenCredential class that is imported
-        const credential = new ClientSecretCredential(process.env.AZURE_TENANT_ID, process.env.AZURE_CLIENT_ID, process.env.AZURE_CLIENT_SECRET);
-        const authProvider = new TokenCredentialAuthenticationProvider(credential, { scopes: [".default"] });
-        const client = Client.initWithMiddleware({ authProvider });
-
         // Call the Microsoft Graph API to get tenant information
         const tenantInfo = await client
             .api(`/tenantRelationships/findTenantInformationByTenantId(tenantId='${tenantId}')`)
