@@ -5,7 +5,7 @@ RUN rm -r ./*
 RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
   --mount=type=cache,target=/var/lib/apt,sharing=locked \
   apt update && apt-get --no-install-recommends install -y \
-  libglpk-dev libudunits2-dev libnetcdf-dev libproj-dev libgdal-dev libmagick++-dev
+  libglpk-dev libudunits2-dev libnetcdf-dev libproj-dev libgdal-dev libmagick++-dev libstdc++6
 
 RUN mv /usr/local/lib/R/site-library /usr/local/lib/R/site-library-2
 COPY auto_install_load.R .
