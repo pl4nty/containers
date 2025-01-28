@@ -1,5 +1,6 @@
 FROM ghcr.io/rocker-org/shiny-verse:4.4.2
 WORKDIR /srv/shiny-server
+USER root
 
 RUN rm -r ./* 
 RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
@@ -11,6 +12,6 @@ RUN mv /usr/local/lib/R/site-library /usr/local/lib/R/site-library-2
 COPY auto_install_load.R .
 RUN --mount=type=cache,target=/usr/local/lib/R/site-library cp -r /usr/local/lib/R/site-library-2/* /usr/local/lib/R/site-library \
 && Rscript auto_install_load.R && cp -r /usr/local/lib/R/site-library/* /usr/local/lib/R/site-library-2
-RUN mv /usr/local/lib/R/site-library-2 /usr/local/lib/R/site-library && chown root:root /usr/local/lib/R/site-library
+RUN mv /usr/local/lib/R/site-library-2 /usr/local/lib/R/site-library
 
 COPY . .
