@@ -8,7 +8,7 @@ RUN npm install
 COPY . .
 RUN npm run build
 
-FROM ghcr.io/pl4nty/static-web-server:2.24.1
+FROM joseluisq/static-web-server:2.35.0
 
 COPY --from=build-env /app/dist /public
 
