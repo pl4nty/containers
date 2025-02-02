@@ -66,3 +66,6 @@
 [submodule "metaxplore/metaxplore"]
 	path = metaxplore/metaxplore
 	url = https://github.com/nbel15/MetaXplore
+[submodule "web-admx-tool/web-admx-tool"]
+	path = web-admx-tool/web-admx-tool
+	url = https://github.com/pl4nty/web-admx-tool/
