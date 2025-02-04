@@ -144,6 +144,7 @@ block content
       "aadv2_xms_st": "Unknown Microsoft extension. Typically an object containing a subject claim. If you know what this is, please contact me at tom@tplant.com.au",
       "aadv2_xms_mpci": "Unknown Microsoft extension. Observed 259200 on an ID token. If you know what this is, please contact me at tom@tplant.com.au",
       "aadv2_xms_pci": "Unknown Microsoft extension. Observed 3600 on an ID token. If you know what this is, please contact me at tom@tplant.com.au",
+      "aadv1_deviceid": "The device ID where the token was issued using a Workplace Join broker.",
 
       'b2c_streetAddress': 'The street address where the user is located.',
       'b2c_country': 'The country in which the user is located.',
@@ -350,7 +351,10 @@ block content
           description = window.descriptions[claimType];
         }
       }
-      if (!description) return '';
+      if (!description) {
+        console.warn(`No description found for claim: ${key}`);
+        return '';
+      }
       return description;
     }
     function getIssuingProvider(decodedToken) {
