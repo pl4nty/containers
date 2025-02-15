@@ -1,5 +1,5 @@
 # Use the official Ruby image as the base image
-FROM ruby:3.1.0 AS build
+FROM ruby:3.4.2 AS build
 
 # Set the working directory
 WORKDIR /usr/src/app
