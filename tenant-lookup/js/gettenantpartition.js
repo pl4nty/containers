@@ -214,17 +214,19 @@ function lookupTenant() {
                     ShowGCCHInGovWarning();
                 }
 
-                fetch(`api?tenantId=${tenantId[1]}`).then(res => res.json()).then(data => {
-                    document.getElementById("tenantName").innerHTML = data.displayName;
-                    document.getElementById("tenantDomain").innerHTML = data.defaultDomainName;
-                    document.getElementById("tenantFederation").innerHTML = data.federationBrandName || "Not applicable";
+                try {
+                        fetch(`api?tenantId=${tenantId[1]}`).then(res => res.json()).then(data => {
+                        document.getElementById("tenantName").innerHTML = data.displayName;
+                        document.getElementById("tenantDomain").innerHTML = data.defaultDomainName;
+                        document.getElementById("tenantFederation").innerHTML = data.federationBrandName || "Not applicable";
 
+                        // build the plaintext version
+                        plainTextResults = "Tenant Name: " + data.displayName + "\nTenant Domain: " + data.defaultDomainName + "\nTenant GUID: " + tenantId[1] + "\nAzure AD Instance: " + tenantRegion + "\nTenant Scope: " + tenantScope + "\nTenant Federation: " + (data.federationBrandName || "Not applicable");
+                    })
+                } catch (e) {} finally {
                     lookupResults.show();
                     spinner.hide();
-
-                    // build the plaintext version
-                    plainTextResults = "Tenant Name: " + data.displayName + "\nTenant Domain: " + data.defaultDomainName + "\nTenant GUID: " + tenantId[1] + "\nAzure AD Instance: " + tenantRegion + "\nTenant Scope: " + tenantScope + "\nTenant Federation: " + (data.federationBrandName || "Not applicable");
-                })
+                }
             }
             catch (error) {
                 console.error(error)
