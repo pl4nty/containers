@@ -48,6 +48,9 @@ window.addEventListener('load',
                     appInsights.trackEvent({ name: "SelectGermanyEnvironment" });
                     $('#tenantToLookup').attr("placeholder", "contoso.onmicrosoft.de");
                     break;
+                case 'PreProduction':
+                    $('#tenantToLookup').attr("placeholder", "microsoft.com");
+                    break;
                 default:
                     $('#tenantToLookup').attr("placeholder", "contoso.onmicrosoft.com");
             }
@@ -108,6 +111,10 @@ function lookupTenant() {
         case 'Germany':  // deprecated
             tenantIdRegEx = /^https:\/\/login\.microsoftonline\.de\/([\dA-Fa-f]{8}-[\dA-Fa-f]{4}-[\dA-Fa-f]{4}-[\dA-Fa-f]{4}-[\dA-Fa-f]{12})\/oauth2\/authorize$/;
             lookupUrl = "https://login.microsoftonline.de/" + tenant + "/.well-known/openid-configuration";
+            break;
+        case 'PreProduction':
+            tenantIdRegEx = /^https:\/\/login\.windows-ppe\.net\/([\dA-Fa-f]{8}-[\dA-Fa-f]{4}-[\dA-Fa-f]{4}-[\dA-Fa-f]{4}-[\dA-Fa-f]{12})\/oauth2\/authorize$/;
+            lookupUrl = "https://login.windows-ppe.net/" + tenant + "/.well-known/openid-configuration";
             break;
         default:
             tenantIdRegEx = /^https:\/\/login\.microsoftonline\.(?:us|com)\/([\dA-Fa-f]{8}-[\dA-Fa-f]{4}-[\dA-Fa-f]{4}-[\dA-Fa-f]{4}-[\dA-Fa-f]{12})\/oauth2\/authorize$/;
