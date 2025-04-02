@@ -69,3 +69,6 @@
 [submodule "web-admx-tool/web-admx-tool"]
 	path = web-admx-tool/web-admx-tool
 	url = https://github.com/pl4nty/web-admx-tool/
+[submodule "mcp-graphql/mcp-graphql"]
+	path = mcp-graphql/mcp-graphql
+	url = https://github.com/blurrah/mcp-graphql
