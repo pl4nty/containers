@@ -1,10 +1,5 @@
-FROM oven/bun:1.2.9
-WORKDIR /usr/src/app
+FROM node:22.14.0
 
-COPY package*.json bun.lockb ./
-RUN bun install --frozen-lockfile --production
+RUN npm install -g mcp-graphql@1.0.0
 
-COPY . .
-
-USER bun
-ENTRYPOINT [ "bun", "run", "src/index.ts" ]
+ENTRYPOINT [ "nodejs", "/usr/local/bin/mcp-graphql" ]
