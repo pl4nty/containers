@@ -7,7 +7,7 @@ RUN curl -L https://github.com/SunshineCTF/CTFd-scores-ctftime/archive/4b9eaf8f9
 RUN curl -L https://github.com/sigpwny/ctfd-discord-webhook-plugin/archive/c8fac3f999c3028e178de0b376e1981dea7db370.tar.gz | tar xz -C /tmp/plugins
 RUN curl -L https://github.com/adb014/CTFd-solutions/archive/8a646c7f08175b271cfc9bf80ddcd8d9a0191ac6.tar.gz | tar xz -C /tmp/plugins
 
-FROM ghcr.io/ctfd/ctfd:3.7.6
+FROM ghcr.io/ctfd/ctfd:3.7.7
 
 COPY --from=plugins /tmp/plugins CTFd/plugins
 RUN for d in CTFd/plugins/*; do \
