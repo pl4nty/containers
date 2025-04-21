@@ -1,6 +1,6 @@
 {
   "dependencies": {
-    "@azure/identity": "4.9.0",
+    "@azure/identity": "4.9.1",
     "@microsoft/microsoft-graph-client": "3.0.7",
     "express": "5.1.0",
     "isomorphic-fetch": "3.0.0"
