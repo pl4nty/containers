@@ -10,6 +10,6 @@ COPY . .
 RUN ./node_modules/.bin/grunt build-website
 RUN ./node_modules/.bin/grunt pug:website 
 
-FROM nginx:1.27.5
+FROM nginx:1.28.0
 
 COPY --from=build /app/dist/website /usr/share/nginx/html
