@@ -1,4 +1,4 @@
-FROM node:22.14.0
+FROM node:22.15.0
 
 RUN npm install -g mcp-graphql@1.0.0
 
