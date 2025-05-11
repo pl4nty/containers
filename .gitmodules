@@ -72,3 +72,6 @@
 [submodule "mcp-graphql/mcp-graphql"]
 	path = mcp-graphql/mcp-graphql
 	url = https://github.com/blurrah/mcp-graphql
+[submodule "talemate/talemate"]
+	path = talemate/talemate
+	url = https://github.com/vegu-ai/talemate
