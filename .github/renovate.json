@@ -47,15 +47,5 @@
         "archive/{/,}**"
       ]
     }
-  ],
-  "hostRules": [
-    {
-      "hostType": "docker",
-      "matchHost": "docker.io",
-      "username": "pl4nty",
-      "encrypted": {
-        "password": "wcFMA/xDdHCJBTolAQ/8CxU2Z0AC0smQ6EbSs7mGcrNbzOUIio1dFRhc22rku/4CaXoMF/pqWAVrfasyIKndnpmbey3t/8qH0VlfBhjX/MVpvsr+Mi43GWqShLhJSNvEkhieshJ6qt/kyTxPB5tsfm3o/wmq8I4fomC7ariFwh+7MhxtK1BGqHArpQMTZTsRvh9ENiOgBjJS320N3D8z0dWpFsRghROxJxGirq4EBri/J1sJQQvvOxuXqNNfqvM/bFxKN3nwTyONyVvpARAdLMWcTNv525Ew82j2S32cxvQc1jqmeIAWM6ukzLf6UofTIvFpvXGXyt8wJeDezwKzYNqR3/I96chhZK1q66wtcGwrZ6OYVS987cUFvqhAS0q8fjYQOdhzf7sRzXudPZpMpO3tAQX3T/qPUK9J23ndgPDDrvkkpUlnnzNLA5gE3/LFU5aB2XRLWl2QuvxQsQhJEnC9WHGPfYcWQW3SPpAYlOF0EHw6taOB4NVeJ99fWkPqz+3yZOmr837Xal+3d/0fMVTKOm7TfBxWMLgSDfwjRp/TUUuhLiP7CMz1mF0l+rOWCQ6WAoit8fNKfl09gMr0vF/yc0uYDms4sVHqWZ6DRMUTOko6phfhY5BgCgRzf/Hc+Tx8/0eBqdSM79aiX9NGN1PGQZXvQys7lVN0DvipCRMfy0AivgbI9WFD+z4rFkzSXQH20K3XolsaC43JYaevo9Eb4BJ50fXoz4c1BZMgzaLLbFJPSzZyNFzb8Vwak4CPnOp8uk99dKm27ICfMR0PhR4m8cT6MTg2HoW2lnN5Y2hFa25dWi5xFPMuLFXzMA"
-      }
-    }
   ]
 }
