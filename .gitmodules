@@ -75,3 +75,6 @@
 [submodule "talemate/talemate"]
 	path = talemate/talemate
 	url = https://github.com/vegu-ai/talemate
+[submodule "obsidian-remote/obsidian-remote"]
+	path = obsidian-remote/obsidian-remote
+	url = https://github.com/sytone/obsidian-remote
