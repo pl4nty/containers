@@ -102,23 +102,19 @@ def is_valid_signature(payload, signature):
 
 @app.route('/', methods=['POST'])
 def webhook():
-    # Get the signature from the HTTP header
     signature = request.headers.get('X-Miniflux-Signature')
     if not signature:
         logger.warning("Unauthorized access attempt - missing signature header")
         return jsonify({"error": "Unauthorized: Missing signature"}), 401
     
-    # Get the raw request payload
     payload = request.get_data(as_text=True)
     if not payload:
         return jsonify({"error": "Invalid request, empty payload"}), 400
     
-    # Validate the signature
     if not is_valid_signature(payload, signature):
         logger.warning("Unauthorized access attempt - invalid signature")
         return jsonify({"error": "Unauthorized: Invalid signature"}), 401
     
-    # Parse the JSON data
     try:
         data = json.loads(payload)
     except json.JSONDecodeError:
@@ -127,43 +123,25 @@ def webhook():
     logger.info(f"Received webhook: {data.get('event_type')} for feed ID {data.get('feed', {}).get('id')}")
     
     if data.get("event_type") != "new_entries":
-        return jsonify({"status": "ignored", "reason": "Not a new entries event"}), 200
+        return jsonify({"status": "ignored", "reason": "Not a new_entries event"}), 200
     
     feed_id = str(data.get("feed", {}).get("id"))
-    
-    # Check if we have rules for this feed
     if feed_id not in RULES_CONFIG.get("feed_rules", {}):
         return jsonify({"status": "ignored", "reason": "No rules for this feed"}), 200
     
     rules_to_apply = RULES_CONFIG["feed_rules"][feed_id]
-    
-    # Process entries
     entries = data.get("entries", [])
-    results = []
-    
     for entry in entries:
         entry_id = entry.get("id")
-        
-        # Apply rules to entry
         modified_entry = apply_rules(entry, rules_to_apply)
         
-        # Only update if the entry was actually modified
         if modified_entry != entry:
-            update_data = {
+            update_miniflux_entry(entry_id, {
                 "title": modified_entry.get("title"),
                 "content": modified_entry.get("content")
-            }
-            
-            success = update_miniflux_entry(entry_id, update_data)
-            results.append({
-                "entry_id": entry_id,
-                "updated": success
             })
     
-    return jsonify({
-        "status": "success",
-        "updated_entries": results
-    }), 200
+    return jsonify({"status": "success"}), 200
 
 if __name__ == "__main__":
     if not MINIFLUX_API_KEY:

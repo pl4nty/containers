@@ -1,4 +1,4 @@
-FROM ghcr.io/linuxserver/baseimage-kasmvnc:${TARGETARCH/arm64/arm64v8}-debianbookworm
+FROM ghcr.io/linuxserver/baseimage-kasmvnc:debianbookworm
 
 LABEL maintainer="github@sytone.com" \
       org.opencontainers.image.authors="github@sytone.com" \

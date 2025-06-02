@@ -1,5 +1,5 @@
 # https://github.com/open-telemetry/opentelemetry-cpp-contrib/blob/webserver/v1.1.0/instrumentation/otel-webserver-module/docker/ubuntu20.04/Dockerfile
-FROM ubuntu:20.04 AS build
+FROM ubuntu:24.04 AS build
 ENV DEBIAN_FRONTEND noninteractive
 
 RUN apt-get -y update && apt-get -y upgrade && apt-get -y dist-upgrade
@@ -11,7 +11,7 @@ RUN apt-get install -qq -y --ignore-missing \
 	pkg-config		                        \
 	protobuf-compiler	                    \
 	libprotobuf-dev                         \
-	python			                        \
+	python3			                        \
 	sudo			                        \
 	tar			                            \
 	zip			                            \
@@ -28,7 +28,7 @@ RUN apt-get install -y \
     default-jre
 
 # The following arguments would be passed from docker-compose.yml
-ARG GRPC_VERSION="1.36.4"
+ARG GRPC_VERSION="1.70.1"
 ARG OPENTELEMETRY_VERSION="1.2.0"
 ARG BOOST_VERSION="1.75.0"
 ARG BOOST_FILENAME="boost_1_75_0"
@@ -63,6 +63,7 @@ RUN git clone --shallow-submodules --depth 1 --recurse-submodules -b v${GRPC_VER
   && cd ../../..
 
 # install opentelemetry
+ARG OPENTELEMETRY_VERSION="1.19.0"
 RUN mkdir -p dependencies/opentelemetry/${OPENTELEMETRY_VERSION}/lib \
     && mkdir -p dependencies/opentelemetry/${OPENTELEMETRY_VERSION}/include \
     && git clone https://github.com/open-telemetry/opentelemetry-cpp \

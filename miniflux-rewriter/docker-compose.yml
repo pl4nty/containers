@@ -33,8 +33,8 @@ services:
     environment:
       - MINIFLUX_API_URL=http://miniflux:8080/v1
     env_file: .env
-    # volumes:
-    #   - ./rules.yaml:/app/data/rules.yaml
+    volumes:
+      - ./rules.yaml:/app/data/rules.yaml
 
 volumes:
   miniflux-db:
