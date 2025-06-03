@@ -9,5 +9,5 @@ RUN --mount=type=cache,target=/root/.npm npm ci
 COPY . ./
 RUN npm run build
 
-FROM joseluisq/static-web-server:2.36.1
+FROM joseluisq/static-web-server:2.37.0
 COPY --from=build /app/dist /public
