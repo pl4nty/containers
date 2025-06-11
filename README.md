@@ -1,6 +1,6 @@
 # Containers
 
-Builds container images for third-party apps with GitHub Actions, to run them on [my homelab](https://github.com/pl4nty/homelab/).
+Builds container images for third-party apps (or my own prototypes) with GitHub Actions, to run them on [my homelab](https://github.com/pl4nty/homelab/). Supports `linux/amd64`, `linux/arm64`, and `windows/amd64`.
 
 The contents of this repository are licensed under the MIT license. For dependencies and submodules, all rights are reserved by their respective owners.
 
