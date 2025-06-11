@@ -5,7 +5,7 @@
     ":disableRateLimiting"
   ],
   "osvVulnerabilityAlerts": true,
-  "dependencyDashboardOSVVulnerabilitySummary": true,
+  "dependencyDashboardOSVVulnerabilitySummary": "all",
   "additionalBranchPrefix": "{{parentDir}}-",
   "ignorePaths": [
     "archive/**"
