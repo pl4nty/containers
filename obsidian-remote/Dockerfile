@@ -17,7 +17,6 @@ RUN echo "**** install packages ****" && \
     apt-get clean && rm -rf /var/lib/apt/lists/* /var/tmp/* /tmp/*
 
 # Download and install Obsidian
-USER abc
 ARG TARGETARCH
 ARG FLAG=${TARGETARCH#amd64}
 RUN echo "**** download obsidian ****" && \
@@ -25,7 +24,8 @@ RUN echo "**** download obsidian ****" && \
         "https://github.com/obsidianmd/obsidian-releases/releases/download/v${OBSIDIAN_VERSION}/Obsidian-${OBSIDIAN_VERSION}${FLAG:+-arm64}.AppImage" && \
     chmod +x ./obsidian.AppImage && \
     ./obsidian.AppImage --appimage-extract && \
-    rm ./obsidian.AppImage
+    rm ./obsidian.AppImage && \
+    chown -R abc:abc squashfs-root
 
 # Environment variables
 ENV CUSTOM_PORT="8080" \
