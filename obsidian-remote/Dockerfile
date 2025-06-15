@@ -17,6 +17,7 @@ RUN echo "**** install packages ****" && \
     apt-get clean && rm -rf /var/lib/apt/lists/* /var/tmp/* /tmp/*
 
 # Download and install Obsidian
+USER abc
 ARG TARGETARCH
 ARG FLAG=${TARGETARCH#amd64}
 RUN echo "**** download obsidian ****" && \
