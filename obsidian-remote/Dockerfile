@@ -25,7 +25,7 @@ RUN echo "**** download obsidian ****" && \
     chmod +x ./obsidian.AppImage && \
     ./obsidian.AppImage --appimage-extract && \
     rm ./obsidian.AppImage && \
-    chown -R abc:abc squashfs-root
+    chown -R abc:abc squashfs-root/obsidian
 
 # Environment variables
 ENV CUSTOM_PORT="8080" \
