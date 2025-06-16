@@ -19,13 +19,14 @@ RUN echo "**** install packages ****" && \
 # Download and install Obsidian
 ARG TARGETARCH
 ARG FLAG=${TARGETARCH#amd64}
+USER abc
 RUN echo "**** download obsidian ****" && \
     curl -L -o ./obsidian.AppImage \
         "https://github.com/obsidianmd/obsidian-releases/releases/download/v${OBSIDIAN_VERSION}/Obsidian-${OBSIDIAN_VERSION}${FLAG:+-arm64}.AppImage" && \
     chmod +x ./obsidian.AppImage && \
     ./obsidian.AppImage --appimage-extract && \
-    rm ./obsidian.AppImage && \
-    chown -R abc:abc squashfs-root/obsidian
+    rm ./obsidian.AppImage
+USER root
 
 # Environment variables
 ENV CUSTOM_PORT="8080" \
