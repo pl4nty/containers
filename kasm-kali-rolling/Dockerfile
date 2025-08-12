@@ -1,4 +1,4 @@
-FROM kasmweb/kali-rolling-desktop:1.15.0-rolling as base
+FROM kasmweb/kali-rolling-desktop:1.17.0-rolling-weekly as base
 
 USER root
 # RUN sed -ie 's/kali-rolling/kali-last-snapshot/g' /etc/apt/sources.list
@@ -37,9 +37,9 @@ RUN --mount=type=cache,target=/var/cache/apt \
     qemu-system-x86 \
     jq
 
-RUN wget https://github.com/pwndbg/pwndbg/releases/download/2024.02.14/pwndbg_2024.02.14_amd64.deb && \
-    apt-get install -y ./pwndbg_2024.02.14_amd64.deb && \
-    rm pwndbg_2024.02.14_amd64.deb
+RUN wget https://github.com/pwndbg/pwndbg/releases/download/2025.05.30/pwndbg_2025.05.30_amd64.deb && \
+    apt-get install -y ./pwndbg_2025.05.30_amd64.deb && \
+    rm pwndbg_2025.05.30_amd64.deb
 
 RUN gem install zsteg
 
