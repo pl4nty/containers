@@ -47,9 +47,9 @@ USER kasm-user
 
 RUN git clone https://github.com/RsaCtfTool/RsaCtfTool.git && \
     cd RsaCtfTool && \
-    pip3 install -r requirements.txt
+    pip3 install -r requirements.txt --break-system-packages
 
-RUN python3 -m pip install --upgrade pwntools pypykatz
+RUN python3 -m pip install --upgrade pwntools pypykatz --break-system-packages
 
 RUN wget http://www.caesum.com/handbook/Stegsolve.jar -O stegsolve.jar && \
     chmod +x stegsolve.jar
@@ -59,9 +59,6 @@ RUN wget https://github.com/volatilityfoundation/volatility/releases/download/2.
     mv volatility_2.6_lin64_standalone/volatility_2.6_lin64_standalone vol.py && \
     chmod +x vol.py && \
     rm -r volatility_2.6_lin64_standalone && rm volatility_2.6_lin64_standalone.zip
-
-# RUN wget https://github.com/volatilityfoundation/volatility3/releases/download/v2.5.0/volatility3-2.5.0-py3-none-any.whl && \
-#     pip install volatility3-2.5.0-py3-none-any.whl
 
 RUN wget https://github.com/icsharpcode/AvaloniaILSpy/releases/download/v7.2-rc/Linux.x64.Release.zip && \
     unzip Linux.x64.Release.zip && unzip ILSpy-linux-x64-Release.zip -d AvaloniaILSpy && \
