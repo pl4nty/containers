@@ -1,5 +1,5 @@
 # Stage 1: Frontend build
-FROM node:21 AS frontend-build
+FROM node:22 AS frontend-build
 
 ENV NODE_ENV=development
 
