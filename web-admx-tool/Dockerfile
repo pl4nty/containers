@@ -1,4 +1,4 @@
-FROM node:22.19.0 AS build
+FROM node:24.11.1 AS build
 WORKDIR /app
 
 # ADD https://github.com/SherlockGn/web-admx-tool.git ./
