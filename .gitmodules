@@ -6,7 +6,7 @@
 	url = https://github.com/maliksahil/JWTPlayground
 [submodule "mha/mha"]
 	path = mha/mha
-	url = https://github.com/stephenegriffin/MHA
+	url = https://github.com/microsoft/MHA
 [submodule "storeweb/storeweb"]
 	path = storeweb/storeweb
 	url = https://github.com/StoreDev/StoreWeb
