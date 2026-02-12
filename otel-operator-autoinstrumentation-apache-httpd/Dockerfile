@@ -206,7 +206,7 @@ RUN cp -r /dependencies /otel-webserver-module/ \
     && ./gradlew assembleWebServerModule -DtargetSystem=ubuntu
 
 # https://github.com/open-telemetry/opentelemetry-operator/blob/v0.107.0/autoinstrumentation/apache-httpd/Dockerfile
-FROM alpine:3.22.0 AS agent
+FROM alpine:3.23.3 AS agent
 
 RUN mkdir /opt/opentelemetry
 WORKDIR /opt/opentelemetry
@@ -218,7 +218,7 @@ RUN mkdir agent
 COPY --from=build /otel-webserver-module/build/opentelemetry-webserver-sdk-$ARCH-linux.tgz .
 RUN tar -xvf opentelemetry-webserver-sdk-$ARCH-linux.tgz -C agent
 
-FROM alpine:3.22.0
+FROM alpine:3.23.3
 
 COPY --from=agent /opt/opentelemetry/agent/opentelemetry-webserver-sdk /opt/opentelemetry
 
