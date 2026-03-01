@@ -78,3 +78,7 @@
 [submodule "obsidian-remote/obsidian-remote"]
 	path = obsidian-remote/obsidian-remote
 	url = https://github.com/sytone/obsidian-remote
+[submodule "fortinet-downloads/fortinet-downloads"]
+	path = fortinet-downloads/fortinet-downloads
+	url = https://github.com/pl4nty/fortinet-downloads
+	branch = main
