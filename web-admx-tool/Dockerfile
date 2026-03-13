@@ -4,8 +4,10 @@ WORKDIR /app
 # ADD https://github.com/SherlockGn/web-admx-tool.git ./
 # COPY *.patch ./
 # find . -name *.patch -exec git apply {} ;
-COPY package*.json ./
-RUN --mount=type=cache,target=/root/.npm npm ci
+COPY package.json ./
+COPY pnpm-lock.yaml ./
+RUN --mount=type=cache,target=/root/.npm pnpm ci
+RUN apt-get update && apt-get install -y p7zip-full
 COPY . ./
 RUN npm run build
 
