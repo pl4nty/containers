@@ -1,0 +1,18 @@
+{
+  "manifest_version": 3,
+  "name": "Opera Flow Bridge",
+  "version": "0.1.0",
+  "description": "Receive files from Opera GX Android via the Opera Flow protocol in Chrome/Edge",
+  "background": {
+    "service_worker": "background.js"
+  },
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "Opera Flow Bridge"
+  },
+  "externally_connectable": {
+    "matches": ["https://web.flow.opera.com/*"]
+  },
+  "permissions": ["storage", "notifications", "downloads"],
+  "host_permissions": ["https://flow.opera.com/*", "https://api.flow.opera.com/*"]
+}
