@@ -1,3 +1,3 @@
-FROM node:24.14.1
+FROM node:24.15.0
 RUN npm install -g wrangler && npm cache clean --force
 ENTRYPOINT ["wrangler"]
