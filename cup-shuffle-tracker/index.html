@@ -1,0 +1,415 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0a0a0a">
+<title>Cup Shuffle Tracker</title>
+<style>
+  :root { color-scheme: dark; }
+  *, *::before, *::after { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; background: #0a0a0a; color: #fff;
+    font: 14px/1.4 -apple-system, system-ui, "Segoe UI", sans-serif;
+    overflow: hidden; overscroll-behavior: none;
+    -webkit-tap-highlight-color: transparent;
+    -webkit-touch-callout: none;
+    user-select: none;
+  }
+  body { display: flex; flex-direction: column; }
+  .stage {
+    position: relative; flex: 1; min-height: 0; background: #000; overflow: hidden;
+  }
+  .stage video, .stage canvas {
+    position: absolute; inset: 0; width: 100%; height: 100%;
+  }
+  .stage video { object-fit: contain; background: #000; }
+  .stage canvas { pointer-events: none; image-rendering: pixelated; }
+  .hud {
+    position: absolute; left: 0; right: 0; top: 0;
+    padding: env(safe-area-inset-top, 0) 12px 8px;
+    padding-top: max(8px, env(safe-area-inset-top));
+    background: linear-gradient(rgba(0,0,0,.72), rgba(0,0,0,0));
+    pointer-events: none;
+  }
+  .phase { font-weight: 700; font-size: 15px; color: #66d17b; letter-spacing: .02em; }
+  .phase.warn { color: #ffb347; }
+  .phase.done { color: #ffd54f; }
+  .info { font-size: 12px; opacity: .8; margin-top: 2px;
+    font-family: ui-monospace, "SF Mono", Menlo, monospace; }
+  .result {
+    position: absolute; left: 50%; bottom: 28px; transform: translate(-50%, 0);
+    background: rgba(255,213,79,.96); color: #1a1a1a;
+    padding: 12px 18px; border-radius: 12px;
+    font-weight: 800; font-size: 16px;
+    box-shadow: 0 6px 24px rgba(0,0,0,.4);
+    pointer-events: none; opacity: 0; transition: opacity .25s ease;
+    text-align: center;
+  }
+  .result.show { opacity: 1; }
+  .controls {
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px;
+    padding: 8px 8px calc(8px + env(safe-area-inset-bottom));
+    background: #111;
+  }
+  button, .lbl {
+    padding: 12px 6px; border: 0; border-radius: 10px;
+    background: #262626; color: #fff; font: 700 13px/1 inherit;
+    text-align: center; cursor: pointer;
+    -webkit-appearance: none; appearance: none;
+  }
+  button.primary { background: #1f7a3a; }
+  button.danger { background: #7a2f2f; }
+  button:active { filter: brightness(1.2); }
+  button:disabled { opacity: .35; pointer-events: none; }
+  button.on { background: #155a8a; }
+  input[type=file] { display: none; }
+  .err { color: #ff5252; font-size: 12px; padding: 6px 12px; background: #200; }
+  .placeholder { position: absolute; inset: 0; display: flex; align-items: center;
+    justify-content: center; color: #555; font-size: 14px; text-align: center; padding: 24px;
+  }
+</style>
+</head>
+<body>
+<div class="stage" id="stage">
+  <video id="vid" playsinline muted></video>
+  <canvas id="overlay"></canvas>
+  <div class="placeholder" id="placeholder">Pick a video file or tap Camera to begin</div>
+  <div class="hud">
+    <div id="phase" class="phase">Idle</div>
+    <div id="info" class="info"></div>
+  </div>
+  <div id="result" class="result"></div>
+</div>
+<div class="controls">
+  <button id="btnStart" class="primary">▶ Start</button>
+  <button id="btnReset">↻ Reset</button>
+  <button id="btnCamera">📷 Camera</button>
+  <label class="lbl" for="fileInput">📁 Video</label>
+  <input type="file" id="fileInput" accept="video/*">
+</div>
+<div id="errBox" class="err" hidden></div>
+
+<script type="module">
+import { GameTracker, CFG, PHASES } from './tracker.js';
+
+const vid = document.getElementById('vid');
+const overlay = document.getElementById('overlay');
+const ovCtx = overlay.getContext('2d');
+const placeholder = document.getElementById('placeholder');
+const phaseEl = document.getElementById('phase');
+const infoEl = document.getElementById('info');
+const resultEl = document.getElementById('result');
+const errBox = document.getElementById('errBox');
+const btnStart = document.getElementById('btnStart');
+const btnReset = document.getElementById('btnReset');
+const btnCamera = document.getElementById('btnCamera');
+const fileInput = document.getElementById('fileInput');
+
+// Hidden processing canvas
+const proc = document.createElement('canvas');
+proc.width = CFG.procW;
+proc.height = CFG.procH;
+const procCtx = proc.getContext('2d', { willReadFrequently: true });
+
+const game = new GameTracker();
+let running = false;
+let lastPhase = null;
+let stream = null;
+const fps = { t: performance.now(), n: 0, value: 0 };
+
+const phaseLabel = (p) => ({
+  [PHASES.IDLE]: 'Tap Start when the cup is about to lift',
+  [PHASES.LOOK_FOR_BALL]: 'Looking for the ball...',
+  [PHASES.WATCH_HIDE]: 'Ball spotted — watching the cup',
+  [PHASES.TRACK]: 'Tracking shuffles...',
+  [PHASES.DONE]: 'Ball found!',
+}[p] ?? p);
+
+function setPhase(p) {
+  phaseEl.textContent = phaseLabel(p);
+  phaseEl.classList.toggle('warn', p === PHASES.LOOK_FOR_BALL || p === PHASES.WATCH_HIDE);
+  phaseEl.classList.toggle('done', p === PHASES.DONE);
+}
+
+function showError(msg) {
+  if (!msg) { errBox.hidden = true; return; }
+  errBox.hidden = false;
+  errBox.textContent = msg;
+}
+
+function setRunning(on) {
+  running = on;
+  if (on) {
+    btnStart.classList.add('on');
+    btnStart.textContent = '⏹ Tracking';
+  } else {
+    btnStart.classList.remove('on');
+    btnStart.textContent = '▶ Start';
+  }
+}
+
+// Layout: keep the overlay canvas synced to the rendered video size
+function syncOverlay() {
+  const rect = vid.getBoundingClientRect();
+  // The video may letterbox inside its element; compute the visible video rect
+  const vw = vid.videoWidth || 1;
+  const vh = vid.videoHeight || 1;
+  const elementAR = rect.width / rect.height;
+  const videoAR = vw / vh;
+  let drawW, drawH;
+  if (videoAR > elementAR) {
+    drawW = rect.width;
+    drawH = drawW / videoAR;
+  } else {
+    drawH = rect.height;
+    drawW = drawH * videoAR;
+  }
+  overlay.width = Math.max(1, Math.floor(drawW));
+  overlay.height = Math.max(1, Math.floor(drawH));
+  // Clear shorthand BEFORE per-side values, otherwise the shorthand wins.
+  overlay.style.inset = 'auto';
+  overlay.style.right = 'auto';
+  overlay.style.bottom = 'auto';
+  overlay.style.width = `${drawW}px`;
+  overlay.style.height = `${drawH}px`;
+  overlay.style.left = `${rect.width / 2 - drawW / 2}px`;
+  overlay.style.top = `${rect.height / 2 - drawH / 2}px`;
+}
+
+function clearOverlay() {
+  ovCtx.clearRect(0, 0, overlay.width, overlay.height);
+}
+
+function drawOverlay(state) {
+  clearOverlay();
+  const sx = overlay.width / CFG.procW;
+  const sy = overlay.height / CFG.procH;
+
+  // Draw detected cups (faint)
+  for (const c of state.detectedCups) {
+    ovCtx.strokeStyle = 'rgba(255,255,255,.25)';
+    ovCtx.lineWidth = 1.5;
+    ovCtx.strokeRect(c.x * sx, c.y * sy, c.w * sx, c.h * sy);
+  }
+
+  // Draw tracked cups with IDs
+  for (const c of state.cups) {
+    const isBall = c.id === state.ballCupId;
+    const alpha = c.missing > 0 ? 0.4 : 1;
+    ovCtx.strokeStyle = isBall ? `rgba(102,209,123,${alpha})` : `rgba(120,180,255,${alpha})`;
+    ovCtx.lineWidth = isBall ? 4 : 2;
+    const x = (c.cx - c.w / 2) * sx;
+    const y = (c.cy - c.h / 2) * sy;
+    const w = c.w * sx, h = c.h * sy;
+    ovCtx.strokeRect(x, y, w, h);
+    ovCtx.fillStyle = ovCtx.strokeStyle;
+    ovCtx.font = `${isBall ? 'bold ' : ''}14px ui-monospace, Menlo, monospace`;
+    ovCtx.fillText(`#${c.id}${isBall ? ' ★' : ''}`, x + 4, y + 16);
+  }
+
+  // Big arrow when DONE
+  if (state.phase === PHASES.DONE && state.ballCupId != null) {
+    const cup = state.cups.find((c) => c.id === state.ballCupId);
+    if (cup) {
+      const cx = cup.cx * sx;
+      const cy = (cup.cy - cup.h / 2) * sy;
+      ovCtx.save();
+      ovCtx.fillStyle = '#ffd54f';
+      ovCtx.strokeStyle = '#0a0a0a';
+      ovCtx.lineWidth = 3;
+      const size = Math.max(24, cup.w * sx * 0.4);
+      // Pulsing
+      const pulse = 1 + 0.12 * Math.sin(performance.now() / 180);
+      const s = size * pulse;
+      ovCtx.beginPath();
+      ovCtx.moveTo(cx, cy - 8);
+      ovCtx.lineTo(cx - s * 0.6, cy - 8 - s);
+      ovCtx.lineTo(cx + s * 0.6, cy - 8 - s);
+      ovCtx.closePath();
+      ovCtx.fill();
+      ovCtx.stroke();
+      ovCtx.restore();
+    }
+  }
+
+  // Draw ball
+  if (state.ball) {
+    const b = state.ball;
+    ovCtx.beginPath();
+    ovCtx.arc(b.cx * sx, b.cy * sy, Math.max(8, (b.w * sx) / 2 + 2), 0, Math.PI * 2);
+    ovCtx.strokeStyle = b.color === 'yellow' ? '#ffeb3b' : '#42a5f5';
+    ovCtx.lineWidth = 3;
+    ovCtx.stroke();
+  }
+}
+
+function showResult(state) {
+  if (state.phase === PHASES.DONE && state.ballCupId != null) {
+    const sorted = [...state.cups].sort((a, b) => a.cx - b.cx);
+    const slot = sorted.findIndex((c) => c.id === state.ballCupId);
+    const slotName =
+      sorted.length <= 1 ? 'this' :
+      slot === 0 ? 'LEFT' :
+      slot === sorted.length - 1 ? 'RIGHT' :
+      sorted.length === 3 && slot === 1 ? 'MIDDLE' :
+      `position ${slot + 1} of ${sorted.length}`;
+    resultEl.textContent = `🎯 Ball is under the ${slotName} cup`;
+    resultEl.classList.add('show');
+  } else {
+    resultEl.classList.remove('show');
+  }
+}
+
+function tick() {
+  requestAnimationFrame(tick);
+
+  if (vid.readyState < 2 || vid.paused || vid.ended) return;
+  if (!vid.videoWidth) return;
+
+  const now = performance.now();
+  fps.n++;
+  if (now - fps.t >= 500) {
+    fps.value = (fps.n / (now - fps.t)) * 1000;
+    fps.t = now; fps.n = 0;
+  }
+
+  // Downsample to processing canvas
+  procCtx.drawImage(vid, 0, 0, CFG.procW, CFG.procH);
+  const img = procCtx.getImageData(0, 0, CFG.procW, CFG.procH);
+
+  let state;
+  if (running || game.phase === PHASES.DONE) {
+    // processFrame freezes itself once DONE so we can keep calling it cheaply
+    // to keep the highlighted overlay anchored on the answer cup.
+    state = game.processFrame(img, CFG.procW, CFG.procH);
+  } else {
+    state = {
+      phase: game.phase,
+      cups: [],
+      detectedCups: [],
+      ball: null,
+      ballCupId: null,
+      meanSpeed: 0,
+      frame: 0,
+    };
+  }
+
+  // Sync overlay size to video rendered size
+  if (overlay.width !== Math.floor(vid.getBoundingClientRect().width)) {
+    syncOverlay();
+  }
+
+  drawOverlay(state);
+  showResult(state);
+
+  // Phase change
+  if (state.phase !== lastPhase) {
+    setPhase(state.phase);
+    lastPhase = state.phase;
+    if (state.phase === PHASES.DONE) {
+      setRunning(false);
+    }
+  }
+
+  infoEl.textContent = [
+    `phase=${state.phase}`,
+    `cups=${state.cups.length}/${state.detectedCups.length}`,
+    state.ballColor ? `ball=${state.ballColor}#${state.ballCupId ?? '?'}` : '',
+    `speed=${state.meanSpeed.toFixed(2)}`,
+    `stop=${state.stopCounter ?? 0}/${CFG.stopFrames}`,
+    `fps=${fps.value.toFixed(0)}`,
+  ].filter(Boolean).join(' • ');
+}
+
+function start() {
+  if (!vid.videoWidth) {
+    showError('Load a video or start the camera first');
+    return;
+  }
+  showError(null);
+  resultEl.classList.remove('show');
+  game.start();
+  setRunning(true);
+  setPhase(game.phase);
+  if (vid.paused) vid.play();
+}
+
+function reset() {
+  game.reset();
+  setRunning(false);
+  setPhase(game.phase);
+  resultEl.classList.remove('show');
+  clearOverlay();
+}
+
+btnStart.addEventListener('click', start);
+btnReset.addEventListener('click', reset);
+
+fileInput.addEventListener('change', async (e) => {
+  const f = e.target.files?.[0];
+  if (!f) return;
+  if (stream) { stream.getTracks().forEach((t) => t.stop()); stream = null; btnCamera.classList.remove('on'); }
+  vid.srcObject = null;
+  vid.src = URL.createObjectURL(f);
+  vid.muted = true;
+  vid.loop = false;
+  placeholder.style.display = 'none';
+  await new Promise((r) => { vid.onloadedmetadata = r; });
+  syncOverlay();
+  reset();
+  vid.play().catch(() => {});
+});
+
+btnCamera.addEventListener('click', async () => {
+  try {
+    if (stream) {
+      stream.getTracks().forEach((t) => t.stop());
+      stream = null;
+      vid.srcObject = null;
+      btnCamera.classList.remove('on');
+      placeholder.style.display = '';
+      clearOverlay();
+      reset();
+      return;
+    }
+    stream = await navigator.mediaDevices.getUserMedia({
+      video: { facingMode: { ideal: 'environment' }, width: { ideal: 1280 }, height: { ideal: 720 } },
+      audio: false,
+    });
+    vid.src = '';
+    vid.srcObject = stream;
+    vid.muted = true;
+    await vid.play();
+    placeholder.style.display = 'none';
+    btnCamera.classList.add('on');
+    showError(null);
+    syncOverlay();
+    reset();
+  } catch (err) {
+    showError(`Camera failed: ${err.message}`);
+  }
+});
+
+window.addEventListener('resize', () => { if (vid.videoWidth) syncOverlay(); });
+vid.addEventListener('loadedmetadata', syncOverlay);
+
+// Expose for test harness
+window.__game = game;
+window.__CFG = CFG;
+window.__PHASES = PHASES;
+window.__getState = () => ({
+  phase: game.phase,
+  ballColor: game.ballColor,
+  ballCupId: game.ballCupId,
+  cups: game.cupTracker.cups.map((c) => ({
+    id: c.id, cx: c.cx, cy: c.cy, vx: c.vx, vy: c.vy, w: c.w, h: c.h, missing: c.missing,
+  })),
+  stopCounter: game.stopCounter,
+  frame: game.cupTracker.frame,
+});
+
+setPhase(game.phase);
+requestAnimationFrame(tick);
+</script>
+</body>
+</html>
