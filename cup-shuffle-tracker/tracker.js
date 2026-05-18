@@ -22,15 +22,18 @@ export const CFG = {
   ballYMax: 0.92,
   ballXMin: 0.10,
   ballXMax: 0.78,
-  // Tracker
+  // Centroid tracker (used only before lock)
   matchDist: 90,
-  matchDistLocked: 110,    // permissive distance when fixed-N tracker is locked
   maxMissingFramesUnlocked: 8,
   // Phase 1: ball must persist for N frames before we accept it
   minBallFrames: 3,
-  // Stop detection
-  stopMoveThreshold: 1.8,  // px/frame mean |velocity| to count as moving
-  stopFrames: 30,          // ~1s @ 30fps
+  // Slot tracker
+  slotToleranceFrac: 0.42,  // tolerance = slotSpacing * frac (capped)
+  slotToleranceMax: 16,
+  slotEmptyMinFrames: 2,    // a slot must be empty this many frames to count
+  swapCommitFrames: 2,      // all slots occupied this long after a swap to commit it
+  // Stop detection (frames of stable+all-occupied)
+  stopFrames: 30,           // ~1s @ 30fps
   minTrackFrames: 8,
 };
 
@@ -233,19 +236,13 @@ export function detect(imageData, w, h, opts = {}) {
   return { cups: cupBlobs, ball, masks };
 }
 
-// ---- Multi-object cup tracker ----
-// Two modes:
-//   unlocked: free to add / drop tracks (used while discovering cups)
-//   locked: number of tracks is fixed; missing detections become extrapolations
+// ---- Centroid tracker (only used during discovery, before the slot tracker takes over)
 export class CupTracker {
   constructor() {
     this.cups = []; // {id, cx, cy, vx, vy, w, h, age, missing}
     this.nextId = 0;
     this.frame = 0;
-    this.locked = false;
   }
-
-  lock() { this.locked = true; }
 
   update(detections) {
     this.frame++;
@@ -257,7 +254,6 @@ export class CupTracker {
 
     const N = tracks.length;
     const M = detections.length;
-    const maxDist = this.locked ? CFG.matchDistLocked : CFG.matchDist;
     const pairs = [];
     for (let i = 0; i < N; i++) {
       for (let j = 0; j < M; j++) {
@@ -270,66 +266,190 @@ export class CupTracker {
     const usedD = new Uint8Array(M);
     const assign = new Map();
     for (const { i, j, d } of pairs) {
-      if (d > maxDist) break;
+      if (d > CFG.matchDist) break;
       if (usedT[i] || usedD[j]) continue;
       usedT[i] = 1; usedD[j] = 1;
       assign.set(i, j);
     }
-
-    // Update matched
     for (const [i, j] of assign) {
       const t = tracks[i];
       const d = detections[j];
-      const nvx = d.cx - t.cx;
-      const nvy = d.cy - t.cy;
-      t.vx = 0.4 * t.vx + 0.6 * nvx;
-      t.vy = 0.4 * t.vy + 0.6 * nvy;
-      t.cx = d.cx; t.cy = d.cy;
-      t.w = d.w; t.h = d.h;
+      t.vx = 0.4 * t.vx + 0.6 * (d.cx - t.cx);
+      t.vy = 0.4 * t.vy + 0.6 * (d.cy - t.cy);
+      t.cx = d.cx; t.cy = d.cy; t.w = d.w; t.h = d.h;
       t.age = (t.age ?? 0) + 1;
       t.missing = 0;
     }
-    // Unmatched tracks: short-step extrapolation with strong velocity damping
-    // so a missed detection never throws a ghost track across the frame.
-    const maxStep = 4;
     for (let i = 0; i < N; i++) {
       if (!usedT[i]) {
-        const t = tracks[i];
-        let dx = t.vx, dy = t.vy;
-        if (dx > maxStep) dx = maxStep; else if (dx < -maxStep) dx = -maxStep;
-        if (dy > maxStep) dy = maxStep; else if (dy < -maxStep) dy = -maxStep;
-        t.cx += dx;
-        t.cy += dy;
-        t.vx *= 0.3;
-        t.vy *= 0.3;
-        t.missing = (t.missing ?? 0) + 1;
+        tracks[i].missing = (tracks[i].missing ?? 0) + 1;
       }
     }
-    if (!this.locked) {
-      // Spawn new tracks for unmatched detections
-      for (let j = 0; j < M; j++) {
-        if (!usedD[j]) {
-          const d = detections[j];
-          tracks.push({
-            id: this.nextId++,
-            cx: d.cx, cy: d.cy, vx: 0, vy: 0, w: d.w, h: d.h,
-            age: 1, missing: 0,
-          });
-        }
+    for (let j = 0; j < M; j++) {
+      if (!usedD[j]) {
+        const d = detections[j];
+        tracks.push({
+          id: this.nextId++,
+          cx: d.cx, cy: d.cy, vx: 0, vy: 0, w: d.w, h: d.h,
+          age: 1, missing: 0,
+        });
       }
-      this.cups = tracks.filter((t) => t.missing < CFG.maxMissingFramesUnlocked);
     }
-    // When locked: never add or drop tracks
-  }
-
-  meanSpeed() {
-    if (!this.cups.length) return 0;
-    let s = 0;
-    for (const c of this.cups) s += Math.hypot(c.vx, c.vy);
-    return s / this.cups.length;
+    this.cups = tracks.filter((t) => t.missing < CFG.maxMissingFramesUnlocked);
   }
 
   get(id) { return this.cups.find((c) => c.id === id); }
+}
+
+// ---- Slot tracker ----
+// The arcade game returns cups to a fixed set of rest positions ("slots").
+// Rather than try to track cup identity through the swap motion (where cups
+// overlap and become visually indistinguishable), we just watch which slots
+// are empty during the motion. Two slots that were both empty during a swap
+// window must have been each other's swap partners; we permute the IDs in
+// those slots accordingly. The ball ID stays put — only its slot index moves.
+export class SlotTracker {
+  constructor(slotPositions, slotCupIds, ballSlot, typicalCupW, baselineCy) {
+    this.slotPositions = slotPositions.slice();          // x of each slot
+    this.slotMap = slotCupIds.slice();                   // cup id at each slot
+    this.ballSlot = ballSlot;
+    this.typicalCupW = typicalCupW;
+    this.baselineCy = baselineCy;
+    this.frame = 0;
+    this.state = 'stable';
+    this.swapStartFrame = 0;
+    this.swapEmptyCounts = new Array(slotPositions.length).fill(0);
+    this.stableSinceSwap = 0;
+    this.stableCount = 0;
+    this.swapHistory = [];                               // [{slots, frame}], for debugging
+    this.emptyStreak = new Array(slotPositions.length).fill(0);
+    // Tolerance for "a cup is at this slot"
+    let minSpacing = Infinity;
+    const sp = [...slotPositions].sort((a, b) => a - b);
+    for (let i = 1; i < sp.length; i++) {
+      const d = sp[i] - sp[i - 1];
+      if (d < minSpacing) minSpacing = d;
+    }
+    this.tolerance = Math.min(CFG.slotToleranceMax,
+      Math.max(6, minSpacing * CFG.slotToleranceFrac));
+    // More generous cy tolerance so a cup sitting slightly low/high still
+    // registers as occupying its slot.
+    this.cyTolerance = Math.max(20, typicalCupW * 1.0);
+    // Don't trust swap detections until the cups have been observed in their
+    // slots for a while — covers the moment the hiding cup is still settling
+    // back to its slot.
+    this.everStable = false;
+  }
+
+  // A cup occupies a slot only when it's centred near the slot's x AND its
+  // centroid is near the resting floor y — a cup lifted up high during a
+  // swap mustn't be counted as still sitting in its slot.
+  computeOccupancy(detections) {
+    const occ = new Array(this.slotPositions.length).fill(false);
+    for (const d of detections) {
+      if (Math.abs(d.cy - this.baselineCy) > this.cyTolerance) continue;
+      let best = -1, bestDist = Infinity;
+      for (let i = 0; i < this.slotPositions.length; i++) {
+        const dist = Math.abs(d.cx - this.slotPositions[i]);
+        if (dist < bestDist && dist <= this.tolerance) {
+          bestDist = dist; best = i;
+        }
+      }
+      if (best >= 0) occ[best] = true;
+    }
+    return occ;
+  }
+
+  applySwap(slots) {
+    if (slots.length !== 2) return; // ignore complex permutations
+    const [a, b] = slots;
+    [this.slotMap[a], this.slotMap[b]] = [this.slotMap[b], this.slotMap[a]];
+    if (this.ballSlot === a) this.ballSlot = b;
+    else if (this.ballSlot === b) this.ballSlot = a;
+    this.swapHistory.push({ slots: [a, b], frame: this.frame });
+  }
+
+  update(detections) {
+    this.frame++;
+    const occupied = this.computeOccupancy(detections);
+    const allOccupied = occupied.every((o) => o);
+
+    for (let i = 0; i < occupied.length; i++) {
+      if (!occupied[i]) this.emptyStreak[i]++;
+      else this.emptyStreak[i] = 0;
+    }
+
+    if (this.state === 'stable') {
+      if (allOccupied) {
+        this.stableCount++;
+        if (this.stableCount >= 3) this.everStable = true;
+      } else {
+        this.stableCount = 0;
+      }
+      const trulyEmpty = [];
+      for (let i = 0; i < this.emptyStreak.length; i++) {
+        if (this.emptyStreak[i] >= CFG.slotEmptyMinFrames) trulyEmpty.push(i);
+      }
+      // A swap requires two slots emptying — a single missed detection on
+      // one slot is not enough. Also don't trust this until we've actually
+      // seen a stable arrangement at least once.
+      if (this.everStable && trulyEmpty.length >= 2) {
+        this.state = 'swapping';
+        this.swapStartFrame = this.frame;
+        this.swapEmptyCounts.fill(0);
+        for (const i of trulyEmpty) this.swapEmptyCounts[i] = this.emptyStreak[i];
+        this.stableSinceSwap = 0;
+        this.stableCount = 0;
+      }
+    } else { // swapping
+      for (let i = 0; i < occupied.length; i++) {
+        if (!occupied[i]) this.swapEmptyCounts[i]++;
+      }
+      if (allOccupied) {
+        this.stableSinceSwap++;
+        if (this.stableSinceSwap >= CFG.swapCommitFrames) {
+          // Pick the slots that were empty for the longest fraction of the
+          // motion. This rejects slots that just had a brief detection glitch.
+          const totalSwapFrames = this.frame - this.swapStartFrame;
+          const minRatio = Math.max(0.35, CFG.slotEmptyMinFrames / Math.max(1, totalSwapFrames));
+          const ranked = this.swapEmptyCounts
+            .map((c, i) => ({ i, c, ratio: c / Math.max(1, totalSwapFrames) }))
+            .filter((e) => e.c >= CFG.slotEmptyMinFrames && e.ratio >= minRatio)
+            .sort((a, b) => b.c - a.c);
+          // Take the top 2 — the swap involves exactly two slots.
+          const slots = ranked.slice(0, 2).map((e) => e.i).sort((a, b) => a - b);
+          if (slots.length === 2) this.applySwap(slots);
+          this.state = 'stable';
+          this.swapEmptyCounts.fill(0);
+          this.stableSinceSwap = 0;
+          this.stableCount = CFG.swapCommitFrames;
+        }
+      } else {
+        this.stableSinceSwap = 0;
+      }
+    }
+
+    return {
+      occupied,
+      emptySlots: occupied.map((o, i) => (o ? -1 : i)).filter((i) => i >= 0),
+      state: this.state,
+      stableCount: this.stableCount,
+      swapEmptyCounts: this.swapEmptyCounts.slice(),
+    };
+  }
+
+  // For UI: a list of slot boxes
+  renderSlots(cupHeight) {
+    return this.slotPositions.map((sx, i) => ({
+      cx: sx,
+      cy: this.baselineCy ?? sx, // baselineCy set by GameTracker
+      w: this.typicalCupW,
+      h: cupHeight ?? this.typicalCupW,
+      slot: i,
+      cupId: this.slotMap[i],
+      isBall: i === this.ballSlot,
+    }));
+  }
 }
 
 // ---- Game state machine ----
@@ -341,12 +461,20 @@ export const PHASES = Object.freeze({
   DONE: 'done',
 });
 
+// median helper for cup geometry
+function median(xs) {
+  if (!xs.length) return 0;
+  const a = [...xs].sort((p, q) => p - q);
+  return a[a.length >> 1];
+}
+
 export class GameTracker {
   constructor() { this.reset(); }
 
   reset() {
     this.phase = PHASES.IDLE;
     this.cupTracker = new CupTracker();
+    this.slotTracker = null;
     this.ballColor = null;
     this.ballPos = null;
     this.ballCupId = null;
@@ -354,10 +482,11 @@ export class GameTracker {
     this.framesInPhase = 0;
     this.ballHistory = [];
     this.ballStreak = 0;
-    this.trackFrames = 0;
     this.lastBall = null;
     this.typicalCupW = 0;
-    this.baselineCups = []; // [{cx, cy}] sorted left-to-right at lock time
+    this.typicalCupH = 0;
+    this.baselineCy = 0;
+    this.lastSlotState = null;
   }
 
   start() {
@@ -365,129 +494,134 @@ export class GameTracker {
     this.phase = PHASES.LOOK_FOR_BALL;
   }
 
+  // Build the slot tracker from the current centroid tracks plus the ball position.
+  _lockSlots(refX) {
+    const cups = this.cupTracker.cups
+      .filter((c) => c.missing <= 1)
+      .sort((a, b) => a.cx - b.cx);
+    if (cups.length < 2) return false;
+
+    const slotPositions = cups.map((c) => c.cx);
+    const slotMap = cups.map((c) => c.id);
+
+    // Ball slot = the slot whose x is closest to where the ball was hidden
+    let ballSlot = 0, bestDist = Infinity;
+    for (let i = 0; i < slotPositions.length; i++) {
+      const d = Math.abs(slotPositions[i] - refX);
+      if (d < bestDist) { bestDist = d; ballSlot = i; }
+    }
+
+    this.typicalCupW = median(cups.map((c) => c.w));
+    this.typicalCupH = median(cups.map((c) => c.h));
+    this.baselineCy = median(cups.map((c) => c.cy));
+    this.ballCupId = slotMap[ballSlot];
+
+    this.slotTracker = new SlotTracker(slotPositions, slotMap, ballSlot,
+      this.typicalCupW, this.baselineCy);
+    return true;
+  }
+
   processFrame(imageData, w, h) {
-    // Once we've reached DONE, freeze the tracker so the highlighted answer
-    // doesn't drift as the user lifts the phone or the game animates.
     if (this.phase === PHASES.DONE) {
+      // Freeze: keep showing the locked answer until reset
+      const st = this.slotTracker;
       return {
         phase: this.phase,
-        cups: this.cupTracker.cups,
+        slots: st ? st.renderSlots(this.typicalCupH) : [],
         detectedCups: [],
         ball: null,
         ballColor: this.ballColor,
         ballCupId: this.ballCupId,
-        ballPos: this.ballPos,
+        ballSlot: st?.ballSlot ?? null,
+        slotMap: st ? st.slotMap.slice() : [],
+        swapHistory: st ? st.swapHistory.slice() : [],
         stopCounter: this.stopCounter,
-        meanSpeed: 0,
+        slotState: 'stable',
         frame: this.cupTracker.frame,
-        locked: true,
       };
     }
-    const result = detect(imageData, w, h, {
-      typicalCupW: this.typicalCupW,
-    });
-    this.cupTracker.update(result.cups);
-    this.framesInPhase++;
 
+    const result = detect(imageData, w, h, {});
+    this.framesInPhase++;
     const { ball } = result;
     if (ball) this.lastBall = ball;
 
+    // Update centroid tracker only during discovery; once we've locked slots,
+    // it's no longer used for matching, so we can stop feeding it.
+    if (this.phase === PHASES.LOOK_FOR_BALL || this.phase === PHASES.WATCH_HIDE) {
+      this.cupTracker.update(result.cups);
+    }
+
     if (this.phase === PHASES.LOOK_FOR_BALL) {
-      // Require a few consecutive frames of the same colored ball
       if (ball) {
-        if (this.ballColor === null) {
+        if (this.ballColor === null || this.ballColor === ball.color) {
           this.ballColor = ball.color;
-          this.ballStreak = 1;
-        } else if (this.ballColor === ball.color) {
           this.ballStreak++;
         } else {
-          // Different color seen; bias toward the larger one, reset streak
           this.ballColor = ball.color;
           this.ballStreak = 1;
         }
         this.ballPos = { x: ball.cx, y: ball.cy };
-        this.ballHistory.push({ x: ball.cx, y: ball.cy, f: this.cupTracker.frame });
+        this.ballHistory.push({ x: ball.cx, y: ball.cy });
         if (this.ballHistory.length > 30) this.ballHistory.shift();
-
         if (this.ballStreak >= CFG.minBallFrames) {
           this.phase = PHASES.WATCH_HIDE;
           this.framesInPhase = 0;
         }
       } else {
-        // Decay streak when we miss
         this.ballStreak = Math.max(0, this.ballStreak - 1);
         if (this.ballStreak === 0) this.ballColor = null;
       }
     } else if (this.phase === PHASES.WATCH_HIDE) {
       if (ball && ball.color === this.ballColor) {
         this.ballPos = { x: ball.cx, y: ball.cy };
-        this.ballHistory.push({ x: ball.cx, y: ball.cy, f: this.cupTracker.frame });
+        this.ballHistory.push({ x: ball.cx, y: ball.cy });
         if (this.ballHistory.length > 30) this.ballHistory.shift();
         this.ballStreak = Math.min(this.ballStreak + 1, 30);
       } else {
-        // Ball not seen this frame
         this.ballStreak = Math.max(0, this.ballStreak - 1);
       }
-      // Once the ball has been gone for several frames, identify the ball cup
       if (this.ballStreak === 0 && this.ballPos && this.framesInPhase > 3) {
-        // Use a centroid of the recent ball positions
-        let sx = 0, sy = 0;
-        for (const p of this.ballHistory) { sx += p.x; sy += p.y; }
+        // Pick the ball slot by where the ball last sat (average of recent positions)
+        let sx = 0;
+        for (const p of this.ballHistory) sx += p.x;
         const refX = sx / Math.max(1, this.ballHistory.length);
-        const refY = sy / Math.max(1, this.ballHistory.length);
-        let best = null;
-        let bestScore = Infinity;
-        for (const c of this.cupTracker.cups) {
-          if (c.missing > 2) continue;
-          const dx = Math.abs(c.cx - refX);
-          // Prefer cup whose x-center is close; tolerate cup being above the ball
-          const score = dx + 0.1 * Math.max(0, c.cy - refY);
-          if (score < bestScore) { bestScore = score; best = c; }
-        }
-        if (best && Math.abs(best.cx - refX) < 50) {
-          this.ballCupId = best.id;
-          // Record typical cup geometry from live tracks for split-wide-blob
-          const widths = this.cupTracker.cups.filter((c) => c.missing <= 1).map((c) => c.w);
-          if (widths.length) {
-            widths.sort((a, b) => a - b);
-            this.typicalCupW = widths[Math.floor(widths.length / 2)];
-          }
-          this.baselineCups = [...this.cupTracker.cups]
-            .filter((c) => c.missing <= 1)
-            .sort((a, b) => a.cx - b.cx)
-            .map((c) => ({ id: c.id, cx: c.cx, cy: c.cy }));
-          this.cupTracker.lock();
+        if (this._lockSlots(refX)) {
           this.phase = PHASES.TRACK;
           this.framesInPhase = 0;
-          this.trackFrames = 0;
           this.stopCounter = 0;
         }
       }
     } else if (this.phase === PHASES.TRACK) {
-      this.trackFrames++;
-      const ms = this.cupTracker.meanSpeed();
-      if (this.trackFrames >= CFG.minTrackFrames && ms < CFG.stopMoveThreshold) {
-        this.stopCounter++;
-        if (this.stopCounter >= CFG.stopFrames) {
-          this.phase = PHASES.DONE;
-        }
-      } else {
-        this.stopCounter = 0;
+      this.lastSlotState = this.slotTracker.update(result.cups);
+      // Done = slot tracker has been stable+all-occupied for stopFrames consecutive frames
+      if (this.framesInPhase >= CFG.minTrackFrames &&
+          this.lastSlotState.state === 'stable' &&
+          this.lastSlotState.stableCount >= CFG.stopFrames) {
+        this.phase = PHASES.DONE;
       }
+      this.stopCounter = this.lastSlotState.stableCount;
     }
 
+    const st = this.slotTracker;
     return {
       phase: this.phase,
-      cups: this.cupTracker.cups,
+      slots: st ? st.renderSlots(this.typicalCupH) : [],
       detectedCups: result.cups,
       ball,
       ballColor: this.ballColor,
       ballCupId: this.ballCupId,
-      ballPos: this.ballPos,
+      ballSlot: st?.ballSlot ?? null,
+      slotMap: st ? st.slotMap.slice() : [],
+      slotState: this.lastSlotState?.state ?? 'idle',
+      emptySlots: this.lastSlotState?.emptySlots ?? [],
+      swapHistory: st ? st.swapHistory.slice() : [],
       stopCounter: this.stopCounter,
-      meanSpeed: this.cupTracker.meanSpeed(),
       frame: this.cupTracker.frame,
-      locked: this.cupTracker.locked,
+      // Discovery-phase centroids (still useful before lock for the overlay)
+      cups: this.phase === PHASES.TRACK || this.phase === PHASES.DONE
+        ? []
+        : this.cupTracker.cups,
     };
   }
 }

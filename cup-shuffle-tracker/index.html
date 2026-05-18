@@ -185,46 +185,66 @@ function drawOverlay(state) {
   const sx = overlay.width / CFG.procW;
   const sy = overlay.height / CFG.procH;
 
-  // Draw detected cups (faint)
-  for (const c of state.detectedCups) {
-    ovCtx.strokeStyle = 'rgba(255,255,255,.25)';
+  // Detected cup blobs (faint): always shown so you can see what the detector picks up
+  for (const c of state.detectedCups || []) {
+    ovCtx.strokeStyle = 'rgba(255,255,255,.22)';
     ovCtx.lineWidth = 1.5;
     ovCtx.strokeRect(c.x * sx, c.y * sy, c.w * sx, c.h * sy);
   }
 
-  // Draw tracked cups with IDs
-  for (const c of state.cups) {
-    const isBall = c.id === state.ballCupId;
+  // Discovery-phase centroid tracks (only before slot lock)
+  for (const c of state.cups || []) {
     const alpha = c.missing > 0 ? 0.4 : 1;
-    ovCtx.strokeStyle = isBall ? `rgba(102,209,123,${alpha})` : `rgba(120,180,255,${alpha})`;
-    ovCtx.lineWidth = isBall ? 4 : 2;
+    ovCtx.strokeStyle = `rgba(120,180,255,${alpha})`;
+    ovCtx.lineWidth = 2;
     const x = (c.cx - c.w / 2) * sx;
     const y = (c.cy - c.h / 2) * sy;
-    const w = c.w * sx, h = c.h * sy;
+    ovCtx.strokeRect(x, y, c.w * sx, c.h * sy);
+  }
+
+  // Slot boxes (during TRACK and DONE)
+  for (const s of state.slots || []) {
+    const x = (s.cx - s.w / 2) * sx;
+    const y = (s.cy - s.h / 2) * sy;
+    const w = s.w * sx, h = s.h * sy;
+    const isEmpty = (state.emptySlots ?? []).includes(s.slot);
+    if (s.isBall) {
+      ovCtx.fillStyle = 'rgba(102,209,123,.18)';
+      ovCtx.fillRect(x, y, w, h);
+      ovCtx.strokeStyle = '#66d17b';
+      ovCtx.lineWidth = 4;
+    } else if (isEmpty) {
+      ovCtx.strokeStyle = 'rgba(255,179,71,.85)';
+      ovCtx.setLineDash([6, 4]);
+      ovCtx.lineWidth = 2;
+    } else {
+      ovCtx.strokeStyle = 'rgba(120,180,255,.8)';
+      ovCtx.lineWidth = 2;
+    }
     ovCtx.strokeRect(x, y, w, h);
-    ovCtx.fillStyle = ovCtx.strokeStyle;
-    ovCtx.font = `${isBall ? 'bold ' : ''}14px ui-monospace, Menlo, monospace`;
-    ovCtx.fillText(`#${c.id}${isBall ? ' ★' : ''}`, x + 4, y + 16);
+    ovCtx.setLineDash([]);
+    ovCtx.fillStyle = s.isBall ? '#66d17b' : 'rgba(255,255,255,.7)';
+    ovCtx.font = `${s.isBall ? 'bold ' : ''}13px ui-monospace, Menlo, monospace`;
+    ovCtx.fillText(`#${s.cupId}${s.isBall ? ' ★' : ''}`, x + 4, y + 15);
   }
 
   // Big arrow when DONE
-  if (state.phase === PHASES.DONE && state.ballCupId != null) {
-    const cup = state.cups.find((c) => c.id === state.ballCupId);
-    if (cup) {
-      const cx = cup.cx * sx;
-      const cy = (cup.cy - cup.h / 2) * sy;
+  if (state.phase === PHASES.DONE && state.ballSlot != null) {
+    const slot = (state.slots || [])[state.ballSlot];
+    if (slot) {
+      const cxp = slot.cx * sx;
+      const cyp = (slot.cy - slot.h / 2) * sy;
       ovCtx.save();
       ovCtx.fillStyle = '#ffd54f';
       ovCtx.strokeStyle = '#0a0a0a';
       ovCtx.lineWidth = 3;
-      const size = Math.max(24, cup.w * sx * 0.4);
-      // Pulsing
+      const size = Math.max(24, slot.w * sx * 0.4);
       const pulse = 1 + 0.12 * Math.sin(performance.now() / 180);
-      const s = size * pulse;
+      const arrowSize = size * pulse;
       ovCtx.beginPath();
-      ovCtx.moveTo(cx, cy - 8);
-      ovCtx.lineTo(cx - s * 0.6, cy - 8 - s);
-      ovCtx.lineTo(cx + s * 0.6, cy - 8 - s);
+      ovCtx.moveTo(cxp, cyp - 8);
+      ovCtx.lineTo(cxp - arrowSize * 0.6, cyp - 8 - arrowSize);
+      ovCtx.lineTo(cxp + arrowSize * 0.6, cyp - 8 - arrowSize);
       ovCtx.closePath();
       ovCtx.fill();
       ovCtx.stroke();
@@ -232,7 +252,7 @@ function drawOverlay(state) {
     }
   }
 
-  // Draw ball
+  // Ball (during discovery)
   if (state.ball) {
     const b = state.ball;
     ovCtx.beginPath();
@@ -244,15 +264,15 @@ function drawOverlay(state) {
 }
 
 function showResult(state) {
-  if (state.phase === PHASES.DONE && state.ballCupId != null) {
-    const sorted = [...state.cups].sort((a, b) => a.cx - b.cx);
-    const slot = sorted.findIndex((c) => c.id === state.ballCupId);
+  if (state.phase === PHASES.DONE && state.ballSlot != null && state.slots?.length) {
+    const slot = state.ballSlot;
+    const n = state.slots.length;
     const slotName =
-      sorted.length <= 1 ? 'this' :
+      n <= 1 ? 'this' :
       slot === 0 ? 'LEFT' :
-      slot === sorted.length - 1 ? 'RIGHT' :
-      sorted.length === 3 && slot === 1 ? 'MIDDLE' :
-      `position ${slot + 1} of ${sorted.length}`;
+      slot === n - 1 ? 'RIGHT' :
+      n === 3 && slot === 1 ? 'MIDDLE' :
+      `position ${slot + 1} of ${n}`;
     resultEl.textContent = `🎯 Ball is under the ${slotName} cup`;
     resultEl.classList.add('show');
   } else {
@@ -279,17 +299,20 @@ function tick() {
 
   let state;
   if (running || game.phase === PHASES.DONE) {
-    // processFrame freezes itself once DONE so we can keep calling it cheaply
-    // to keep the highlighted overlay anchored on the answer cup.
     state = game.processFrame(img, CFG.procW, CFG.procH);
   } else {
     state = {
       phase: game.phase,
       cups: [],
+      slots: [],
       detectedCups: [],
       ball: null,
       ballCupId: null,
-      meanSpeed: 0,
+      ballSlot: null,
+      slotState: 'idle',
+      emptySlots: [],
+      swapHistory: [],
+      stopCounter: 0,
       frame: 0,
     };
   }
@@ -313,9 +336,11 @@ function tick() {
 
   infoEl.textContent = [
     `phase=${state.phase}`,
-    `cups=${state.cups.length}/${state.detectedCups.length}`,
-    state.ballColor ? `ball=${state.ballColor}#${state.ballCupId ?? '?'}` : '',
-    `speed=${state.meanSpeed.toFixed(2)}`,
+    state.slots?.length ? `slots=${state.slots.length}` : `det=${(state.detectedCups || []).length}`,
+    state.ballColor ? `ball=${state.ballColor}` : '',
+    state.slotState && state.slotState !== 'idle' ? `state=${state.slotState}` : '',
+    state.emptySlots?.length ? `empty=[${state.emptySlots.join(',')}]` : '',
+    state.swapHistory?.length ? `swaps=${state.swapHistory.length}` : '',
     `stop=${state.stopCounter ?? 0}/${CFG.stopFrames}`,
     `fps=${fps.value.toFixed(0)}`,
   ].filter(Boolean).join(' • ');
