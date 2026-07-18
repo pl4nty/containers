@@ -1,4 +1,4 @@
-FROM kasmweb/kali-rolling-desktop:1.19.0-rolling-weekly as base
+FROM kasmweb/kali-rolling-desktop:1.19.0-rolling-weekly@sha256:c72dc4937f38b2fd9009a745823e744820f7c3d76ef9af8b387422cb9d58e0f1 as base
 
 USER root
 # RUN sed -ie 's/kali-rolling/kali-last-snapshot/g' /etc/apt/sources.list
