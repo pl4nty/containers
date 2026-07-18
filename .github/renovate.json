@@ -1,10 +1,9 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": [
-    "config:recommended",
+    "github>pl4nty/.github",
     ":disableRateLimiting"
   ],
-  "osvVulnerabilityAlerts": true,
   "dependencyDashboardOSVVulnerabilitySummary": "all",
   "additionalBranchPrefix": "{{parentDir}}-",
   "ignorePaths": [
