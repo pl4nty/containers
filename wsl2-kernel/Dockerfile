@@ -2,7 +2,7 @@
 # docker image save ghcr.io/pl4nty/wsl2-kernel --output .\kernel.tar
 # tar -xvf .\kernel.tar blobs\sha256\
 # Get-ChildItem .\blobs\sha256\ | Sort-Object Length -Descending | select -First 1 | ForEach-Object { tar -xvf .\blobs\sha256\$_ }
-FROM ubuntu:24.04 AS build
+FROM ubuntu:24.04@sha256:4fbb8e6a8395de5a7550b33509421a2bafbc0aab6c06ba2cef9ebffbc7092d90 AS build
 
 RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
   --mount=type=cache,target=/var/lib/apt,sharing=locked \
