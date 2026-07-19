@@ -1,7 +1,7 @@
 # https://miniflux.app/docs/docker.html#docker-compose
 services:
   miniflux:
-    image: miniflux/miniflux:latest
+    image: miniflux/miniflux:latest@sha256:cd353a6af9ce663291f405eddef26fa0d567f486b521c5d34e3fb50e41938b9a
     ports:
       - "80:8080"
     depends_on:
@@ -14,7 +14,7 @@ services:
       - ADMIN_USERNAME=admin
       - ADMIN_PASSWORD=test123
   db:
-    image: postgres:18-alpine
+    image: postgres:18-alpine@sha256:9a8afca54e7861fd90fab5fdf4c42477a6b1cb7d293595148e674e0a3181de15
     environment:
       - POSTGRES_USER=miniflux
       - POSTGRES_PASSWORD=secret
