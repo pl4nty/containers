@@ -14,7 +14,7 @@
 #    OTEL_DOTNET_AUTO_HOME=%InstallationLocation%
 #  - For auto-instrumentation by container injection, the Linux command cp is
 #    used and must be availabe in the image.
-FROM busybox as downloader
+FROM busybox@sha256:dc2d74b28e4cf8984fa52af1f39bc7c3d9c73760b41a74d629f5d11b1ab28616 as downloader
 
 ARG version=1.9.0
 
@@ -37,6 +37,6 @@ RUN unzip opentelemetry-dotnet-instrumentation-linux-glibc-x64.zip &&\
   rm opentelemetry-dotnet-instrumentation-linux-glibc-arm64.zip opentelemetry-dotnet-instrumentation-linux-musl-arm64.zip &&\
   chmod -R go+r .
 
-FROM busybox
+FROM busybox@sha256:dc2d74b28e4cf8984fa52af1f39bc7c3d9c73760b41a74d629f5d11b1ab28616
 
 COPY --from=downloader /autoinstrumentation /autoinstrumentation
