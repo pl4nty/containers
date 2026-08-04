@@ -1,4 +1,4 @@
-FROM gradle:8.14.5-jdk17 AS build
+FROM gradle:9.6.0-jdk17@sha256:e9f58500306b743df32ebb2729bb9d96e1853547a155f1f4d759d3118c2fc47a AS build
 WORKDIR /app
 
 COPY . .
