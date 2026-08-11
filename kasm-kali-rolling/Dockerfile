@@ -1,74 +1,58 @@
-FROM kasmweb/kali-rolling-desktop:1.19.0-rolling-weekly as base
+FROM kasmweb/kali-rolling-desktop:1.19.0-rolling-weekly AS base
 
 USER root
-# RUN sed -ie 's/kali-rolling/kali-last-snapshot/g' /etc/apt/sources.list
-# remove desktop background, might improve performance# /tmp/dbus-KA37XaRP1n
-# RUN xfconf-query -c xfce4-desktop -p /backdrop/screen0/monitorVNC-0/workspace0/image-style -s 0
-# RUN sed -ie 's/(image-style.*)5/\\10/' /etc/xdg/xfce4/xfconf/xfce-perchannel-xml/xfce4-desktop.xml
-RUN echo 'kasm-user ALL=(ALL) NOPASSWD: ALL' >> /etc/sudoers
+WORKDIR /tmp                                   # keep root's droppings out of $HOME
+RUN echo 'kasm-user ALL=(ALL) NOPASSWD: ALL' > /etc/sudoers.d/kasm-user && \
+    chmod 0440 /etc/sudoers.d/kasm-user        # sudoers.d, not appending to /etc/sudoers
 
-FROM base as linux-amd64
+FROM base AS linux-amd64
 
 RUN --mount=type=cache,target=/var/cache/apt \
     apt-get update && apt-get install -y --no-install-recommends \
-    sudo \
-    kali-linux-default \
-    torbrowser-launcher \
-    # RSACTFTool
+    sudo kali-linux-default torbrowser-launcher \
     libgmp3-dev libmpc-dev \
-    # pwntools
     python3 python3-pip python3-dev git libssl-dev libffi-dev build-essential \
-    autopsy \
-    ghidra \
-    burpsuite \
-    steghide \
-    radare2 \
-    hashcat \
-    binwalk \
-    wireshark \
-    gdb gdb-peda \
-    libimage-exiftool-perl \
-    ltrace \
-    gimp \
-    audacity \
-    qsstv \
-    strace \
-    gfortran \
-    qemu-system-x86 \
-    jq
+    autopsy ghidra burpsuite steghide radare2 hashcat binwalk wireshark \
+    gdb gdb-peda libimage-exiftool-perl ltrace gimp audacity qsstv strace \
+    gfortran qemu-system-x86 jq
 
-RUN wget https://github.com/pwndbg/pwndbg/releases/download/2025.05.30/pwndbg_2025.05.30_amd64.deb && \
-    apt-get install -y ./pwndbg_2025.05.30_amd64.deb && \
-    rm pwndbg_2025.05.30_amd64.deb
+RUN wget --no-hsts -q https://github.com/pwndbg/pwndbg/releases/download/2025.05.30/pwndbg_2025.05.30_amd64.deb && \
+    apt-get install -y ./pwndbg_2025.05.30_amd64.deb && rm pwndbg_2025.05.30_amd64.deb
 
 RUN gem install zsteg
 
-USER kasm-user
-
-RUN git clone https://github.com/RsaCtfTool/RsaCtfTool.git && \
-    cd RsaCtfTool && \
-    pip3 install -r requirements.txt --break-system-packages
-
+# --- tooling into /opt, NOT $HOME ---
+RUN git clone --depth 1 https://github.com/RsaCtfTool/RsaCtfTool.git /opt/RsaCtfTool && \
+    pip3 install -r /opt/RsaCtfTool/requirements.txt --break-system-packages
 RUN python3 -m pip install --upgrade pwntools pypykatz --break-system-packages
+RUN wget --no-hsts -q http://www.caesum.com/handbook/Stegsolve.jar -O /opt/stegsolve.jar && \
+    chmod 0755 /opt/stegsolve.jar
+RUN wget --no-hsts -q https://github.com/volatilityfoundation/volatility/releases/download/2.6.1/volatility_2.6_lin64_standalone.zip -O /tmp/vol.zip && \
+    unzip -j /tmp/vol.zip volatility_2.6_lin64_standalone/volatility_2.6_lin64_standalone -d /opt && \
+    mv /opt/volatility_2.6_lin64_standalone /opt/vol.py && chmod 0755 /opt/vol.py && rm /tmp/vol.zip
+RUN wget --no-hsts -q https://github.com/icsharpcode/AvaloniaILSpy/releases/download/v7.2-rc/Linux.x64.Release.zip -O /tmp/ilspy.zip && \
+    unzip -q /tmp/ilspy.zip -d /tmp/ilspy && \
+    unzip -q /tmp/ilspy/ILSpy-linux-x64-Release.zip -d /opt/AvaloniaILSpy && \
+    rm -rf /tmp/ilspy.zip /tmp/ilspy
+RUN ln -sf /opt/vol.py /usr/local/bin/vol.py && \
+    ln -sf /opt/RsaCtfTool/RsaCtfTool.py /usr/local/bin/RsaCtfTool.py
 
-RUN wget http://www.caesum.com/handbook/Stegsolve.jar -O stegsolve.jar && \
-    chmod +x stegsolve.jar
+FROM base AS linux-arm64
 
-RUN wget https://github.com/volatilityfoundation/volatility/releases/download/2.6.1/volatility_2.6_lin64_standalone.zip && \
-    unzip volatility_2.6_lin64_standalone.zip volatility_2.6_lin64_standalone/volatility_2.6_lin64_standalone && \
-    mv volatility_2.6_lin64_standalone/volatility_2.6_lin64_standalone vol.py && \
-    chmod +x vol.py && \
-    rm -r volatility_2.6_lin64_standalone && rm volatility_2.6_lin64_standalone.zip
-
-RUN wget https://github.com/icsharpcode/AvaloniaILSpy/releases/download/v7.2-rc/Linux.x64.Release.zip && \
-    unzip Linux.x64.Release.zip && unzip ILSpy-linux-x64-Release.zip -d AvaloniaILSpy && \
-    rm Linux.x64.Release.zip ILSpy-linux-x64-Release.zip
-
-FROM base as linux-arm64
-
-RUN wget https://github.com/icsharpcode/AvaloniaILSpy/releases/download/v7.2-rc/Linux.arm64.Release.zip && \
-    unzip Linux.arm64.Release.zip && unzip ILSpy-linux-arm64-Release.zip -d AvaloniaILSpy && \
-    rm Linux.arm64.Release.zip ILSpy-linux-arm64-Release.zip
+RUN wget --no-hsts -q https://github.com/icsharpcode/AvaloniaILSpy/releases/download/v7.2-rc/Linux.arm64.Release.zip -O /tmp/ilspy.zip && \
+    unzip -q /tmp/ilspy.zip -d /tmp/ilspy && \
+    unzip -q /tmp/ilspy/ILSpy-linux-arm64-Release.zip -d /opt/AvaloniaILSpy && \
+    rm -rf /tmp/ilspy.zip /tmp/ilspy
 
 ARG TARGETOS TARGETARCH
-FROM ${TARGETOS}-${TARGETARCH}
+FROM ${TARGETOS}-${TARGETARCH} AS final
+
+# --- required Kasm tail: applies to BOTH arches, fixes the arm64-runs-as-root bug ---
+USER root
+ENV HOME=/home/kasm-user
+RUN rm -f $HOME/.wget-hsts /home/kasm-default-profile/.wget-hsts && \
+    mkdir -p $HOME && \
+    chown -R 1000:0 $HOME && \
+    $STARTUPDIR/set_user_permission.sh $HOME
+USER 1000
+WORKDIR $HOME
