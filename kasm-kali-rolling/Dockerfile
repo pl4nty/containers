@@ -22,8 +22,6 @@ RUN wget --no-hsts -q https://github.com/pwndbg/pwndbg/releases/download/2025.05
 RUN gem install zsteg
 
 # --- tooling into /opt, NOT $HOME ---
-RUN git clone --depth 1 https://github.com/RsaCtfTool/RsaCtfTool.git /opt/RsaCtfTool && \
-    pip3 install -r /opt/RsaCtfTool/requirements.txt --break-system-packages
 RUN python3 -m pip install --upgrade pwntools pypykatz --break-system-packages
 RUN wget --no-hsts -q http://www.caesum.com/handbook/Stegsolve.jar -O /opt/stegsolve.jar && \
     chmod 0755 /opt/stegsolve.jar
@@ -34,8 +32,7 @@ RUN wget --no-hsts -q https://github.com/icsharpcode/AvaloniaILSpy/releases/down
     unzip -q /tmp/ilspy.zip -d /tmp/ilspy && \
     unzip -q /tmp/ilspy/ILSpy-linux-x64-Release.zip -d /opt/AvaloniaILSpy && \
     rm -rf /tmp/ilspy.zip /tmp/ilspy
-RUN ln -sf /opt/vol.py /usr/local/bin/vol.py && \
-    ln -sf /opt/RsaCtfTool/RsaCtfTool.py /usr/local/bin/RsaCtfTool.py
+RUN ln -sf /opt/vol.py /usr/local/bin/vol.py
 
 FROM base AS linux-arm64
 
