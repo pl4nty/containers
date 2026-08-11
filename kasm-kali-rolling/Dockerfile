@@ -1,7 +1,7 @@
 FROM kasmweb/kali-rolling-desktop:1.19.0-rolling-weekly AS base
 
 USER root
-WORKDIR /tmp                                   # keep root's droppings out of $HOME
+WORKDIR /tmp                                   # keep root droppings out of $HOME
 RUN echo 'kasm-user ALL=(ALL) NOPASSWD: ALL' > /etc/sudoers.d/kasm-user && \
     chmod 0440 /etc/sudoers.d/kasm-user        # sudoers.d, not appending to /etc/sudoers
 
