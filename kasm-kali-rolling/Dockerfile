@@ -11,7 +11,8 @@ RUN --mount=type=cache,target=/var/cache/apt \
     apt-get update && apt-get install -y --no-install-recommends \
     sudo kali-linux-default \
     libgmp3-dev libmpc-dev \
-    python3 python3-pip python3-dev git libssl-dev libffi-dev build-essential \
+    python3 python3-pip python3-venv python3-dev git libssl-dev libffi-dev build-essential \
+    python3-pwntools python3-pypykatz \
     autopsy ghidra burpsuite steghide radare2 hashcat binwalk wireshark \
     gdb gdb-peda libimage-exiftool-perl ltrace gimp audacity qsstv strace \
     gfortran qemu-system-x86 jq
@@ -22,9 +23,10 @@ RUN wget --no-hsts -q https://github.com/pwndbg/pwndbg/releases/download/2025.05
 RUN gem install zsteg
 
 # --- tooling into /opt, NOT $HOME ---
-RUN git clone --depth 1 https://github.com/RsaCtfTool/RsaCtfTool.git /opt/RsaCtfTool && \
-    pip3 install -r /opt/RsaCtfTool/requirements.txt --break-system-packages
-RUN python3 -m pip install --upgrade pwntools pypykatz --break-system-packages
+# own venv: RsaCtfTool pins old cryptography/requests/psutil, and pip can't
+# replace Kali's dist-packages anyway (dpkg ships no RECORD to uninstall from)
+RUN python3 -m venv /opt/RsaCtfTool && \
+    /opt/RsaCtfTool/bin/pip install --no-cache-dir git+https://github.com/RsaCtfTool/RsaCtfTool.git
 RUN wget --no-hsts -q http://www.caesum.com/handbook/Stegsolve.jar -O /opt/stegsolve.jar && \
     chmod 0755 /opt/stegsolve.jar
 RUN wget --no-hsts -q https://github.com/volatilityfoundation/volatility/releases/download/2.6.1/volatility_2.6_lin64_standalone.zip -O /tmp/vol.zip && \
@@ -35,7 +37,9 @@ RUN wget --no-hsts -q https://github.com/icsharpcode/AvaloniaILSpy/releases/down
     unzip -q /tmp/ilspy/ILSpy-linux-x64-Release.zip -d /opt/AvaloniaILSpy && \
     rm -rf /tmp/ilspy.zip /tmp/ilspy
 RUN ln -sf /opt/vol.py /usr/local/bin/vol.py && \
-    ln -sf /opt/RsaCtfTool/RsaCtfTool.py /usr/local/bin/RsaCtfTool.py
+    ln -sf /opt/RsaCtfTool/bin/rsacrack /usr/local/bin/rsacrack && \
+    ln -sf /opt/RsaCtfTool/bin/RsaCtfTool /usr/local/bin/RsaCtfTool && \
+    ln -sf /opt/RsaCtfTool/bin/RsaCtfTool /usr/local/bin/RsaCtfTool.py
 
 FROM base AS linux-arm64
 
