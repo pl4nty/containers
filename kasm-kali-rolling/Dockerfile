@@ -9,7 +9,7 @@ FROM base AS linux-amd64
 
 RUN --mount=type=cache,target=/var/cache/apt \
     apt-get update && apt-get install -y --no-install-recommends \
-    sudo kali-linux-default torbrowser-launcher \
+    sudo kali-linux-default \
     libgmp3-dev libmpc-dev \
     python3 python3-pip python3-dev git libssl-dev libffi-dev build-essential \
     autopsy ghidra burpsuite steghide radare2 hashcat binwalk wireshark \
