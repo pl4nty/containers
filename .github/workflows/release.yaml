@@ -78,6 +78,10 @@ jobs:
             cp * ${{ matrix.target }} -r  -ErrorAction SilentlyContinue
             echo "context=${{ matrix.target }}/${{ matrix.target }}" >> $env:GITHUB_OUTPUT
           }
+          # submodule checkouts have a .git file, plain subfolders would resolve to the superproject
+          if (Test-Path "${{ matrix.target }}/.git") {
+            echo "revision=$(git -C ${{ matrix.target }} rev-parse HEAD)" >> $env:GITHUB_OUTPUT
+          }
           if (Test-Path "PLATFORMS") {
             echo "platforms=$(cat PLATFORMS)" >> $env:GITHUB_OUTPUT
           }
@@ -103,6 +107,9 @@ jobs:
             type=ref,event=branch
             type=ref,event=pr
             type=raw,value=latest,enable={{is_default_branch}}
+          # default revision is the superproject SHA, use the submodule commit instead
+          labels: org.opencontainers.image.revision=${{ steps.context.outputs.revision || github.sha }}
+          annotations: org.opencontainers.image.revision=${{ steps.context.outputs.revision || github.sha }}
 
         # https://github.com/profnandaa/buildkit/blob/97b80f23f3e55861f70bb7aaf4558340af78d030/docs/windows.md#cni--networking-setup
       - name: Setup CNI
