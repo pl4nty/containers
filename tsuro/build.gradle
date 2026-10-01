@@ -4,7 +4,7 @@
  */
 buildscript {
   repositories {
-    jcenter()
+    mavenCentral()
     gradlePluginPortal()
 
     maven {
@@ -46,7 +46,7 @@ compileJava {
 }
 
 repositories {
-  jcenter()
+  mavenCentral()
 }
 
 javafx {
