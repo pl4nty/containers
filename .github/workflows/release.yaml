@@ -36,6 +36,7 @@ jobs:
         dir_names: true # output folders instead of files
         dir_names_max_depth: 1 # only return roots, not subfolders
         dir_names_exclude_current_dir: true # exclude root files
+        files_ignore: .github/** # workflow changes aren't images
         matrix: true
         fetch_additional_submodule_history: true
 
@@ -176,6 +177,7 @@ jobs:
       - name: Setup Docker Buildx
         run: |
           $version = "v0.19.3"
+          New-Item -ItemType Directory -Force "$env:ProgramData\Docker\cli-plugins" | Out-Null
           curl.exe -L https://github.com/docker/buildx/releases/download/$version/buildx-$version.windows-amd64.exe -o $env:ProgramData\Docker\cli-plugins\docker-buildx.exe
 
       - name: Setup builders
