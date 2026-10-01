@@ -177,8 +177,8 @@ jobs:
       - name: Setup Docker Buildx
         run: |
           $version = "v0.19.3"
-          New-Item -ItemType Directory -Force "$env:ProgramData\Docker\cli-plugins" | Out-Null
-          curl.exe -L https://github.com/docker/buildx/releases/download/$version/buildx-$version.windows-amd64.exe -o $env:ProgramData\Docker\cli-plugins\docker-buildx.exe
+          New-Item -ItemType Directory -Force "$env:ProgramFiles\Docker\cli-plugins" | Out-Null
+          curl.exe -L https://github.com/docker/buildx/releases/download/$version/buildx-$version.windows-amd64.exe -o "$env:ProgramFiles\Docker\cli-plugins\docker-buildx.exe"
 
       - name: Setup builders
         run: |
