@@ -95,14 +95,17 @@ jobs:
           username: ${{ vars.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
-      - uses: docker/metadata-action@v5.10.0
+      # master for git:<path> context (docker/metadata-action#729), unreleased
+      - uses: docker/metadata-action@8e671d84a3bd81afdfc4fdbb96a42b07c2a80934
         id: meta
         with:
+          # revision label from the submodule commit, plain folders resolve to the superproject
+          context: git:${{ steps.context.outputs.context || matrix.target }}
           images: ghcr.io/${{ github.repository_owner }}/${{ matrix.target }}
+          # git context refs come from the detached submodule, so tag from the workflow instead
           tags: |
-            type=ref,event=branch
-            type=ref,event=pr
-            type=raw,value=latest,enable={{is_default_branch}}
+            type=raw,value=${{ github.ref_name }}
+            type=raw,value=latest,enable=${{ github.ref_name == github.event.repository.default_branch }}
 
         # https://github.com/profnandaa/buildkit/blob/97b80f23f3e55861f70bb7aaf4558340af78d030/docs/windows.md#cni--networking-setup
       - name: Setup CNI
