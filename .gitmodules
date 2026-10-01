@@ -82,3 +82,6 @@
 	path = fortinet-downloads/fortinet-downloads
 	url = https://github.com/pl4nty/fortinet-downloads
 	branch = main
+[submodule "flat-viewer/flat-viewer"]
+	path = flat-viewer/flat-viewer
+	url = https://github.com/githubocto/flat-viewer

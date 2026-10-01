@@ -1,4 +1,4 @@
-FROM node:24.17.0 AS build
+FROM node:24.19.0@sha256:934240a162082fd8b8a2f90cd5114446443f1eba1c5378f6687167ca405e6584 AS build
 
 WORKDIR /app
 COPY package*.json ./
@@ -10,6 +10,6 @@ COPY . .
 RUN ./node_modules/.bin/grunt build-website
 RUN ./node_modules/.bin/grunt pug:website 
 
-FROM nginx:1.31.1
+FROM nginx:1.31.3
 
 COPY --from=build /app/dist/website /usr/share/nginx/html
