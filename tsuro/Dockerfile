@@ -6,7 +6,7 @@ RUN gradle jproRelease --warning-mode all
 
 # Ubuntu with required packages
 # https://www.jpro.one/docs/current/2.7/PREPARING_LINUX_FOR_JPRO
-FROM eclipse-temurin:17.0.11_9-jre
+FROM eclipse-temurin:17.0.11_9-jre@sha256:b9f5c0acd03eb8275690fe310506f62743a5aaf90e37d165bc0484037a5a9376
 
 # prevent interactive prompt from debconf
 RUN echo 'debconf debconf/frontend select Noninteractive' | debconf-set-selections \
