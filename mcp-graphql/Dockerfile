@@ -1,4 +1,4 @@
-FROM node:22.23.2@sha256:0557ac14e0d45d02ed563067b82856ca5e7aa3437fa28d98d4350ea9c3d9494a
+FROM node:22.23.2@sha256:dd5847a04b0deee391fa145f1f4c6d214196668b6bcc7988ebed67249f226844
 
 RUN npm install -g mcp-graphql@1.0.0
 
