@@ -1,4 +1,4 @@
-FROM node:22.19.0 as build
+FROM node:22.23.3@sha256:363e1587494626837fa7f9a23bdb453d13b0ff3c67c705c2805cfc69c2d2fad7 as build
 WORKDIR /app
 
 # puppeteer dependency can't install ARM chromium by default
