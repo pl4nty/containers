@@ -1,3 +1,3 @@
-FROM node:24.19.0@sha256:934240a162082fd8b8a2f90cd5114446443f1eba1c5378f6687167ca405e6584
+FROM node:24.19.0@sha256:4196d66a565c6f195728d9952f161f4adfe2ad753052a08b7ec7f1c5a6bda42b
 RUN npm install -g wrangler && npm cache clean --force
 ENTRYPOINT ["wrangler"]
