@@ -1,6 +1,6 @@
 # vendored WCF image is core without a print spooler service, so we DIY based on
 # https://github.com/microsoft/dotnet-framework-docker/blob/main/src/wcf/4.8.1/windowsservercore-ltsc2022/Dockerfile
-FROM mcr.microsoft.com/powershell:windowsserver-ltsc2022
+FROM mcr.microsoft.com/powershell:windowsserver-ltsc2022@sha256:0da13abce40c475788d29106ef9c4d52120f21401fb329ffbb79d23c18220c70
 RUN dism /Online /Quiet /Enable-Feature /All /FeatureName:WCF-HTTP-Activation45 /FeatureName:WCF-TCP-Activation45 /FeatureName:IIS-WebSockets
 
 # https://aka.ms/UPConnector
