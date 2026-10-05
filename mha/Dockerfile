@@ -1,4 +1,4 @@
-FROM node:22.19.0 as build
+FROM node:22.23.3@sha256:363e1587494626837fa7f9a23bdb453d13b0ff3c67c705c2805cfc69c2d2fad7 as build
 WORKDIR /app
 
 # puppeteer dependency can't install ARM chromium by default
@@ -16,6 +16,6 @@ RUN npm run build --if-present
 
 FROM joseluisq/static-web-server:2.38.0
 
-COPY --from=build /app/Resources /public/Resources
+COPY --from=build /app/src/Resources /public/Resources
 COPY --from=build /app/Pages /public/Pages
 COPY --from=build /app/Pages/mha.html /public/index.html
