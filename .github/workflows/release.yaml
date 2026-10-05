@@ -43,6 +43,8 @@ jobs:
   main:
     runs-on: windows-2022
     needs: targets
+    # workflow-only changes produce no targets, and an empty matrix fails the run
+    if: needs.targets.outputs.targets != '[]' && needs.targets.outputs.targets != ''
     permissions:
       packages: write # push images
       id-token: write # OIDC artifact signing
