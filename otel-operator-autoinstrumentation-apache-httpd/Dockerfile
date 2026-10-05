@@ -72,11 +72,11 @@ RUN mkdir -p dependencies/opentelemetry/${OPENTELEMETRY_VERSION}/lib \
     && git submodule update --init --recursive \
     && mkdir build \
     && cd build \
-    && cmake .. -DCMAKE_POSITION_INDEPENDENT_CODE=ON -DBUILD_TESTING=OFF -DBUILD_SHARED_LIBS=ON -DWITH_OTLP=ON -DCMAKE_INSTALL_PREFIX=/dependencies/opentelemetry/${OPENTELEMETRY_VERSION} \
+    && cmake .. -DCMAKE_POSITION_INDEPENDENT_CODE=ON -DBUILD_TESTING=OFF -DBUILD_SHARED_LIBS=ON -DWITH_OTLP_GRPC=ON -DCMAKE_INSTALL_PREFIX=/dependencies/opentelemetry/${OPENTELEMETRY_VERSION} \
     && cmake --build . --target all \
     && cd .. \
     && find . -name "*.so" -type f -exec cp {} /dependencies/opentelemetry/${OPENTELEMETRY_VERSION}/lib/ \; \
-    && cp build/libopentelemetry_proto.a /dependencies/opentelemetry/${OPENTELEMETRY_VERSION}/lib \
+    && find build -name 'libopentelemetry_proto*.a' -exec cp {} /dependencies/opentelemetry/${OPENTELEMETRY_VERSION}/lib/ \; \
     && cp -r api/include/ /dependencies/opentelemetry/${OPENTELEMETRY_VERSION}/ \
     && for dir in exporters/*; do if [ -d "$dir" ]; then cp -rf "$dir/include" /dependencies/opentelemetry/${OPENTELEMETRY_VERSION}/; fi; done \
     && cp -r sdk/include/ /dependencies/opentelemetry/${OPENTELEMETRY_VERSION}/ \
@@ -119,6 +119,7 @@ RUN mkdir -p dependencies/apache-log4cxx/${LOG4CXX_VERSION} \
     && wget https://archive.apache.org/dist/logging/log4cxx/${LOG4CXX_VERSION}/apache-log4cxx-${LOG4CXX_VERSION}.tar.gz --no-check-certificate \
     && tar -xf apache-log4cxx-${LOG4CXX_VERSION}.tar.gz \
     && cd apache-log4cxx-${LOG4CXX_VERSION} \
+    && autoreconf -fi \
     && ./configure --prefix=/dependencies/apache-log4cxx/${LOG4CXX_VERSION}/ --enable-static=yes --enable-shared=no --with-pic --with-apr=/dependencies/apr/1.7.0/ --with-apr-util=/dependencies/apr-util/1.6.1/ && echo $? \
     && make -j 6 ; echo 0 \
     && automake --add-missing \
@@ -131,7 +132,7 @@ RUN mkdir -p dependencies/googletest/${GTEST_VERSION}/ \
     && tar -xf release-${GTEST_VERSION}.tar.gz \
     && cd googletest-release-${GTEST_VERSION}/  \
     && mkdir build && cd build \
-    && cmake .. -DCMAKE_INSTALL_PREFIX=/dependencies/googletest/${GTEST_VERSION}/ \
+    && cmake .. -DCMAKE_INSTALL_PREFIX=/dependencies/googletest/${GTEST_VERSION}/ -DCMAKE_CXX_FLAGS="-Wno-error=maybe-uninitialized" \
     && make \
     && make install \
     && cd ../.. && rm -rf release-${GTEST_VERSION}.tar.gz && rm -rf googletest-release-${GTEST_VERSION}/
@@ -195,7 +196,12 @@ RUN echo "deb [signed-by=/usr/share/keyrings/nginx-archive-keyring.gpg] \
     && apt update -y && apt install nginx -y
 
 # Build Webserver Module
-COPY opentelemetry-cpp-contrib/instrumentation/otel-webserver-module /otel-webserver-module
+# system gyp (python3) replaces the vendored python2-only r1919; restore r1919's
+# solink behaviour of linking $(LIBS) inside --whole-archive (static deps link order)
+RUN apt-get install -y gyp \
+    && sed -i 's/-Wl,--no-whole-archive $(LIBS)$/$(LIBS) -Wl,--no-whole-archive/' /usr/lib/python3/dist-packages/gyp/generator/make.py \
+    && grep -q -- '--whole-archive $(LD_INPUTS) $(LIBS) -Wl,--no-whole-archive' /usr/lib/python3/dist-packages/gyp/generator/make.py
+COPY instrumentation/otel-webserver-module /otel-webserver-module
 COPY *.gradle /otel-webserver-module/
 COPY Makefile /otel-webserver-module/src/nginx/Makefile
 COPY script.sh /otel-webserver-module/src/nginx/script.sh
@@ -203,6 +209,8 @@ COPY script.sh /otel-webserver-module/src/nginx/script.sh
 RUN cp -r /dependencies /otel-webserver-module/ \
     && cp -r /build-dependencies /otel-webserver-module/ \
     && cd otel-webserver-module \
+    && sed -i "s/^CPP-SDK-version=.*/CPP-SDK-version=${OPENTELEMETRY_VERSION}/" version.properties \
+    && sed -i 's/-std=c++11/-std=c++17/' src/build.gyp \
     && ./gradlew assembleWebServerModule -DtargetSystem=ubuntu
 
 # https://github.com/open-telemetry/opentelemetry-operator/blob/v0.107.0/autoinstrumentation/apache-httpd/Dockerfile
