@@ -9,8 +9,9 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
 
 RUN mv /usr/local/lib/R/site-library /usr/local/lib/R/site-library-2
 COPY auto_install_load.R .
+# devtools >= 2.5 no longer pulls in remotes, which install_github still needs
 RUN --mount=type=cache,target=/usr/local/lib/R/site-library cp -r /usr/local/lib/R/site-library-2/* /usr/local/lib/R/site-library \
-&& Rscript auto_install_load.R && cp -r /usr/local/lib/R/site-library/* /usr/local/lib/R/site-library-2
+&& Rscript -e 'install.packages("remotes")' && Rscript auto_install_load.R && cp -r /usr/local/lib/R/site-library/* /usr/local/lib/R/site-library-2
 # shiny user can't write to /usr/local/lib/R/site-library
 RUN mv /usr/local/lib/R/site-library-2 /usr/local/lib/R/site-library && usermod -a -G staff shiny
 
