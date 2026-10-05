@@ -8,7 +8,15 @@ WORKDIR /usr/src/app
 RUN gem install jekyll bundler
 
 # Copy the Gemfile and Gemfile.lock into the container
-COPY website/Gemfile website/Gemfile.lock ./
+# Kept outside the site dir so the patches below survive copying the site
+COPY website/Gemfile website/Gemfile.lock /usr/src/gems/
+
+# The upstream lockfile pins Bundler 2.2.9, which crashes on Ruby >= 3.4, so use the image's Bundler.
+# Ruby 3.4 moved csv, base64 and bigdecimal out of the default gems, and the locked
+# jekyll-last-modified-at depends on posix-spawn, which no longer compiles.
+ENV BUNDLE_VERSION=system BUNDLE_GEMFILE=/usr/src/gems/Gemfile
+RUN bundle add csv base64 bigdecimal --skip-install \
+ && bundle lock --update jekyll-last-modified-at
 
 # Install the dependencies
 RUN bundle install
