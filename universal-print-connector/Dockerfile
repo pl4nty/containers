@@ -13,8 +13,8 @@ RUN UniversalPrintConnectorInstaller.exe /quiet
 # clear logs from failed auto-start
 RUN pwsh -Command [System.Diagnostics.Eventing.Reader.EventLogSession]::GlobalSession.ClearLog('Microsoft-Windows-PrintConnector/Operational')
 
-COPY LogMonitorConfig.json /LogMonitor/
 RUN pwsh -Command New-Item -ItemType Directory -Force C:\LogMonitor; iwr -OutFile C:\LogMonitor\LogMonitor.exe https://github.com/microsoft/windows-container-tools/releases/download/v1.2.1/LogMonitor.exe
+COPY LogMonitorConfig.json /LogMonitor/LogMonitorConfig.json
 COPY entrypoint.ps1 .
 
 CMD [ "entrypoint.ps1" ]
