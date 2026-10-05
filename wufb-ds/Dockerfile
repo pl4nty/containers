@@ -1,4 +1,4 @@
-FROM node:24.17.0 AS build-env
+FROM node:24.21.0@sha256:64af3819f9275802414d7cdc38c27e9d82bd564dec4d4da87d008255d36c63b4 AS build-env
 WORKDIR /app
 
 COPY package*.json ./
@@ -8,7 +8,7 @@ RUN npm install
 COPY . .
 RUN npm run build
 
-FROM joseluisq/static-web-server:2.43.0
+FROM joseluisq/static-web-server:2.44.0@sha256:2c1a7c3e0feaea5859307403b74e1c575f3ec1499094fc077344173d11abaae2
 
 COPY --from=build-env /app/dist /public
 

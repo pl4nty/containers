@@ -1,5 +1,5 @@
 # Stage 1: Frontend build
-FROM node:21 AS frontend-build
+FROM node:21.7.3@sha256:4b232062fa976e3a966c49e9b6279efa56c8d207a67270868f51b3d155c4e33d AS frontend-build
 
 ENV NODE_ENV=development
 
@@ -12,7 +12,7 @@ COPY ./talemate_frontend /app
 RUN npm install && npm run build
 
 # Stage 2: Backend build
-FROM python:3.11-slim AS backend-build
+FROM python:3.11-slim@sha256:db3ff2e1800a8581e2c48a27c3995339d47bdf046da21c7627accd3d51053a93 AS backend-build
 
 WORKDIR /app
 
@@ -49,7 +49,7 @@ RUN . /app/talemate_env/bin/activate && \
     fi
 
 # Stage 3: Final image
-FROM python:3.11-slim
+FROM python:3.11-slim@sha256:db3ff2e1800a8581e2c48a27c3995339d47bdf046da21c7627accd3d51053a93
 
 WORKDIR /app
 

@@ -22,26 +22,29 @@ jobs:
       targets: ${{ github.event_name == 'workflow_dispatch' && inputs.targets || steps.targets.outputs.all_modified_files }}
     steps:
     # fetch-depth may cause issues with multi-commit submodule changes
-    - uses: actions/checkout@v6.0.0
+    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       with:
         fetch-depth: 5
         submodules: true
         token: ${{ secrets.GH_PAT }} # private submodules
 
     - name: Find changed folders
-      uses: tj-actions/changed-files@v47.0.0
+      uses: tj-actions/changed-files@9426d40962ed5378910ee2e21d5f8c6fcbf2dd96 # v47.0.6
       id: targets
       with:
         skip_initial_fetch: true
         dir_names: true # output folders instead of files
         dir_names_max_depth: 1 # only return roots, not subfolders
         dir_names_exclude_current_dir: true # exclude root files
+        files_ignore: .github/** # workflow changes aren't images
         matrix: true
         fetch_additional_submodule_history: true
 
   main:
     runs-on: windows-2022
     needs: targets
+    # workflow-only changes produce no targets, and an empty matrix fails the run
+    if: needs.targets.outputs.targets != '[]' && needs.targets.outputs.targets != ''
     permissions:
       packages: write # push images
       id-token: write # OIDC artifact signing
@@ -82,27 +85,30 @@ jobs:
             echo "platforms=$(cat PLATFORMS)" >> $env:GITHUB_OUTPUT
           }
 
-      - uses: docker/login-action@v3.6.0
+      - uses: docker/login-action@dbcb813823bdd20940b903addbd779551569679f # v4.6.0
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ github.token }}
 
       # increase ratelimit
-      - uses: docker/login-action@v3.6.0
+      - uses: docker/login-action@dbcb813823bdd20940b903addbd779551569679f # v4.6.0
         with:
           registry: docker.io
           username: ${{ vars.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
-      - uses: docker/metadata-action@v5.10.0
+      # master for git:<path> context (docker/metadata-action#729), unreleased
+      - uses: docker/metadata-action@8e671d84a3bd81afdfc4fdbb96a42b07c2a80934
         id: meta
         with:
+          # revision label from the submodule commit, plain folders resolve to the superproject
+          context: git:${{ steps.context.outputs.context || matrix.target }}
           images: ghcr.io/${{ github.repository_owner }}/${{ matrix.target }}
+          # git context refs come from the detached submodule, so tag from the workflow instead
           tags: |
-            type=ref,event=branch
-            type=ref,event=pr
-            type=raw,value=latest,enable={{is_default_branch}}
+            type=raw,value=${{ github.ref_name }}
+            type=raw,value=latest,enable=${{ github.ref_name == github.event.repository.default_branch }}
 
         # https://github.com/profnandaa/buildkit/blob/97b80f23f3e55861f70bb7aaf4558340af78d030/docs/windows.md#cni--networking-setup
       - name: Setup CNI
@@ -173,7 +179,8 @@ jobs:
       - name: Setup Docker Buildx
         run: |
           $version = "v0.19.3"
-          curl.exe -L https://github.com/docker/buildx/releases/download/$version/buildx-$version.windows-amd64.exe -o $env:ProgramData\Docker\cli-plugins\docker-buildx.exe
+          New-Item -ItemType Directory -Force "$env:ProgramFiles\Docker\cli-plugins" | Out-Null
+          curl.exe -L https://github.com/docker/buildx/releases/download/$version/buildx-$version.windows-amd64.exe -o "$env:ProgramFiles\Docker\cli-plugins\docker-buildx.exe"
 
       - name: Setup builders
         run: |
@@ -206,7 +213,7 @@ jobs:
       #     docker run --privileged --rm -d --name buildkit -p 1234:1234 --security-opt seccomp=unconfined --security-opt apparmor=unconfined moby/buildkit:v0.13.2
       #     docker buildx create --append --name nsc-remote --bootstrap --use docker-container://buildkit
 
-      - uses: docker/build-push-action@v6.18.0
+      - uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7.4.0
         id: build
         continue-on-error: ${{ contains(steps.context.outputs.platforms, 'windows') }}
         with:
@@ -221,7 +228,7 @@ jobs:
       # Windows BuildKit still has a lot of bugs, so we only attempt it if cross-compiled build fails
       - if: steps.build.outcome == 'failure'
         run: docker buildx create --append --name nsc-remote npipe:////./pipe/buildkitd --bootstrap
-      - uses: docker/build-push-action@v6.18.0
+      - uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7.4.0
         id: build1
         if: steps.build.outcome == 'failure'
         with:
@@ -235,6 +242,6 @@ jobs:
           labels: ${{ steps.meta.outputs.labels }}
           annotations: ${{ steps.meta.outputs.annotations }}
 
-      - uses: sigstore/cosign-installer@v4.0.0
+      - uses: sigstore/cosign-installer@6f9f17788090df1f26f669e9d70d6ae9567deba6 # v4.1.2
       - name: Sign image manifest
         run: cosign sign --yes "ghcr.io/${{ github.repository_owner }}/${{ matrix.target }}@${{ steps.build.outputs.digest || steps.build1.outputs.digest }}"
