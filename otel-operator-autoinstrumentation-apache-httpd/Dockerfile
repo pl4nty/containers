@@ -201,7 +201,7 @@ RUN echo "deb [signed-by=/usr/share/keyrings/nginx-archive-keyring.gpg] \
 RUN apt-get install -y gyp \
     && sed -i 's/-Wl,--no-whole-archive $(LIBS)$/$(LIBS) -Wl,--no-whole-archive/' /usr/lib/python3/dist-packages/gyp/generator/make.py \
     && grep -q -- '--whole-archive $(LD_INPUTS) $(LIBS) -Wl,--no-whole-archive' /usr/lib/python3/dist-packages/gyp/generator/make.py
-COPY instrumentation/otel-webserver-module /otel-webserver-module
+COPY opentelemetry-cpp-contrib/instrumentation/otel-webserver-module /otel-webserver-module
 COPY *.gradle /otel-webserver-module/
 COPY Makefile /otel-webserver-module/src/nginx/Makefile
 COPY script.sh /otel-webserver-module/src/nginx/script.sh
