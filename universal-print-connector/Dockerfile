@@ -8,13 +8,13 @@ RUN dism /Online /Quiet /Enable-Feature /All /FeatureName:WCF-HTTP-Activation45 
 ENV PATH="C:\Windows\System32;C:\Windows;C:\Windows\System32\WindowsPowerShell\v1.0;C:\Program Files\PowerShell\latest"
 
 # https://aka.ms/UPConnector
-RUN pwsh iwr -OutFile UniversalPrintConnectorInstaller.exe https://download.microsoft.com/download/a/5/4/a5411e44-ff15-4a41-aede-6bb6aa581756/UniversalPrintConnectorInstaller.1.87.8489.31785.exe
+RUN pwsh -Command iwr -OutFile UniversalPrintConnectorInstaller.exe https://download.microsoft.com/download/a/5/4/a5411e44-ff15-4a41-aede-6bb6aa581756/UniversalPrintConnectorInstaller.1.87.8489.31785.exe
 RUN UniversalPrintConnectorInstaller.exe /quiet
 # clear logs from failed auto-start
-RUN pwsh [System.Diagnostics.Eventing.Reader.EventLogSession]::GlobalSession.ClearLog('Microsoft-Windows-PrintConnector/Operational')
+RUN pwsh -Command [System.Diagnostics.Eventing.Reader.EventLogSession]::GlobalSession.ClearLog('Microsoft-Windows-PrintConnector/Operational')
 
 COPY LogMonitorConfig.json /LogMonitor/
-RUN pwsh iwr  -OutFile C:\LogMonitor\LogMonitor.exe https://github.com/microsoft/windows-container-tools/releases/download/v1.2.1/LogMonitor.exe
+RUN pwsh -Command iwr -OutFile C:\LogMonitor\LogMonitor.exe https://github.com/microsoft/windows-container-tools/releases/download/v1.2.1/LogMonitor.exe
 COPY entrypoint.ps1 .
 
 CMD [ "entrypoint.ps1" ]
