@@ -16,6 +16,6 @@ RUN npm run build --if-present
 
 FROM joseluisq/static-web-server:2.38.0
 
-COPY --from=build /app/Resources /public/Resources
+COPY --from=build /app/src/Resources /public/Resources
 COPY --from=build /app/Pages /public/Pages
 COPY --from=build /app/Pages/mha.html /public/index.html
