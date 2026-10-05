@@ -8,7 +8,7 @@ buildscript {
     gradlePluginPortal()
 
     maven {
-      url "https://sandec.jfrog.io/artifactory/repo"
+      url = "https://sandec.jfrog.io/artifactory/repo"
     }
   }
 
@@ -26,7 +26,9 @@ buildscript {
  ******************  Java Configuration ******************
  */
 plugins {
-  id 'org.openjfx.javafxplugin' version '0.0.13'
+  // 0.0.13 uses org.gradle.util.VersionNumber, removed in Gradle 9
+  // 0.1.0 resolves JavaFX by variant attributes, which jpro's own configurations lack
+  id 'org.openjfx.javafxplugin' version '0.0.14'
 }
 
 sourceSets {
@@ -62,7 +64,8 @@ apply plugin: 'com.sandec.jpro'
 /**
  * App Main Class
  */
-mainClassName = 'comp1140.ass2.gui.Board'
+// read by the jpro plugin; the application convention property was removed in Gradle 9
+ext.mainClassName = 'comp1140.ass2.gui.Board'
 
 /**
  * jpro settings
