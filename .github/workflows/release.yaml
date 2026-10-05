@@ -22,7 +22,7 @@ jobs:
       targets: ${{ github.event_name == 'workflow_dispatch' && inputs.targets || steps.targets.outputs.all_modified_files }}
     steps:
     # fetch-depth may cause issues with multi-commit submodule changes
-    - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       with:
         fetch-depth: 5
         submodules: true
@@ -85,14 +85,14 @@ jobs:
             echo "platforms=$(cat PLATFORMS)" >> $env:GITHUB_OUTPUT
           }
 
-      - uses: docker/login-action@c94ce9fb468520275223c153574b00df6fe4bcc9 # v3.7.0
+      - uses: docker/login-action@dbcb813823bdd20940b903addbd779551569679f # v4.6.0
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ github.token }}
 
       # increase ratelimit
-      - uses: docker/login-action@c94ce9fb468520275223c153574b00df6fe4bcc9 # v3.7.0
+      - uses: docker/login-action@dbcb813823bdd20940b903addbd779551569679f # v4.6.0
         with:
           registry: docker.io
           username: ${{ vars.DOCKER_USERNAME }}
@@ -213,7 +213,7 @@ jobs:
       #     docker run --privileged --rm -d --name buildkit -p 1234:1234 --security-opt seccomp=unconfined --security-opt apparmor=unconfined moby/buildkit:v0.13.2
       #     docker buildx create --append --name nsc-remote --bootstrap --use docker-container://buildkit
 
-      - uses: docker/build-push-action@10e90e3645eae34f1e60eeb005ba3a3d33f178e8 # v6.19.2
+      - uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7.4.0
         id: build
         continue-on-error: ${{ contains(steps.context.outputs.platforms, 'windows') }}
         with:
@@ -228,7 +228,7 @@ jobs:
       # Windows BuildKit still has a lot of bugs, so we only attempt it if cross-compiled build fails
       - if: steps.build.outcome == 'failure'
         run: docker buildx create --append --name nsc-remote npipe:////./pipe/buildkitd --bootstrap
-      - uses: docker/build-push-action@10e90e3645eae34f1e60eeb005ba3a3d33f178e8 # v6.19.2
+      - uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7.4.0
         id: build1
         if: steps.build.outcome == 'failure'
         with:
