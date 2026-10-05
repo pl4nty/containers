@@ -3,6 +3,10 @@
 FROM mcr.microsoft.com/powershell:windowsserver-ltsc2022@sha256:0da13abce40c475788d29106ef9c4d52120f21401fb329ffbb79d23c18220c70
 RUN dism /Online /Quiet /Enable-Feature /All /FeatureName:WCF-HTTP-Activation45 /FeatureName:WCF-TCP-Activation45 /FeatureName:IIS-WebSockets
 
+# pwsh is only on the machine PATH (setx in the base image), which Windows BuildKit
+# ignores: it injects a default PATH when the image config has none
+ENV PATH="C:\Windows\System32;C:\Windows;C:\Windows\System32\WindowsPowerShell\v1.0;C:\Program Files\PowerShell\latest"
+
 # https://aka.ms/UPConnector
 RUN pwsh iwr -OutFile UniversalPrintConnectorInstaller.exe https://download.microsoft.com/download/a/5/4/a5411e44-ff15-4a41-aede-6bb6aa581756/UniversalPrintConnectorInstaller.1.87.8489.31785.exe
 RUN UniversalPrintConnectorInstaller.exe /quiet
