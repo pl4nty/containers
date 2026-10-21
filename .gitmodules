@@ -85,3 +85,6 @@
 [submodule "flat-viewer/flat-viewer"]
 	path = flat-viewer/flat-viewer
 	url = https://github.com/githubocto/flat-viewer
+[submodule "devx-api/devx-api"]
+	path = devx-api/devx-api
+	url = https://github.com/ehtick/microsoft-graph-devx-api
