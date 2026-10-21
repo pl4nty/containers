@@ -3,7 +3,10 @@ WORKDIR /src
 COPY . .
 # fixes PowerShell snippets (microsoftgraph/microsoft-graph-devx-content#1564) and adds CORS
 # submodule .git points outside the build context, so remove it before applying
-RUN rm -rf .git && git apply devx-api.patch
+# Windows checkouts have CRLF (upstream .gitattributes is text=auto), so normalise patched files first
+RUN rm -rf .git \
+  && git apply --numstat devx-api.patch | cut -f3 | xargs sed -i 's/\r$//' \
+  && git apply devx-api.patch
 
 # opt-in: docker build --target test
 FROM source AS test
