@@ -17,6 +17,9 @@ ARG TARGETARCH
 RUN dotnet publish GraphWebApi/GraphWebApi.csproj -c Release -a $TARGETARCH -o /app
 
 FROM mcr.microsoft.com/dotnet/aspnet:8.0
+# config reload watches files with inotify, which crashes the app when the node's per-user limit is exhausted
+ENV DOTNET_hostBuilder__reloadConfigOnChange=false
+USER $APP_UID
 WORKDIR /app
 COPY --from=build /app .
 ENTRYPOINT ["dotnet", "GraphWebApi.dll"]
