@@ -5,8 +5,9 @@ COPY . .
 RUN npm install \
   # wasm-webterm falls back to registry.wapm.io for unknown commands, which now times out
   # after ~20s (HTTP 522). Answer its lookup with "no such command" so it fails immediately
-  && sed -i 's#https://registry.wapm.io/graphql#data:application/json,%7B%22data%22%3A%7B%22command%22%3Anull%7D%7D#g' \
-    node_modules/wasm-webterm/webterm.bundle.js \
+  # (bundle path differs across wasm-webterm versions, so find it rather than hardcode it)
+  && grep -rl 'registry.wapm.io/graphql' node_modules/wasm-webterm \
+    | xargs -r sed -i 's#https://registry.wapm.io/graphql#data:application/json,%7B%22data%22%3A%7B%22command%22%3Anull%7D%7D#g' \
   && npm run build
 
 FROM nginx:alpine
