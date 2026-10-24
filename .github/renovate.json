@@ -6,6 +6,7 @@
   ],
   "dependencyDashboardOSVVulnerabilitySummary": "all",
   "additionalBranchPrefix": "{{parentDir}}-",
+  "semanticCommitScope": "{{#if parentDir}}{{parentDir}}{{else}}deps{{/if}}",
   "ignorePaths": [
     "archive/**"
   ],
