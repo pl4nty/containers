@@ -1,4 +1,4 @@
-FROM kasmweb/kali-rolling-desktop:1.19.0-rolling-weekly AS base
+FROM kasmweb/kali-rolling-desktop:1.19.0-rolling-weekly@sha256:56eb718b5fde8dbde9fc5b8f5468898a0b16331ad40975bb275c5ceb1e64ae13 AS base
 
 USER root
 WORKDIR /tmp                                   # keep root droppings out of $HOME
