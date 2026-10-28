@@ -45,7 +45,7 @@ project.ext {
     buildType = "Release Build"
     fullVersion = "${moduleName} ${moduleVersion} ${moduleRelease} ${headSHA1}: ${buildType}"
 
-    gypPath = "$projectDir/scripts/gyp/r1919/gyp"
+    gypPath = "gyp" // system gyp (python3); vendored r1919 needs python2.7
     gypType = 'make'
 
     scriptExt = 'sh'
@@ -190,6 +190,10 @@ task stageLibrary(type: Copy) {
     from("${modDepDir}/opentelemetry/${cppSDKVersion}/lib/libopentelemetry_otlp_recordable.so") { it.into "sdk_lib/lib" }
     from("${modDepDir}/opentelemetry/${cppSDKVersion}/lib/libopentelemetry_exporter_ostream_span.so") { it.into "sdk_lib/lib" }
     from("${modDepDir}/opentelemetry/${cppSDKVersion}/lib/libopentelemetry_exporter_otlp_grpc.so") { it.into "sdk_lib/lib" }
+    from("${modDepDir}/opentelemetry/${cppSDKVersion}/lib/libopentelemetry_exporter_otlp_grpc_client.so") { it.into "sdk_lib/lib" }
+    from("${modDepDir}/opentelemetry/${cppSDKVersion}/lib/libopentelemetry_proto.so") { it.into "sdk_lib/lib" }
+    from("${modDepDir}/opentelemetry/${cppSDKVersion}/lib/libopentelemetry_proto_grpc.so") { it.into "sdk_lib/lib" }
+    from("${modDepDir}/opentelemetry/${cppSDKVersion}/lib/libopentelemetry_logs.so") { it.into "sdk_lib/lib" }
     from("dist/opentelemetry_sdk_log4cxx.xml.template") { it.into "conf" }
     from("dist/install.${scriptExt}") { it.fileMode 0700 }
 
@@ -388,7 +392,7 @@ nginxSupportedVersions.each { nginxVersion ->
 
         dependsOn "extractNginx${nginxVersion}"
         workingDir "${buildDir}/nginx-${nginxVersion}"
-        commandLine './configure', "--with-compat", "--with-cc-opt=-Wno-error -Wno-unused-variable -Wno-unused-but-set-variable", "--with-ld-opt=-L${libraryStageDir}/sdk_lib/lib", "--add-dynamic-module=${projectDir}/src/nginx"
+        commandLine './configure', "--with-compat", "--with-cc-opt=-Wno-error -Wno-unused-variable -Wno-unused-but-set-variable -fcommon", "--with-ld-opt=-L${libraryStageDir}/sdk_lib/lib", "--add-dynamic-module=${projectDir}/src/nginx"
     }
 
     task("delMakefile${nginxVersion}", type: Exec) {
