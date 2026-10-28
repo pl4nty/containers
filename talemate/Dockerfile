@@ -1,15 +1,23 @@
 # Stage 1: Frontend build
-FROM node:21.7.3@sha256:4b232062fa976e3a966c49e9b6279efa56c8d207a67270868f51b3d155c4e33d AS frontend-build
-
-ENV NODE_ENV=development
+FROM node:22.23.3-slim@sha256:43ac6c60b8f89723f746e8a92ce91abd5017e627ce1ddfe4238355d3a30b772c AS frontend-build
 
 WORKDIR /app
 
-# Copy the frontend directory contents into the container at /app
-COPY ./talemate_frontend /app
+# Enable pnpm via corepack (version pinned by package.json "packageManager").
+ENV COREPACK_ENABLE_DOWNLOAD_PROMPT=0
+RUN npm install -g corepack@latest && corepack enable
 
-# Install all dependencies and build
-RUN npm install && npm run build
+# Copy frontend manifest, lockfile and pnpm settings
+COPY talemate_frontend/package.json talemate_frontend/pnpm-lock.yaml talemate_frontend/pnpm-workspace.yaml ./
+
+# Install dependencies
+RUN pnpm install --frozen-lockfile
+
+# Copy frontend source
+COPY talemate_frontend/ ./
+
+# Build frontend
+RUN pnpm build
 
 # Stage 2: Backend build
 FROM python:3.11-slim@sha256:db3ff2e1800a8581e2c48a27c3995339d47bdf046da21c7627accd3d51053a93 AS backend-build
@@ -22,31 +30,17 @@ RUN apt-get update && apt-get install -y \
     gcc \
     && rm -rf /var/lib/apt/lists/*
 
-# Install poetry
-RUN pip install poetry
+# Install uv
+RUN pip install uv
 
-# Copy poetry files
-COPY pyproject.toml poetry.lock* /app/
+# Copy installation files
+COPY pyproject.toml uv.lock /app/
 
-# Create a virtual environment
-RUN python -m venv /app/talemate_env
-
-# Activate virtual environment and install dependencies
-RUN . /app/talemate_env/bin/activate && \
-    poetry config virtualenvs.create false && \
-    poetry install  --only main --no-root
-
-# Copy the Python source code
+# Copy the Python source code (needed for editable install)
 COPY ./src /app/src
 
-# Conditional PyTorch+CUDA install
-ARG CUDA_AVAILABLE=false
-RUN . /app/talemate_env/bin/activate && \
-    if [ "$CUDA_AVAILABLE" = "true" ]; then \
-        echo "Installing PyTorch with CUDA support..." && \
-        pip uninstall torch torchaudio -y && \
-        pip install torch~=2.4.1 torchaudio~=2.4.1 --index-url https://download.pytorch.org/whl/cu121; \
-    fi
+# Create virtual environment and install dependencies (includes CUDA support via pyproject.toml)
+RUN uv sync
 
 # Stage 3: Final image
 FROM python:3.11-slim@sha256:db3ff2e1800a8581e2c48a27c3995339d47bdf046da21c7627accd3d51053a93
@@ -55,16 +49,44 @@ WORKDIR /app
 
 RUN apt-get update && apt-get install -y \
     bash \
+    wget \
+    tar \
+    xz-utils \
+    gettext-base \
     && rm -rf /var/lib/apt/lists/*
 
+# Install uv in the final stage
+RUN pip install uv
+
 # Copy virtual environment from backend-build stage
-COPY --from=backend-build /app/talemate_env /app/talemate_env
+COPY --from=backend-build /app/.venv /app/.venv
+
+# Download and install FFmpeg 8.0 with shared libraries into .venv (matching Windows installer approach)
+# Using BtbN FFmpeg builds which provide shared libraries - verified to work
+# Note: We tried using jrottenberg/ffmpeg:8.0-ubuntu image but copying libraries from it didn't work properly,
+#       so we use the direct download approach which is more reliable and matches the Windows installer
+# BtbN names its builds linux64/linuxarm64, so pick the one matching the target platform
+ARG TARGETARCH
+RUN cd /tmp && \
+    FFMPEG=ffmpeg-master-latest-$([ "$TARGETARCH" = arm64 ] && echo linuxarm64 || echo linux64)-gpl-shared && \
+    wget -q https://github.com/BtbN/FFmpeg-Builds/releases/download/latest/$FFMPEG.tar.xz -O ffmpeg.tar.xz && \
+    tar -xf ffmpeg.tar.xz && \
+    cp -a $FFMPEG/bin/* /app/.venv/bin/ && \
+    cp -a $FFMPEG/lib/* /app/.venv/lib/ && \
+    rm -rf $FFMPEG ffmpeg.tar.xz && \
+    LD_LIBRARY_PATH=/app/.venv/lib /app/.venv/bin/ffmpeg -version | head -n 1
+
+# Set LD_LIBRARY_PATH so torchcodec can find ffmpeg libraries at runtime
+ENV LD_LIBRARY_PATH=/app/.venv/lib:${LD_LIBRARY_PATH}
 
 # Copy Python source code
 COPY --from=backend-build /app/src /app/src
 
 # Copy Node.js build artifacts from frontend-build stage
 COPY --from=frontend-build /app/dist /app/talemate_frontend/dist
+
+# Preserve index.html as template for runtime envsubst substitution
+COPY --from=frontend-build /app/dist/index.html /app/talemate_frontend/dist/index.template.html
 
 # Copy the frontend WSGI file if it exists
 COPY frontend_wsgi.py /app/frontend_wsgi.py
@@ -73,16 +95,27 @@ COPY frontend_wsgi.py /app/frontend_wsgi.py
 COPY config.example.yaml /app/config.yaml
 
 # Copy essentials
-COPY scenes scenes
-COPY templates templates
-COPY chroma* .
+COPY scenes/ /app/scenes/
+COPY templates/ /app/templates/
+COPY chroma* /app/
+COPY tts/ /app/tts/
+
+# Copy entrypoint script for runtime environment variable substitution
+COPY docker-entrypoint.sh /app/docker-entrypoint.sh
+RUN chmod +x /app/docker-entrypoint.sh
 
 # Set PYTHONPATH to include the src directory
 ENV PYTHONPATH=/app/src:$PYTHONPATH
 
+# Bind on all interfaces inside the container by default. Ports can be
+# overridden with TALEMATE_BACKEND_PORT / TALEMATE_FRONTEND_PORT.
+ENV TALEMATE_BACKEND_HOST=0.0.0.0
+ENV TALEMATE_FRONTEND_HOST=0.0.0.0
+
 # Make ports available to the world outside this container
 EXPOSE 5050
-EXPOSE 8080
+EXPOSE 8082
 
-# Use bash as the shell, activate the virtual environment, and run backend server
-CMD ["/bin/bash", "-c", "source /app/talemate_env/bin/activate && python src/talemate/server/run.py runserver --host 0.0.0.0 --port 5050 --frontend-host 0.0.0.0 --frontend-port 8080"]
+# Use entrypoint for runtime config, CMD for the actual server
+ENTRYPOINT ["/app/docker-entrypoint.sh"]
+CMD ["uv", "run", "src/talemate/server/run.py", "runserver"]
