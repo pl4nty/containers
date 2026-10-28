@@ -1,9 +1,12 @@
-# vite 2 loads postcss through the "./": "./" exports mapping node dropped in 17:
-# Package subpath './lib/node' is not defined by "exports"
-FROM node:16.20.2@sha256:f77a1aef2da8d83e45ec990f45df50f1a286c5fe8bbfb8c6e4246c6389705c0b AS build
+FROM node:24.21.0@sha256:64af3819f9275802414d7cdc38c27e9d82bd564dec4d4da87d008255d36c63b4 AS build
 WORKDIR /app
 
 COPY package.json yarn.lock ./
+# tailwind 2.1 does require("postcss/lib/node"), which the locked postcss 8.2.8 only exposes
+# through the "./": "./" exports folder mapping that node dropped in 17:
+# Package subpath './lib/node' is not defined by "exports"
+# Dedupe postcss@^8 onto the 8.4.5 already in the lockfile, which exports ./lib/node explicitly.
+RUN npx --yes yarn-deduplicate@6.0.2 --packages postcss --strategy highest yarn.lock
 RUN yarn install --frozen-lockfile --network-timeout 600000
 
 COPY . .
